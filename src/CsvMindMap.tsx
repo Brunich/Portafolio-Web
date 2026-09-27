@@ -11,7 +11,7 @@ type Props = { lang: 'es' | 'en'; file: string; rows: number; columns: ColumnPro
 export default function CsvMindMap({ lang, file, rows, columns, hover, onHover, runKey }: Props) {
  const es = lang === 'es';
  const kindLabel: Record<ColumnKind, string> = es ? { number: 'número', date: 'fecha', category: 'categoría', text: 'texto' } : { number: 'number', date: 'date', category: 'category', text: 'text' };
- const shown = columns.slice(0, 8);
+ const shown = columns.slice(0, 10);
  const leftCount = Math.ceil(shown.length / 2);
  const leaves = (c: ColumnProfile): string[] => {
   const out: string[] = [];
@@ -70,6 +70,6 @@ export default function CsvMindMap({ lang, file, rows, columns, hover, onHover, 
    <p className="mm-tree-root"><strong>{rootLabel}</strong>{rows} {es ? 'filas' : 'rows'} · {columns.length} {es ? 'columnas' : 'columns'}</p>
    <ul>{shown.map((c, i) => <li key={c.name + i} style={{ ['--c' as string]: KIND_COLOR[c.kind], ['--d' as string]: `${i * 0.08}s` }}><span className="mm-tree-name">{c.name}<small>{kindLabel[c.kind]}</small></span><span className="mm-tree-facts">{leaves(c).join(' · ')}</span></li>)}</ul>
   </div>
-  <ul className="mm-legend">{(Object.keys(KIND_COLOR) as ColumnKind[]).map(k => <li key={k}><i style={{ background: KIND_COLOR[k] }}/>{kindLabel[k]}</li>)}{columns.length > 8 && <li>+{columns.length - 8} {es ? 'columnas más' : 'more columns'}</li>}</ul>
+  <ul className="mm-legend">{(Object.keys(KIND_COLOR) as ColumnKind[]).map(k => <li key={k}><i style={{ background: KIND_COLOR[k] }}/>{kindLabel[k]}</li>)}{columns.length > 10 && <li>+{columns.length - 10} {es ? (columns.length === 11 ? 'columna más' : 'columnas más') : (columns.length === 11 ? 'more column' : 'more columns')}</li>}</ul>
  </div>;
 }

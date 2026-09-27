@@ -1,24 +1,27 @@
-// Esquema oscuro de lo que hace VibeMap: una carpeta entra y sale un mapa mental con analogías.
-// La app real tiene tema claro; esto es una ilustración rotulada, no una captura.
+// Ilustración del formato de salida de VibeMap (diagrama Mermaid con flechas numeradas por
+// función real + explicación con los mismos números), aplicado al código de este sitio.
+// No es una captura: la app real tiene tema claro y necesita la API de Gemini.
+const STEPS: { from: string; call: string; to: string; es: string; en: string }[] = [
+ { from: 'DataWorkbench', call: 'loadFile()', to: 'csv.ts', es: 'lee el archivo y rechaza lo que no sea UTF-8', en: 'reads the file and rejects non-UTF-8 input' },
+ { from: 'csv.ts', call: 'parseCsv()', to: 'CsvData', es: 'detecta el separador y respeta las comillas', en: 'detects the delimiter and respects quotes' },
+ { from: 'CsvData', call: 'profileColumns()', to: 'perfil', es: 'decide el tipo de cada columna', en: 'infers each column type' },
+ { from: 'perfil', call: '<CsvMindMap/>', to: 'SVG', es: 'dibuja el mapa de la estructura', en: 'draws the structure map' },
+];
+
 export default function VibeSketch({ lang }: { lang: 'es' | 'en' }) {
  const es = lang === 'es';
- const branches: [string, string, number][] = es
-  ? [['api/', 'el mesero', 70], ['components/', 'el comedor', 150], ['utils/', 'la cocina', 230]]
-  : [['api/', 'the waiter', 70], ['components/', 'the dining room', 150], ['utils/', 'the kitchen', 230]];
+ const nodes = [STEPS[0].from, ...STEPS.map(s => s.to)];
  return <div className="vibe-sketch" aria-hidden="true">
-  <span className="vibe-tag">{es ? 'ESQUEMA DEL RESULTADO' : 'RESULT SKETCH'}</span>
-  <p className="vibe-word">VibeMap</p>
-  <svg viewBox="0 0 520 300">
-   <defs><linearGradient id="vibe-grad" x1="0" x2="1"><stop offset="0" stopColor="#7c83ff"/><stop offset=".55" stopColor="#b57cff"/><stop offset="1" stopColor="#ff7cc8"/></linearGradient></defs>
-   <g className="vibe-folder"><rect x="14" y="128" width="118" height="44" rx="10"/><text x="73" y="155" textAnchor="middle">{es ? 'mi-proyecto/' : 'my-project/'}</text></g>
-   <path className="vibe-flow" d="M136 150 C 170 150, 170 150, 204 150" pathLength={1}/>
-   <g className="vibe-root"><circle cx="236" cy="150" r="30"/><text x="236" y="155" textAnchor="middle">App</text></g>
-   {branches.map(([dir, analogy, y], i) => <g key={dir} className="vibe-branch" style={{ ['--i' as string]: i }}>
-    <path d={`M266 150 C 300 150, 300 ${y}, 330 ${y}`} pathLength={1}/>
-    <rect x="330" y={y - 17} width="174" height="34" rx="9"/>
-    <text x="344" y={y + 5}><tspan className="vibe-dir">{dir}</tspan><tspan className="vibe-an" dx="8">{analogy}</tspan></text>
-   </g>)}
-  </svg>
-  <p className="vibe-caption">{es ? 'Como un restaurante: cada carpeta explicada con una analogía.' : 'Like a restaurant: each folder explained with an analogy.'}</p>
+  <div className="vs-bar"><i/><i/><i/><span>VibeMap · DataWorkbench.tsx</span></div>
+  <div className="vs-body">
+   <div className="vs-flow">
+    {nodes.map((n, i) => <div key={n} className="vs-step" style={{ ['--i' as string]: i }}>
+     <span className="vs-node">{n}</span>
+     {i < STEPS.length && <span className="vs-edge"><b>{i + 1}.</b> {STEPS[i].call}</span>}
+    </div>)}
+   </div>
+   <ol className="vs-notes">{STEPS.map((s, i) => <li key={s.call} style={{ ['--i' as string]: i + 1 }}><b>{i + 1}.</b> <code>{s.call}</code> {es ? s.es : s.en}</li>)}</ol>
+  </div>
+  <p className="vs-caption">{es ? 'Formato de VibeMap aplicado al código de este sitio: cada flecha es una función real y su número coincide con la explicación.' : 'VibeMap’s format applied to this site’s code: every arrow is a real function and its number matches the explanation.'}</p>
  </div>;
 }
