@@ -7,7 +7,7 @@
 .original-lens{position:absolute;z-index:2;border-radius:50%;border:2px solid #dcebff;box-shadow:0 10px 30px #0008,inset 0 0 0 1px #0006;background-repeat:no-repeat;image-rendering:pixelated;pointer-events:none}
 .original-lens small{position:absolute;left:50%;bottom:-26px;transform:translateX(-50%);white-space:nowrap;font-size:11px;padding:3px 8px;border-radius:4px;background:#122238e8;color:#fff}
 .pano{display:grid;gap:14px}
-.pano-stage{position:relative;display:block;width:100%;aspect-ratio:21/9;padding:0;border:1px solid #47617e;border-radius:14px;overflow:hidden;background:#0e1829;cursor:zoom-in}
+.pano-stage{position:relative;display:block;width:100%;aspect-ratio:2/1;padding:0;border:1px solid #47617e;border-radius:14px;overflow:hidden;background:#0e1829;cursor:zoom-in}
 .pano-stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.02);transition:opacity 1.1s ease}
 .pano-stage img.on{opacity:1;animation:pano-drift 9s ease-out both}
 .pano-title{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:2px;padding:48px 24px 20px;text-align:left;font-size:13px;color:#d6e4f5;background:linear-gradient(transparent,#0b1424d9)}

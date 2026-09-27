@@ -137,3 +137,6 @@ html[data-motion=paused] .ld-build li::after{animation:none}
 .ld-preview-chip i{position:absolute;inset:-1px;border-radius:14px;border:2px solid #9cc0ff;animation:ld-ring 2.4s ease-out infinite}
 .ld-preview-chip i+i{animation-delay:1.2s}
 html[data-motion=paused] .ld-preview *{animation-play-state:paused!important}
+.ld-preview{align-items:center}
+.ld-preview .ld-pass{width:100%}
+.ld-preview .ld-bubble{align-self:center;margin-left:min(28%,160px)}
