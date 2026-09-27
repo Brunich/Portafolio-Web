@@ -1,4 +1,4 @@
-import { toNumber } from './quality';
+import { toNumber } from './quality.ts';
 export type CsvData = { headers: string[]; rows: string[][] };
 
 export function parseCsv(source: string): CsvData {
