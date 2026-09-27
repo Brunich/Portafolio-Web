@@ -54,7 +54,10 @@ test('proposals page explains steps and English CV is downloadable', async ({pag
  await expect(page.locator('.ie-report')).toContainText('orders.service.ts');
  await expect(page.locator('.ie-report')).toContainText('orders.service.test.ts');
  await page.goto('/');
+ await expect(page.locator('a[download]').first()).toHaveAttribute('href','/cv/Bruno-Salas-ES.pdf');
+ await page.getByRole('button', { name:'Switch to English' }).click();
  await expect(page.locator('a[download]').first()).toHaveAttribute('href','/cv/Bruno-Salas-EN.pdf');
+ await page.getByRole('button', { name:'Cambiar a español' }).click();
  expect((await request.get('/cv/Bruno-Salas-EN.pdf')).status()).toBe(200);
 });
 
