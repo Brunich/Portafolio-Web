@@ -14,7 +14,7 @@ export default function ModelLab({ lang, paused }: { lang: 'es' | 'en'; paused: 
  const [pair, setPair] = useState(0);
  const [split, setSplit] = useState(50);
  const [status, setStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
- const [pixelSize, setPixelSize] = useState(5);
+ const [pixelSize, setPixelSize] = useState(4);
  const api = useRef<{ zoom: (f: number) => void; reset: () => void; refresh: () => void } | null>(null);
  const state = useRef({ pair, split, paused, pixelSize });
  useEffect(() => { state.current = { pair, split, paused, pixelSize }; api.current?.refresh(); }, [pair, split, paused, pixelSize]);
@@ -83,7 +83,8 @@ export default function ModelLab({ lang, paused }: { lang: 'es' | 'en'; paused: 
      if (glows) pbr.emissiveIntensity = 0.9;
      // Los colores del juego son muy oscuros; en toon se levantan un poco para que las bandas se lean.
      const lifted = src.color.clone().convertLinearToSRGB().multiplyScalar(1.8).convertSRGBToLinear();
-     const toon = (gradientMap: T.Texture) => new THREE.MeshToonMaterial({ color: lifted, gradientMap, emissive: src.emissive, emissiveIntensity: glows ? 1.6 : 0 });
+     // Las piezas del modelo son de doble cara: con una sola, la cabeza se veía por dentro.
+     const toon = (gradientMap: T.Texture) => new THREE.MeshToonMaterial({ color: lifted, gradientMap, emissive: src.emissive, emissiveIntensity: glows ? 1.6 : 0, side: src.side });
      const outline = new THREE.Mesh(mesh.geometry, outlineMat);
      const face = glows || /visor|eye/i.test(`${src.name} ${mesh.name}`);
      if (!face) mesh.add(outline);
@@ -179,7 +180,7 @@ export default function ModelLab({ lang, paused }: { lang: 'es' | 'en'; paused: 
   </div>
   <div className="ml-controls">
    <label>{es ? 'División' : 'Divider'}<input type="range" min="0" max="100" value={split} onChange={e => setSplit(Number(e.target.value))} aria-label={es ? 'Comparación de estilos sobre el modelo' : 'Style comparison on the model'}/></label>
-   <label>{es ? 'Tamaño del píxel' : 'Pixel size'}<input type="range" min="2" max="10" value={pixelSize} onChange={e => setPixelSize(Number(e.target.value))}/></label>
+   <label>{es ? 'Tamaño del píxel' : 'Pixel size'}<input type="range" min="2" max="6" step="0.25" value={pixelSize} onChange={e => setPixelSize(Number(e.target.value))}/></label>
   </div>
   <p className="original-caption">{es ? 'Arrastra el modelo para girarlo y usa la rueda o pellizca para acercarte. Null es el protagonista de IA Rogue; los estilos del juego están recreados en WebGL para el navegador.' : 'Drag the model to rotate it; scroll or pinch to zoom. Null is IA Rogue’s protagonist; the game’s styles are recreated in WebGL for the browser.'}</p>
  </div>;

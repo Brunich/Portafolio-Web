@@ -5,6 +5,7 @@ import { detectIssues } from './quality';
 import type { Issue } from './quality';
 import { SAMPLES } from './samples';
 import CsvMindMap from './CsvMindMap';
+import { personal } from './personal';
 import './data-workbench.css';
 
 const LIMIT = 2 * 1024 * 1024;
@@ -98,6 +99,10 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
     <button className="dw-primary" onClick={() => upload.current?.click()}>{t('Subir el tuyo', 'Upload yours')} <span aria-hidden="true">↑</span></button>
    </div>
   </header>
+  {sample && <div className="dw-yours">
+   <p><strong>{t('Esto es un ejemplo', 'This is a sample')}</strong> {t('con el formato de un reporte real de planta; los datos son inventados. Con tu propio archivo verás lo mismo sobre tus datos.', 'shaped like a real plant report; the data is made up. With your own file you get the same analysis on your data.')}</p>
+   <div><button className="dw-primary" onClick={() => upload.current?.click()}>{t('Sube el tuyo', 'Upload yours')} <span aria-hidden="true">↑</span></button><a href={`mailto:${personal.email}?subject=${encodeURIComponent(t('CSV para revisar', 'CSV to review'))}`}>{t('o mándamelo y lo reviso', 'or send it to me')}</a></div>
+  </div>}
   {error && <p className="dw-error" role="alert">{error} {t('Se conserva el análisis anterior.', 'The previous analysis is kept.')}</p>}
 
   <dl className="dw-kpis">

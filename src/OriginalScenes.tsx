@@ -4,10 +4,13 @@ import './original-scenes.css';
 
 const PANORAMAS: { file: string; title: [string, string]; note: [string, string] }[] = [
  { file: 'templo-portico', title: ['Pórtico del templo', 'Temple portico'], note: ['Antorchas, piedra y agua de noche', 'Torches, stone and water at night'] },
- { file: 'costa-atardecer', title: ['Costa al atardecer', 'Coast at sunset'], note: ['Llegada junto al acantilado', 'Arrival by the cliff'] },
- { file: 'ciudad-noche', title: ['Ciudad de noche', 'City at night'], note: ['Ventanas encendidas, vista ortográfica', 'Lit windows, orthographic view'] },
  { file: 'costa-facetada', title: ['Costa facetada', 'Faceted coast'], note: ['Iluminación cel facetada', 'Faceted cel lighting'] },
- { file: 'isla-ciudad', title: ['Isla ciudad', 'Island city'], note: ['Nivel generado por el juego', 'Game-generated level'] },
+];
+
+const GAME_METRICS: [string, [string, string]][] = [
+ ['18 → 55 fps', ['al dejar de crear 195 materiales en cada cuadro', 'by no longer creating 195 materials every frame']],
+ ['13,3 → 7,1 ms', ['por cuadro en el bosque: el cielo y el minimapa eran el costo, no los árboles', 'per frame in the forest: the sky and minimap were the cost, not the trees']],
+ ['831', ['baterías de pruebas automáticas que avisan si algo vuelve', 'automated test batteries that warn if something comes back']],
 ];
 
 export default function OriginalScenes({ lang, paused }: { lang: 'es' | 'en'; paused: boolean }) {
@@ -25,7 +28,8 @@ export default function OriginalScenes({ lang, paused }: { lang: 'es' | 'en'; pa
  }, [paused, open, hovering]);
  useEffect(() => { if (open) dialog.current?.showModal(); else dialog.current?.close(); }, [open]);
 
- return <section id="graphics" className="wrap section-space"><div className="section-heading"><div><h2>{es ? 'Entornos y dirección visual.' : 'Environments & visual direction.'}</h2><p>{es ? 'IA Rogue, mi videojuego en Godot. Composición, vegetación, iluminación y estilos de renderizado en escenas jugables.' : 'IA Rogue, my Godot game. Composition, vegetation, lighting and rendering styles in playable scenes.'}</p></div></div>
+ return <section id="graphics" className="wrap section-space gamedev"><div className="section-heading"><div><span className="gamedev-kicker">Game development</span><h2>{es ? 'IA Rogue, mi videojuego en Godot.' : 'IA Rogue, my Godot game.'}</h2><p>{es ? 'Un roguelike 3D que hago como hobby profesional: dirijo lo visual, armo las escenas, escribo los shaders y mido el rendimiento antes de tocar código.' : 'A 3D roguelike I build as a professional hobby: I direct the visuals, build the scenes, write the shaders and measure performance before touching code.'}</p><div className="tags gamedev-tags">{(es ? ['Dirección visual', 'Game dev', 'Modelado 3D', 'Shaders', 'Hobby profesional'] : ['Visual direction', 'Game dev', '3D modeling', 'Shaders', 'Professional hobby']).map(tag => <span key={tag}>{tag}</span>)}</div></div></div>
+  <dl className="gamedev-metrics">{GAME_METRICS.map(([value, label]) => <div key={value}><dt>{value}</dt><dd>{label[L]}</dd></div>)}</dl>
   <div className="original-gallery"><div className="original-toolbar"><h3>{es ? 'El bosque' : 'The forest'}</h3><div>{[es ? 'Tres cuartos' : 'Three-quarter', es ? 'Primera persona' : 'First-person'].map((label, i) => <button key={label} onClick={() => setView(i)} aria-pressed={view === i}>{label}</button>)}</div></div><img className="original-scene" src={`/media/rogue-forest-${view ? 'first-person' : 'overview'}.webp`} width="1600" height="1000" loading="lazy" alt={es ? (view ? 'Vista en primera persona del bosque al anochecer' : 'Bosque con luz solar, vegetación y sendero en vista tres cuartos') : (view ? 'First-person forest view at dusk' : 'Forest with sunlight, vegetation and path in three-quarter view')}/><p className="original-caption">{es ? 'Captura del juego · Cámara y hora distintas en cada vista.' : 'In-game capture · Each view uses a different camera and time of day.'}</p></div>
 
   <div className="original-compare-heading"><h3>{es ? 'Un personaje, tres estilos.' : 'One character, three styles.'}</h3><p>{es ? 'Compara pixel art, cel shading y 3D realista sobre el mismo modelo. Gíralo, acércate y cambia el tamaño del píxel en tiempo real.' : 'Compare pixel art, cel shading and realistic 3D on the same model. Rotate it, zoom in and change the pixel size in real time.'}</p></div>
