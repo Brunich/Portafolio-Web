@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { ClubPreview } from './LoyaltyDemo';
+import ClubPreview from './ClubPreview';
+import LoopVideo from './LoopVideo';
 import './hero-showcase.css';
 
 // Portada: tres proyectos reales apilados que rotan solos. La tarjeta del frente lleva a su página.
@@ -25,7 +26,7 @@ export default function HeroShowcase({ lang, paused }: { lang: 'es' | 'en'; paus
     const pos = (i - front + SLIDES.length) % SLIDES.length;
     return <a key={s.slug} href={`/proyectos/${s.slug}`} className={`hs-card hs-${s.kind} hs-pos${pos}`} tabIndex={pos === 0 ? 0 : -1} aria-hidden={pos !== 0}
      aria-label={`${s.title} — ${s.note[L]}. ${es ? 'Ver proyecto' : 'View project'}`}>
-     {s.kind === 'club' ? <ClubPreview lang={lang}/> : <img src={s.img} alt="" loading={i ? 'lazy' : undefined}/>}
+     {s.kind === 'club' ? <ClubPreview lang={lang}/> : s.kind === 'shot' ? <LoopVideo name="analizador" paused={paused || pos !== 0}/> : <img src={s.img} alt="" loading={i ? 'lazy' : undefined}/>}
     </a>;
    })}
   </div>
