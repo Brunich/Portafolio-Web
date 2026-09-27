@@ -1,0 +1,101 @@
+/* Distribución: una barra fija arriba, proyectos en filas alternadas con el mismo ritmo,
+   y un perfil con retrato. Va al final para mandar sobre styles.css. */
+
+/* Barra superior */
+.topbar{position:sticky;top:0;z-index:40;background:#111319d9;backdrop-filter:blur(16px) saturate(1.2);border-bottom:1px solid #ffffff0f}
+.topbar-inner{display:flex;align-items:center;gap:24px;min-height:74px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--mint),var(--violet) 55%,var(--amber));color:#111319;font:800 14px/1 var(--display);letter-spacing:.02em;box-shadow:0 6px 18px #b9a7ff33}
+.brand-name{font:650 15.5px/1.2 var(--display)}
+.brand-name small{display:block;margin-top:2px;font:400 11.5px/1.3 'DM Sans Variable',sans-serif;color:var(--muted)}
+.topnav{display:flex;gap:2px;margin-left:auto}
+.topnav a{padding:10px 14px;border-radius:9px;font-size:14px;color:#c6cad6;transition:background .2s,color .2s}
+.topnav a:hover{background:#1e222c;color:#fff}
+.topbar-tools{display:flex;align-items:center;gap:8px}
+.icon-button{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;border:1px solid #2e3340;background:transparent;color:#c6cad6}
+.icon-button:hover{border-color:var(--violet);color:#fff}
+.topbar .language-control button{min-width:40px;min-height:40px;border-radius:9px}
+.topbar-cta{padding:10px 16px;border-radius:10px;background:var(--mint);color:#0d1a16;font-weight:650;font-size:13.5px;transition:transform .2s,box-shadow .2s}
+.topbar-cta:hover{transform:translateY(-1px);box-shadow:0 8px 24px #7fe3c633}
+.scroll-progress{z-index:60}
+html{scroll-padding-top:96px}
+section{scroll-margin-top:96px}
+
+/* Portada */
+.hero{padding-block:clamp(56px,8vw,110px) clamp(72px,9vw,130px)}
+.section-space{padding-block:clamp(96px,11vw,150px)}
+.section-heading{margin-bottom:clamp(56px,7vw,88px)}
+
+/* Proyectos en filas */
+.rows{display:grid;gap:clamp(110px,12vw,170px)}
+.row{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:clamp(40px,6vw,96px);align-items:center}
+.row.flip .project-media{order:2}
+.row .project-media{position:relative;aspect-ratio:16/11;border-radius:22px;overflow:hidden;padding:0;background:var(--surface)}
+.row .project-media>*:first-child{height:100%}
+.row .project-info{padding:0;max-width:480px}
+.row .project-info h3{font-size:clamp(32px,3.4vw,46px);line-height:1.08;margin-top:14px}
+.row .project-info>p{font-size:16px;line-height:1.65;margin-top:18px}
+.row .project-metrics{margin-top:28px;gap:22px}
+.row .project-links{margin-top:30px}
+.row.wide{grid-template-columns:1fr;gap:44px}
+.row.wide .project-media{aspect-ratio:auto;min-height:420px;display:flex;align-items:center;justify-content:center;padding:clamp(20px,4vw,56px);background:radial-gradient(ellipse 70% 80% at 50% 30%,#221f33,#15171e 70%)}
+.row.wide .project-media>*:first-child{height:auto;width:100%;max-width:980px}
+.row.wide .project-info{max-width:none;display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:48px;align-items:end}
+.row.wide .project-info>*{grid-column:1}
+.row.wide .project-links{grid-column:2;grid-row:1/5;margin:0}
+.project-kind{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.project-kind em{font-style:normal;font-size:11px;letter-spacing:.02em;text-transform:none;padding:3px 9px;border-radius:20px;background:#1e222c;color:#a8f0da;font-weight:600}
+.media-open{opacity:0;transform:translateY(6px);transition:opacity .3s,transform .3s;background:#eef0f5}
+.project-media:hover .media-open,.project-media:focus-visible .media-open{opacity:1;transform:none}
+
+/* Punto U: dos celulares */
+.phones{height:100%;display:flex;align-items:center;justify-content:center;gap:clamp(14px,3vw,30px);padding:clamp(18px,4%,36px);background:radial-gradient(ellipse 80% 70% at 50% 30%,#1f2a44,#14161d 72%)}
+.phones img{height:100%;width:auto!important;max-width:46%;object-fit:cover;object-position:top;border:5px solid #0b0d12;border-radius:26px;box-shadow:0 24px 60px #0009,0 0 0 1px #3d4458}
+.phones img:first-child{transform:translateY(16px) rotate(-2deg)}
+.phones img:last-child{transform:translateY(-10px) rotate(2deg)}
+.project-media:hover .phones img{transform:none;transition:transform .6s cubic-bezier(.16,1,.3,1)}
+
+/* Perfil con retrato */
+.about-section{padding-block:clamp(96px,11vw,150px)}
+.about-grid{display:grid;grid-template-columns:minmax(220px,330px) minmax(0,1fr);gap:clamp(40px,7vw,100px);align-items:center}
+.portrait{margin:0;padding:2px;border-radius:26px;background:linear-gradient(150deg,var(--mint),var(--violet) 50%,var(--amber));box-shadow:0 30px 70px #0009}
+.portrait img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:24px}
+.about-copy h2{font-size:clamp(32px,3.3vw,46px);line-height:1.15}
+.about-copy>p{color:var(--muted);font-size:16.5px;margin-top:20px;max-width:620px}
+.about-copy .profile-points{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 36px;margin-top:36px}
+.about-copy .profile-points div{border-top:1px solid #2a2f3b;padding-top:12px}
+.about-copy .profile-points dt{font-size:12px;color:var(--muted)}
+.about-copy .profile-points dd{margin:4px 0 0;font-size:15px}
+.about-section .experience-grid{margin-top:clamp(80px,9vw,120px)}
+.tools-block{margin-top:clamp(80px,9vw,120px);border-top:0;padding-top:0}
+.tools-block>h3{font-size:clamp(26px,2.4vw,32px);letter-spacing:-.03em}
+.tools-block .skills-grid h4{font:600 18px/1.3 var(--display)}
+.languages-line{margin-top:34px;color:var(--muted);font-size:14.5px}
+
+/* Páginas de proyecto: cómo funciona */
+.how{padding:8px 0 clamp(56px,6vw,80px)}
+.how h2{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--mint);font-family:inherit;font-weight:600}
+.how ol{list-style:none;margin:22px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(24px,4vw,48px)}
+.how li{border-top:1px solid #2a2f3b;padding-top:20px}
+.how li span{font:700 12px/1 var(--display);color:var(--violet);letter-spacing:.08em}
+.how li strong{display:block;margin-top:12px;font:650 22px/1.2 var(--display)}
+.how li p{margin-top:10px;font-size:15px;line-height:1.6;color:var(--muted)}
+.case-head{padding:30px 0 56px}
+
+@media(max-width:980px){
+ .row,.row.flip{grid-template-columns:1fr;gap:32px}.row.flip .project-media{order:0}
+ .row .project-info{max-width:none}
+ .row.wide .project-info{display:block}.row.wide .project-links{margin-top:30px}
+ .about-grid{grid-template-columns:1fr;justify-items:start}.portrait{width:min(300px,70%)}
+ .how ol{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+ .topnav,.brand-name small{display:none}
+ .topbar-inner{gap:10px;min-height:64px}
+ .brand-name{font-size:14px}
+ .topbar-cta{padding:9px 12px;font-size:12.5px}
+ .row .project-media{aspect-ratio:4/3.4}
+ .row.wide .project-media{min-height:0}
+ .about-copy .profile-points{grid-template-columns:1fr}
+}
+@media(max-width:420px){.brand-name{display:none}}

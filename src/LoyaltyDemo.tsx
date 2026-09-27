@@ -88,7 +88,7 @@ export default function LoyaltyDemo({ lang }: { lang: 'es' | 'en' }) {
    const at = now + 2 * 60 * 60 * 1000; setNow(at);
    if (pendingReview) {
     setPendingReview(false);
-    send([`Hola ${first}, gracias por venir hoy a El Cerrito. ¿Qué tal estuvo todo? Si te gustó, una reseña nos ayuda muchísimo.`, `Hi ${first}, thanks for coming to El Cerrito today. How was everything? If you liked it, a review helps us a lot.`], at, 'review');
+    send([`Hola ${first}, gracias por venir hoy a El Cerro. ¿Qué tal estuvo todo? Si te gustó, una reseña nos ayuda muchísimo.`, `Hi ${first}, thanks for coming to El Cerro today. How was everything? If you liked it, a review helps us a lot.`], at, 'review');
     note(['2 h después de la visita · se pidió una reseña', '2 h after the visit · review requested'], 'msg', at);
    } else note(['Pasaron 2 horas · nada pendiente', '2 hours passed · nothing pending'], 'rule', at);
   }
@@ -137,20 +137,20 @@ export default function LoyaltyDemo({ lang }: { lang: 'es' | 'en' }) {
     <div className="ld-screen" aria-live="polite">
      {screen === 'lock' && <div className="ld-lock"><strong>{clock(now)}</strong><span>{when(now)}</span><p>{t('Pide la cuenta. El mesero apoya el chip de la carpeta en tu celular.', 'Ask for the bill. The waiter taps the folder’s chip on your phone.')}</p></div>}
      {screen === 'join' && <form className="ld-join" onSubmit={join}>
-      <span className="ld-url">elcerrito.club/t/mesa-7</span>
+      <span className="ld-url">elcerro.club/t/mesa-7</span>
       <div className="ld-brand" aria-hidden="true">EC</div>
-      <h4>{t('Únete al club de El Cerrito', 'Join El Cerrito’s club')}</h4>
+      <h4>{t('Únete al club de El Cerro', 'Join El Cerro’s club')}</h4>
       <p>{t(`Cada visita suma un sello. Con ${GOAL}, la comida va por la casa.`, `Every visit adds a stamp. With ${GOAL}, your meal is on the house.`)}</p>
       <label>{t('Nombre', 'Name')}<input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required/></label>
       <label>WhatsApp<input value={form.phone} inputMode="tel" onChange={e => setForm({ ...form, phone: e.target.value })} required/></label>
       <label>{t('Cumpleaños', 'Birthday')}<input type="date" value={form.birthday} onChange={e => setForm({ ...form, birthday: e.target.value })} required/></label>
       <button type="submit">{t('Agregar a mi Wallet', 'Add to my Wallet')}</button>
-      <small>{t('Acepto recibir mensajes de El Cerrito. Escribe BAJA para dejar de recibirlos.', 'I agree to receive messages from El Cerrito. Reply STOP to opt out.')}</small>
+      <small>{t('Acepto recibir mensajes de El Cerro. Escribe BAJA para dejar de recibirlos.', 'I agree to receive messages from El Cerro. Reply STOP to opt out.')}</small>
      </form>}
      {screen === 'wallet' && member && <div className="ld-wallet">
       <span className="ld-app">Wallet</span>
       <div className="ld-pass">
-       <div className="ld-pass-top"><span className="ld-brand" aria-hidden="true">EC</span><div><strong>El Cerrito</strong><small>{t('Taquería · Monterrey', 'Taquería · Monterrey')}</small></div><span className="ld-pass-count">{stamps}/{GOAL}</span></div>
+       <div className="ld-pass-top"><span className="ld-brand" aria-hidden="true">EC</span><div><strong>El Cerro</strong><small>{t('Restaurante · Monterrey', 'Restaurant · Monterrey')}</small></div><span className="ld-pass-count">{stamps}/{GOAL}</span></div>
        <div className="ld-stamps" role="img" aria-label={t(`${stamps} de ${GOAL} sellos`, `${stamps} of ${GOAL} stamps`)}>
         {Array.from({ length: GOAL }, (_, i) => <span key={i} className={`${i < stamps ? 'on' : ''}${i === fresh ? ' fresh' : ''}`}>{i === GOAL - 1 ? '★' : ''}</span>)}
        </div>
@@ -160,7 +160,7 @@ export default function LoyaltyDemo({ lang }: { lang: 'es' | 'en' }) {
       <p className="ld-hint">{t('Vive en el Wallet: sin app ni tarjeta de cartón.', 'Lives in the Wallet: no app, no paper card.')}</p>
      </div>}
      {screen === 'chat' && <div className="ld-chat">
-      <div className="ld-chat-head"><span className="ld-brand" aria-hidden="true">EC</span><div><strong>El Cerrito</strong><small>{t('Cuenta de empresa', 'Business account')}</small></div></div>
+      <div className="ld-chat-head"><span className="ld-brand" aria-hidden="true">EC</span><div><strong>El Cerro</strong><small>{t('Cuenta de empresa', 'Business account')}</small></div></div>
       <div className="ld-chat-body" ref={chat}>
        {msgs.map(m => <div key={m.id} className="ld-bubble"><p>{m.text[L]}</p>
         {m.action && !m.done && <button onClick={() => act(m)}>{m.action === 'review' ? t('Dejar reseña en Google', 'Leave a Google review') : t('Reservar mesa', 'Book a table')}</button>}
@@ -195,7 +195,7 @@ export default function LoyaltyDemo({ lang }: { lang: 'es' | 'en' }) {
 
    {/* Panel del dueño */}
    <div className="ld-panel">
-    <div className="ld-panel-head"><strong>{t('Panel de El Cerrito', 'El Cerrito dashboard')}</strong><span>{when(now)}</span></div>
+    <div className="ld-panel-head"><strong>{t('Panel de El Cerro', 'El Cerro dashboard')}</strong><span>{when(now)}</span></div>
     <dl className="ld-kpis">
      <div><dt>{t('En el club', 'Members')}</dt><dd>{member ? 1 : 0}</dd></div>
      <div><dt>{t('Visitas', 'Visits')}</dt><dd>{stats.visits}</dd></div>
@@ -221,6 +221,6 @@ export default function LoyaltyDemo({ lang }: { lang: 'es' | 'en' }) {
     </li>)}
    </ol>
   </div>
-  <p className="ld-note">{t('Simulación: la taquería es ficticia y no se envía ningún WhatsApp. Inspirado en un producto real; esta versión es mía.', 'Simulation: the taquería is fictional and no WhatsApp is sent. Inspired by a real product; this version is mine.')}</p>
+  <p className="ld-note">{t('Simulación: el restaurante es ficticio y no se envía ningún WhatsApp. Inspirado en un producto real; esta versión es mía.', 'Simulation: the restaurant is fictional and no WhatsApp is sent. Inspired by a real product; this version is mine.')}</p>
  </div>;
 }

@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 
 // Movimiento de la página: aparición al hacer scroll, barra de lectura, luz que sigue al cursor
 // en las tarjetas y números que cuentan al aparecer. Todo respeta la pausa global.
-const TARGETS = '.section-heading,.project,.proposals-strip,.skills-grid>div,.experience-row,.certificate,.about-intro>*,.gamedev-metrics>div,.original-compare-heading,.model-lab,.pano,.contact-links>a,.case-story>div,.case-next,.case-head>*';
+const TARGETS = '.section-heading,.row>.project-media,.row>.project-info,.skills-grid>div,.experience-row,.certificate,.about-grid>*,.gamedev-metrics>div,.original-compare-heading,.model-lab,.pano,.contact-links>a,.how li,.case-next,.case-head>*';
 
 export function useMotion(key: string) {
  useEffect(() => {
