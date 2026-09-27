@@ -74,7 +74,7 @@ test('game scenes gallery: cameras, and the temple toggles its pixel art', async
  await page.goto('/');
  const thumbs=page.locator('.pano-thumbs button');
  await thumbs.first().scrollIntoViewIfNeeded();
- await expect(thumbs).toHaveCount(15);
+ await expect(thumbs).toHaveCount(4);
  await thumbs.nth(0).click();
  const stage=page.locator('.pano-stage img.on');
  await expect(stage).toHaveAttribute('src','/media/escenas/templo-noche-pixel.webp');

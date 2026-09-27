@@ -20,25 +20,6 @@
 html[data-motion=paused] .live-dot{animation:none}
 @keyframes live-dot{70%{box-shadow:0 0 0 8px #9ddbc900}100%{box-shadow:0 0 0 0 #9ddbc900}}
 @media(max-width:640px){.media-punto.live{height:640px}}
-.vibe-sketch{height:100%;display:flex;flex-direction:column;background:#181a21;font-family:'DM Sans',sans-serif}
-.vs-bar{display:flex;align-items:center;gap:7px;padding:11px 16px;background:#121419;border-bottom:1px solid #282a31}
-.vs-bar i{width:10px;height:10px;border-radius:50%;background:#f43f5e}.vs-bar i:nth-child(2){background:#f59e0b}.vs-bar i:nth-child(3){background:#10b981}
-.vs-bar span{margin-left:8px;font:500 11px ui-monospace,Consolas,monospace;color:#9fa5ad;letter-spacing:.02em}
-.vs-body{flex:1;display:grid;grid-template-columns:.95fr 1.05fr;gap:14px;padding:14px 16px 6px;min-height:0}
-.vs-flow{display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
-.vs-step{display:flex;flex-direction:column;align-items:flex-start}
-.vs-node{font:600 11.5px ui-monospace,Consolas,monospace;color:#eaecf5;padding:5px 10px;border:1px solid #8f90c5;border-radius:6px;background:#1e1b4b;animation:vs-node 6.4s ease calc(var(--i) * 1.6s - 1.6s) infinite}
-.vs-edge{position:relative;margin:0 0 0 14px;padding:5px 0 5px 16px;border-left:2px solid #3f4149;font:500 10.5px ui-monospace,Consolas,monospace;color:#9fa5ad;animation:vs-edge 6.4s ease calc(var(--i) * 1.6s) infinite}
-.vs-edge b{color:#c0c6e1}
-.vs-notes{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;justify-content:center;gap:7px}
-.vs-notes li{font-size:11.5px;line-height:1.4;color:#9fa5ad;padding:5px 8px;border-radius:6px;animation:vs-note 6.4s ease calc((var(--i) - 1) * 1.6s) infinite}
-.vs-notes b{color:#c0c6e1}.vs-notes code{font:600 10.5px ui-monospace,Consolas,monospace;color:#eaecf5}
-.vs-caption{padding:6px 76px 14px 16px;font-size:11.5px;color:#9fa5ad}
-@keyframes vs-edge{0%,30%{border-left-color:#a6aad3;color:#eaecf5}40%,100%{border-left-color:#3f4149;color:#9fa5ad}}
-@keyframes vs-node{0%,30%{border-color:#c0c6e1;box-shadow:0 0 14px #8f90c566}40%,100%{border-color:#8f90c5;box-shadow:none}}
-@keyframes vs-note{0%,30%{background:#1e1b4b;color:#eaecf5}40%,100%{background:transparent;color:#9fa5ad}}
-html[data-motion=paused] .vs-node,html[data-motion=paused] .vs-edge,html[data-motion=paused] .vs-notes li{animation:none}
-@media(max-width:640px){.vs-body{grid-template-columns:1fr}.vs-notes{display:none}}
 .data-section .section-heading{margin-bottom:34px}
 
 .data-section .dw-workbench{max-width:none}

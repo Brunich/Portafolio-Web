@@ -9,7 +9,6 @@ import OriginalScenes from './OriginalScenes';
 const DataWorkbench = lazy(() => import('./DataWorkbench'));
 const LoyaltyDemo = lazy(() => import('./LoyaltyDemo'));
 const ShiftHandover = lazy(() => import('./ShiftHandover'));
-import VibeSketch from './VibeSketch';
 import ClubPreview from './ClubPreview';
 import CsvChart from './CsvChart';
 import TurnoPreview from './TurnoPreview';
@@ -70,7 +69,7 @@ function Home({ lang, paused, projects }: { lang: Lang; paused: boolean; project
   </section>
   <section id="about" className="about-section section-space"><div className="wrap">
    <div className="about-grid">
-    <figure className="portrait"><img src="/media/bruno-retrato.jpg" alt="Bruno Salas" width="660" height="660" loading="lazy"/><figcaption><strong>Bruno Salas</strong><span>Monterrey, N. L.</span></figcaption></figure>
+    <figure className="portrait"><img src="/media/bruno-retrato.jpg" alt="Bruno Salas" width="640" height="800" loading="lazy"/><figcaption><strong>Bruno Salas</strong><span>Monterrey, N. L.</span></figcaption></figure>
     <div className="about-copy"><span className="kicker">02 · {es ? 'Perfil' : 'Profile'}</span><h2>{p.aboutTitle}</h2><p>{p.about}</p><p>{p.about2}</p><a className="inline-link" href={cv} download>{es ? 'Descargar CV' : 'Download CV'}<DownloadSimple size={20}/></a>
      <dl className="profile-points">{p.profilePoints.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></div>
    </div>
@@ -88,7 +87,7 @@ function Media({ lang, project }: { lang: Lang; project: Project }) {
   case 'club': return <ClubPreview lang={lang}/>;
   case 'analizador': return <CsvChart lang={lang}/>;
   case 'turno': return <TurnoPreview lang={lang}/>;
-  case 'vibemap': return <VibeSketch lang={lang}/>;
+  case 'vibemap': return <img className="vibe-shot" src="/media/vibemap-mapa.webp" alt={lang === 'es' ? 'Mapa mental de VibeMap sobre el código de este portafolio' : 'VibeMap mind map of this portfolio’s code'} width="1210" height="350" loading="lazy"/>;
   default: return <div className="phones"><img src="/media/punto-u-mapa.webp" alt={es ? 'Punto U: mapa del campus con misiones' : 'Punto U: campus map with missions'} loading="lazy"/><img src="/media/punto-u.webp" alt={es ? 'Punto U: crear perfil' : 'Punto U: create profile'} loading="lazy"/></div>;
  }
 }
@@ -125,7 +124,7 @@ function ProjectPage({ lang, project, projects }: { lang: Lang; project: Project
    {project.id === 'club' && <LoyaltyDemo lang={lang}/>}
    {project.id === 'turno' && <ShiftHandover lang={lang}/>}
    {project.id === 'csv' && <><div className="case-demo-head"><h2>{es ? 'Tus datos, en un mapa.' : 'Your data, as a map.'}</h2><p>{es ? 'Sube o arrastra tu CSV. Se analiza en tu navegador y nada sale de tu equipo.' : 'Upload or drag your CSV. It is analyzed in your browser and nothing leaves your device.'}</p></div><DataWorkbench lang={lang}/></>}
-   {project.id === 'vibe' && <div className="demo-vibe"><VibeSketch lang={lang}/><p>{es ? 'La salida de VibeMap sobre el código de este sitio: cada flecha es una función real.' : 'VibeMap’s output on this site’s code: every arrow is a real function.'}</p></div>}
+   {project.id === 'vibe' && <div className="demo-vibe"><div className="case-demo-head"><h2>{es ? 'Pruébalo aquí mismo.' : 'Try it right here.'}</h2><p>{es ? 'Toca «Un RPG en Godot» o suelta la carpeta de tu proyecto. Todo corre en tu navegador.' : 'Tap “Un RPG en Godot” or drop your own project folder. Everything runs in your browser.'}</p></div><div className="case-browser"><span className="case-browser-bar"><i/><i/><i/><b>vibemap-brunich.vercel.app</b></span><iframe src={project.link} title={es ? 'VibeMap en vivo' : 'VibeMap live'} loading="lazy"/></div><p className="demo-vibe-links"><a className="inline-link" href={project.link} {...external(project.link)}>{es ? 'Abrir en otra pestaña' : 'Open in a new tab'}<ArrowUpRight size={18}/></a><a className="inline-link" href="https://github.com/Brunich/VibeMap" {...external('https://github.com/Brunich/VibeMap')}>{es ? 'Ver el código' : 'View the code'}<ArrowUpRight size={18}/></a></p></div>}
   </Suspense></div></section>
   <nav className="case-next wrap" aria-label={es ? 'Siguiente proyecto' : 'Next project'}><a href={`/proyectos/${next.slug}`}><span>{es ? 'Siguiente proyecto' : 'Next project'}</span><strong>{next.title}</strong><ArrowRight size={26}/></a></nav>
  </main>;
