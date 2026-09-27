@@ -182,6 +182,6 @@ export default function ModelLab({ lang, paused }: { lang: 'es' | 'en'; paused: 
    <label>{es ? 'División' : 'Divider'}<input type="range" min="0" max="100" value={split} onChange={e => setSplit(Number(e.target.value))} aria-label={es ? 'Comparación de estilos sobre el modelo' : 'Style comparison on the model'}/></label>
    <label>{es ? 'Tamaño del píxel' : 'Pixel size'}<input type="range" min="2" max="6" step="0.25" value={pixelSize} onChange={e => setPixelSize(Number(e.target.value))}/></label>
   </div>
-  <p className="original-caption">{es ? 'Arrastra el modelo para girarlo y usa la rueda o pellizca para acercarte. Null es el protagonista de IA Rogue; los estilos del juego están recreados en WebGL para el navegador.' : 'Drag the model to rotate it; scroll or pinch to zoom. Null is IA Rogue’s protagonist; the game’s styles are recreated in WebGL for the browser.'}</p>
+  <p className="original-caption">{es ? 'Null, protagonista de IA Rogue. Los estilos del juego, recreados en WebGL.' : 'Null, IA Rogue’s protagonist. The game’s styles, recreated in WebGL.'}</p>
  </div>;
 }
