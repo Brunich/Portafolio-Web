@@ -41,3 +41,4 @@ Capturas de la sesión de IA Rogue con `tools/capture_portafolio_v2.gd` (ruta re
 - escenas/templo-{dia,noche}-{pixel,suave}.webp: cámara 1 de frente, misma toma e instante en cada pareja; recorte 1600×900 desde (480,0) a tamaño nativo, para dejar fuera el aviso «[E] Open system board» que sale al pie.
 - escenas/bosque-camara-1/2, arbol-camara-1/2/3, bosque-oscuro, bosque-oscuro-claro-de-la-espada, espada-de-cerca, lago, arana-jefa: escaladas a 1600×900, sin retoque.
 Descartadas: bosque_camara_3 (planos de luz translúcidos cruzan la toma) y agua_desde_arriba_espuma (no muestra líneas de espuma).
+- 2026-09-27 (noche): bruno-retrato.jpg pasa a cuadrado 1:1 (x 38–368, y 30–360 del original, 660×660) para la tarjeta de Perfil.
