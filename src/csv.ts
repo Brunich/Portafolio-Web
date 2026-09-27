@@ -57,3 +57,28 @@ export function exportCsv(headers:string[],rows:string[][]):string {
  };
  return [headers,...rows].map(row=>row.map(encode).join(',')).join('\r\n');
 }
+
+export type ColumnKind = 'number' | 'date' | 'category' | 'text';
+export type ColumnProfile = { name: string; kind: ColumnKind; filled: number; blanks: number; unique: number; top: [string, number][]; min?: number; max?: number; from?: string; to?: string };
+
+const toNumber = (v: string) => { const t = v.trim().replace(/\s/g, ''); if (!/^-?[\d.,]+$/.test(t)) return NaN; return Number(t.includes(',') && !t.includes('.') ? t.replace(',', '.') : t.replace(/,/g, '')); };
+const isDate = (v: string) => /^\d{4}-\d{2}-\d{2}/.test(v.trim()) || /^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(v.trim());
+
+export function profileColumns(headers: string[], rows: string[][]): ColumnProfile[] {
+ return headers.map((name, index) => {
+  const values = rows.map(r => (r[index] ?? '').trim());
+  const present = values.filter(Boolean);
+  const counts = new Map<string, number>();
+  present.forEach(v => counts.set(v, (counts.get(v) ?? 0) + 1));
+  const top = [...counts].sort((a, b) => b[1] - a[1]).slice(0, 3);
+  const numbers = present.map(toNumber);
+  let kind: ColumnKind = 'text';
+  if (present.length && numbers.every(n => !Number.isNaN(n))) kind = 'number';
+  else if (present.length && present.every(isDate)) kind = 'date';
+  else if (present.length && counts.size <= Math.max(3, present.length * 0.6)) kind = 'category';
+  const profile: ColumnProfile = { name, kind, filled: values.length ? present.length / values.length : 0, blanks: values.length - present.length, unique: counts.size, top };
+  if (kind === 'number') { profile.min = Math.min(...numbers); profile.max = Math.max(...numbers); }
+  if (kind === 'date') { const sorted = [...present].sort(); profile.from = sorted[0]; profile.to = sorted[sorted.length - 1]; }
+  return profile;
+ });
+}

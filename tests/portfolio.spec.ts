@@ -53,6 +53,22 @@ test('original style comparison responds to pointer and keyboard',async({page})=
  const box=await slider.boundingBox();if(!box)throw new Error('Missing comparator');
  await page.mouse.click(box.x+box.width*.75,box.y+box.height/2);
  expect(Number(await slider.inputValue())).toBeGreaterThan(65);
- await page.locator('#graphics').getByRole('button',{name:'Intermedio',exact:true}).click();
+ await page.locator('#graphics').getByRole('button',{name:/^Intermedio/}).click();
  await expect(page.locator('.original-comparator img').nth(1)).toHaveAttribute('src','/media/shader-original/forest_1.webp');
+});
+
+test('csv mind map, impact explorer and panoramas respond',async({page})=>{
+ await page.goto('/');
+ const map=page.locator('.dw-mindmap');await map.scrollIntoViewIfNeeded();
+ await expect(map.locator('.mm-branch')).toHaveCount(6);
+ await expect(page.locator('.dw-stats')).toContainText('1');
+ await page.locator('#automation').scrollIntoViewIfNeeded();
+ await page.locator('.ie-scenarios button').nth(2).click();
+ await expect(page.locator('.ie-report')).toContainText('orders.service.ts');
+ await expect(page.locator('.ie-report')).toContainText('orders.service.test.ts');
+ await page.locator('.pano-thumbs button').nth(1).click();
+ await page.locator('.pano-stage').click();
+ await expect(page.locator('.pano-dialog')).toBeVisible();
+ await page.keyboard.press('Escape');
+ await expect(page.locator('.pano-dialog')).toBeHidden();
 });
