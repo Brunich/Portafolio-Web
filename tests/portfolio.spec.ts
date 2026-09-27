@@ -45,23 +45,27 @@ test('original forest gallery switches between authentic views',async({page})=>{
  expect(await scene.locator('.original-scene').evaluate((img:HTMLImageElement)=>img.complete&&img.naturalWidth===1600)).toBe(true);
 });
 
-test('original style comparison responds to pointer and keyboard',async({page})=>{
+test('3D style comparison responds to keyboard and style pairs',async({page})=>{
  await page.goto('/');
- const slider=page.getByRole('slider',{name:'Comparación de estilos originales'});
+ const slider=page.getByRole('slider',{name:'Comparación de estilos sobre el modelo'});
  await slider.scrollIntoViewIfNeeded();await slider.focus();await slider.press('ArrowRight');
  await expect(slider).toHaveValue('51');
- const box=await slider.boundingBox();if(!box)throw new Error('Missing comparator');
- await page.mouse.click(box.x+box.width*.75,box.y+box.height/2);
- expect(Number(await slider.inputValue())).toBeGreaterThan(65);
- await page.locator('#graphics').getByRole('button',{name:/^Intermedio/}).click();
- await expect(page.locator('.original-comparator img').nth(1)).toHaveAttribute('src','/media/shader-original/forest_1.webp');
+ await page.locator('#graphics').getByRole('button',{name:/^Cel shading/}).click();
+ await expect(page.locator('.model-lab .original-side-labels')).toContainText('Cel shading');
+ await expect(page.locator('#graphics')).not.toContainText('Definitive');
 });
 
 test('csv mind map, impact explorer and panoramas respond',async({page})=>{
  await page.goto('/');
  const map=page.locator('.dw-mindmap');await map.scrollIntoViewIfNeeded();
- await expect(map.locator('.mm-branch')).toHaveCount(6);
- await expect(page.locator('.dw-stats')).toContainText('1');
+ await expect(map.locator('.mm-branch')).toHaveCount(10);
+ const problems=page.locator('.dw-kpis div').nth(3).locator('dd');
+ await expect(problems).toHaveText('7');
+ await page.getByRole('button',{name:/Arreglar lo automático/}).click();
+ await expect(problems).toHaveText('1'); // sólo queda la regla de negocio, que no se arregla sola
+ await expect(page.locator('.dw-kpis div').first().locator('dd')).toHaveText('22');
+ await page.getByRole('button',{name:'Organismo de agua'}).click();
+ await expect(page.locator('.dw-issues')).toContainText('Negativos en «dias_para_atender»');
  await page.locator('#automation').scrollIntoViewIfNeeded();
  await page.locator('.ie-scenarios button').nth(2).click();
  await expect(page.locator('.ie-report')).toContainText('orders.service.ts');
