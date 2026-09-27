@@ -13,6 +13,9 @@ const ISO = /^\d{4}-\d{2}-\d{2}$/, DMY = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
 const THOUSANDS = /^-?\d{1,3}(,\d{3})+(\.\d+)?$/, PLAIN = /^-?\d+(\.\d+)?$/;
 export const toNumber = (v: string) => { const t = v.trim(); return THOUSANDS.test(t) ? Number(t.replace(/,/g, '')) : PLAIN.test(t) ? Number(t) : NaN; };
 const line = (r: number) => r + 2; // fila en el archivo: la 1 es el encabezado
+// En un empate gana la forma «bien escrita»: mayúscula inicial, con acentos y nunca TODO EN MAYÚSCULAS.
+const tidy = (v: string) => (/^\p{Lu}/u.test(v) ? 2 : 0) + (/[À-ſ]/.test(v) ? 1 : 0) - (v === v.toUpperCase() && /\p{L}{2}/u.test(v) ? 3 : 0);
+const cap = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
 export function detectIssues(headers: string[], rows: string[][]): Issue[] {
@@ -39,7 +42,7 @@ export function detectIssues(headers: string[], rows: string[][]): Issue[] {
  const seen = new Map<string, number>(), dup: [number, number][] = [];
  rows.forEach((r, i) => { const k = JSON.stringify(r.map(v => v.trim())); if (seen.has(k)) dup.push([i, seen.get(k)!]); else seen.set(k, i); });
  if (dup.length) issues.push({ id: 'dup', severity: 'medium', title: ['Filas repetidas', 'Duplicate rows'],
-  detail: [dup.map(([i, j]) => `la fila ${line(i)} repite la ${line(j)}`).join('; ') + '. Pasa cuando un reporte se exporta dos veces.', dup.map(([i, j]) => `row ${line(i)} repeats row ${line(j)}`).join('; ') + '. Typical when a report is exported twice.'],
+  detail: [cap(dup.map(([i, j]) => `la fila ${line(i)} repite la ${line(j)}`).join('; ')) + '. Pasa cuando un reporte se exporta dos veces.', cap(dup.map(([i, j]) => `row ${line(i)} repeats row ${line(j)}`).join('; ')) + '. Typical when a report is exported twice.'],
   example: rows[dup[0][0]][0], cells: dup.flatMap(([i]) => headers.map((_, c) => [i, c] as [number, number])), rows: dup.map(([i]) => i),
   fix: rs => { const s = new Set<string>(); return rs.filter(r => { const k = JSON.stringify(r.map(v => v.trim())); if (s.has(k)) return false; s.add(k); return true; }); },
   fixLabel: ['Quitar repetidas', 'Remove duplicates'], fixDone: [`Quité ${plural(dup.length, 'fila repetida', 'filas repetidas')}`, `Removed ${plural(dup.length, 'duplicate row', 'duplicate rows')}`] });
@@ -52,7 +55,7 @@ export function detectIssues(headers: string[], rows: string[][]): Issue[] {
   const messy = [...groups.values()].filter(g => g.size > 1);
   if (messy.length && groups.size <= Math.max(4, present.length * 0.6)) {
    const canon = new Map<string, string>();
-   messy.forEach(g => { const best = [...g].sort((a, b) => b[1] - a[1] || (a[0] === a[0].toUpperCase() ? 1 : -1))[0][0]; g.forEach((_, form) => canon.set(fold(form), best)); });
+   messy.forEach(g => { const best = [...g].sort((a, b) => b[1] - a[1] || tidy(b[0]) - tidy(a[0]))[0][0]; g.forEach((_, form) => canon.set(fold(form), best)); });
    const cells = values.map((v, i) => [i, v] as const).filter(([, v]) => v.trim() && canon.has(fold(v)) && v.trim() !== canon.get(fold(v))).map(([i]) => [i, c] as [number, number]);
    const forms = messy.map(g => [...g.keys()].map(f => `«${f}»`).join(' / '));
    issues.push({ id: `case-${c}`, severity: 'medium', column: c, title: [`«${h}» escrito de varias formas`, `“${h}” written several ways`],

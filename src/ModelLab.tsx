@@ -108,7 +108,7 @@ export default function ModelLab({ lang, paused }: { lang: 'es' | 'en'; paused: 
     let w = 1, h = 1;
     const resize = () => {
      const b = el.getBoundingClientRect(); w = Math.max(1, b.width); h = Math.max(1, b.height);
-     renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
+     renderer.setSize(w, h); camera.aspect = w / h; camera.fov = camera.aspect < 1 ? 32 / camera.aspect * 0.85 : 32; camera.updateProjectionMatrix(); // en vertical se abre el ángulo para que quepa entero
     };
     const drawStyle = (style: Style, x: number, width: number) => {
      if (width <= 0) return;
