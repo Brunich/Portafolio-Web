@@ -96,5 +96,5 @@ test('customer club demo joins, stamps once per day and sends each message',asyn
  await club.getByRole('button',{name:/Enviar campaña/}).click();
  await club.getByRole('button',{name:'Reservar mesa'}).click();
  await expect(club.locator('.ld-chat')).toContainText('4 personas');
- await expect(page.locator('.pano-thumbs button')).toHaveCount(2);
+ await expect(page.locator('.pano-thumbs button')).toHaveCount(3);
 });

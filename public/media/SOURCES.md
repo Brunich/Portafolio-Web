@@ -29,3 +29,6 @@ Recortes 21:9 sin retoque de capturas existentes en IA Rogue DEFINITIVE/screensh
 - isla-ciudad.webp: audit_levels/generated_cyber_square.png
 Descartadas: reference_video_analysis/* (vídeo de referencia, no es trabajo de Bruno) y las que llevan texto de depuración encima.
 La tarjeta de VibeMap usa un esquema dibujado (VibeSketch.tsx), rotulado «Esquema del resultado»: la app real sólo tiene tema claro.
+
+## Cascada arreglada (2026-09-27)
+- costa-atardecer.webp: nueva captura `IA Rogue DEFINITIVE/tmp/cascada_portafolio/costa_atardecer.png` (2560×1440, sin HUD, por la ruta real del juego) tras el arreglo de la cascada (commit b2464478 en Antigravity_Version: cara del acantilado recta detrás de la cortina y sin los cilindros de arriba). Recorte 21:9 desde y=40, escalado a 1600×686, sin retoque.
