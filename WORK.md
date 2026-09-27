@@ -22,3 +22,7 @@ Siguiente acción: que Bruno apruebe el encuadre y publicar (vercel --prod); lue
 Sin fondos blancos (Punto U y VibeMap en oscuro). Nuevo: río de código bajo la portada (CodeRiver), sección Datos con analizador CSV + mapa mental (árbol en móvil), explorador de impacto animado en Flujos, Punto U en vivo (iframe), comparador por parejas con lupa ×3 y carrusel de 5 panorámicas. Build y 6/6 Playwright+axe en verde. SIN publicar.
 Hallazgos: el Supabase de Punto U no existe (NXDOMAIN) → la app no guarda perfiles. El logo cortado es Punto U/src/PuntoU.jsx:705-706 (justifyContent center en contenedor con scroll; arreglo: "safe center").
 Siguiente acción: Bruno lo ve y aprueba publicar; decidir si se capturan más escenas del juego para el comparador (requiere lanzar Godot con --windowed).
+
+## 3ª tanda 2026-09-27
+Fuera «Definitive» del sitio. Comparador 3D en WebGL sobre Null (classic_null_v2.glb): pixel art / cel / 3D, división, giro, zoom y tamaño de píxel; ~240 fps en la RTX 4070 tras arreglar un bucle de render que se duplicaba (daba 0,5 fps). OJO: la malla base de Null viene de un modelo de referencia (README del donante): el sitio no dice que Bruno la modeló. VibeMap: esquema con su formato real (flechas numeradas por función, sin metáforas). Punto U: texto de favores; en vivo funciona en modo local (PuntoU.jsx:159/171). Analizador CSV rehecho (quality.ts, samples.ts). 6/6 pruebas. SIN publicar.
+Siguiente acción: Bruno revisa en local; con su «publica», `vercel --prod`.
