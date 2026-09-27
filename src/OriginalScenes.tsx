@@ -6,11 +6,21 @@ import './original-scenes.css';
 // `soft` es la misma toma sin pixelado: esas fotos llevan un interruptor de pixel art.
 type Shot = { file: string; soft?: string; title: [string, string]; note: [string, string] };
 const PANORAMAS: Shot[] = [
- { file: 'rogue-forest-overview', title: ['El bosque', 'The forest'], note: ['Vista tres cuartos, sol entre los árboles', 'Three-quarter view, sunlight through the trees'] },
+ { file: 'escenas/templo-noche-pixel', soft: 'escenas/templo-noche-suave', title: ['El templo de noche', 'The temple at night'], note: ['Cámara 1, de frente. Quita y pon el pixel art', 'Camera 1, front view. Toggle the pixel art'] },
+ { file: 'escenas/templo-dia-pixel', soft: 'escenas/templo-dia-suave', title: ['El templo de día', 'The temple by day'], note: ['Mismo encuadre e instante que de noche', 'Same framing and moment as at night'] },
+ { file: 'escenas/bosque-camara-1', title: ['El bosque · cámara 1', 'The forest · camera 1'], note: ['Cámara clásica en tres cuartos', 'Classic three-quarter camera'] },
+ { file: 'escenas/bosque-camara-2', title: ['El bosque · cámara 2', 'The forest · camera 2'], note: ['Cámara en perspectiva', 'Perspective camera'] },
+ { file: 'escenas/arbol-camara-1', title: ['Un árbol · cámara 1', 'One tree · camera 1'], note: ['El mismo árbol desde las tres cámaras', 'The same tree from all three cameras'] },
+ { file: 'escenas/arbol-camara-2', title: ['Un árbol · cámara 2', 'One tree · camera 2'], note: ['Perspectiva', 'Perspective'] },
+ { file: 'escenas/arbol-camara-3', title: ['Un árbol · cámara 3', 'One tree · camera 3'], note: ['Sobre el hombro', 'Over the shoulder'] },
+ { file: 'escenas/bosque-oscuro', title: ['El bosque oscuro', 'The dark forest'], note: ['El portal entre los árboles', 'The portal among the trees'] },
+ { file: 'escenas/bosque-oscuro-claro-de-la-espada', title: ['El claro de la espada', 'The sword clearing'], note: ['Un haz de luz sobre la roca', 'A beam of light on the rock'] },
+ { file: 'escenas/espada-de-cerca', title: ['La espada', 'The sword'], note: ['De cerca, clavada en la roca', 'Up close, set in the rock'] },
+ { file: 'escenas/lago', title: ['El lago', 'The lake'], note: ['Agua con reflejos entre el pasto', 'Water with reflections in the grass'] },
+ { file: 'escenas/arana-jefa', title: ['La araña jefa', 'The spider boss'], note: ['Frente al templo, sobre el agua', 'Before the temple, over the water'] },
+ { file: 'panoramas/costa-atardecer', title: ['La cascada al atardecer', 'The waterfall at sunset'], note: ['Agua que cae por delante del acantilado', 'Water falling in front of the cliff'] },
+ { file: 'rogue-forest-overview', title: ['Rayos entre los árboles', 'Light through the trees'], note: ['Vista tres cuartos en pixel art', 'Three-quarter view in pixel art'] },
  { file: 'rogue-forest-first-person', title: ['El bosque al anochecer', 'The forest at dusk'], note: ['Primera persona, niebla y luna', 'First person, fog and moon'] },
- { file: 'panoramas/templo-portico', title: ['Pórtico del templo', 'Temple portico'], note: ['Antorchas, piedra y agua de noche', 'Torches, stone and water at night'] },
- { file: 'panoramas/costa-atardecer', title: ['La cascada al atardecer', 'The waterfall at sunset'], note: ['Agua que cae por delante del acantilado y cambia con la hora', 'Water falling in front of the cliff, changing with the time of day'] },
- { file: 'panoramas/costa-facetada', title: ['Costa facetada', 'Faceted coast'], note: ['Iluminación cel facetada', 'Faceted cel lighting'] },
 ];
 
 const GAME_METRICS: [string, [string, string]][] = [
@@ -41,7 +51,7 @@ export default function OriginalScenes({ lang, paused }: { lang: 'es' | 'en'; pa
   <div className="original-compare-heading"><h3>{es ? 'Un personaje, tres estilos.' : 'One character, three styles.'}</h3><p>{es ? 'Gíralo, acércate y cambia el tamaño del píxel.' : 'Rotate it, zoom in and change the pixel size.'}</p></div>
   <ModelLab lang={lang} paused={paused}/>
 
-  <div className="original-compare-heading"><h3>{es ? 'Escenas del juego.' : 'Scenes from the game.'}</h3><p>{es ? 'Capturas del juego, sin retoque. Toca una para verla completa.' : 'In-game captures, untouched. Tap one to see it in full.'}</p></div>
+  <div className="original-compare-heading"><h3>{es ? 'Escenas del juego.' : 'Scenes from the game.'}</h3><p>{es ? 'Capturas del juego desde sus tres cámaras, sin retoque. Toca una para verla completa.' : 'In-game captures from its three cameras, untouched. Tap one to see it in full.'}</p></div>
   <div className="pano" onMouseEnter={() => setHovering(true)} onMouseLeave={() => setHovering(false)}>
    <button className="pano-stage" onClick={() => setOpen(true)} aria-label={`${PANORAMAS[pano].title[L]} — ${es ? 'ver a pantalla completa' : 'view full screen'}`}>
     {PANORAMAS.map((p, i) => <img key={p.file} src={src(p)} alt="" className={i === pano ? 'on' : ''} loading={i ? 'lazy' : undefined}/>)}

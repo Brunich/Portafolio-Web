@@ -70,13 +70,18 @@ test('shift handover: an incident cannot be closed without evidence, and the han
  expect((await request.get('/cv/Bruno-Salas-EN.pdf')).status()).toBe(200);
 });
 
-test('game scenes gallery includes the forest and opens full screen',async({page})=>{
+test('game scenes gallery: cameras, and the temple toggles its pixel art', async ({page})=>{
  await page.goto('/');
  const thumbs=page.locator('.pano-thumbs button');
  await thumbs.first().scrollIntoViewIfNeeded();
- await expect(thumbs).toHaveCount(5);
- await thumbs.nth(1).click();
- await expect(page.locator('.pano-stage img.on')).toHaveAttribute('src','/media/rogue-forest-first-person.webp');
+ await expect(thumbs).toHaveCount(15);
+ await thumbs.nth(0).click();
+ const stage=page.locator('.pano-stage img.on');
+ await expect(stage).toHaveAttribute('src','/media/escenas/templo-noche-pixel.webp');
+ await page.getByRole('button',{name:'Pixel art',exact:true}).click();
+ await expect(stage).toHaveAttribute('src','/media/escenas/templo-noche-suave.webp');
+ await thumbs.nth(2).click();
+ await expect(page.getByRole('button',{name:'Pixel art',exact:true})).toHaveCount(0);
  await page.locator('.pano-stage').click();
  await expect(page.locator('.pano-dialog')).toBeVisible();
  await page.keyboard.press('Escape');
