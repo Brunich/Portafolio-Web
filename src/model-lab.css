@@ -1,14 +1,14 @@
-.model-lab{border:1px solid #47617e;border-radius:14px;overflow:hidden;background:#1b2d46}
-.ml-stage{position:relative;aspect-ratio:16/9;background:radial-gradient(ellipse 55% 70% at 50% 55%,#2b4671 0%,#16243c 60%,#101b2f 100%);touch-action:none}
+.model-lab{border:1px solid #5a5e6b;border-radius:14px;overflow:hidden;background:#2a2d37}
+.ml-stage{position:relative;aspect-ratio:16/9;background:radial-gradient(ellipse 55% 70% at 50% 55%,#444859 0%,#23262f 60%,#1b1d24 100%);touch-action:none}
 .ml-stage canvas{display:block;width:100%;height:100%;cursor:grab}
 .ml-stage canvas:active{cursor:grabbing}
-.ml-status{position:absolute;inset:0;display:grid;place-items:center;color:#bdcce1;font-size:14px}
+.ml-status{position:absolute;inset:0;display:grid;place-items:center;color:#c8ced6;font-size:14px}
 .ml-split{position:absolute;top:0;bottom:0;width:30px;margin-left:-15px;cursor:ew-resize;z-index:2;touch-action:none}
 .ml-split::before{content:'';position:absolute;left:14px;top:0;bottom:0;border-left:2px solid #ffffffd9}
-.ml-split span{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border:1px solid #adcdf0;border-radius:50%;background:#172c45;color:#fff;padding:10px;line-height:1}
+.ml-split span{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border:1px solid #c2cedb;border-radius:50%;background:#272a35;color:#fff;padding:10px;line-height:1}
 .ml-zoom{position:absolute;right:14px;bottom:14px;display:flex;gap:6px;z-index:2}
-.ml-zoom button{width:40px;height:40px;border:1px solid #6582a3;border-radius:8px;background:#122238e8;color:#fff;font-size:18px}
+.ml-zoom button{width:40px;height:40px;border:1px solid #788390;border-radius:8px;background:#1f222be8;color:#fff;font-size:18px}
 .ml-controls{display:flex;flex-wrap:wrap;gap:22px;padding:16px 24px 0}
-.ml-controls label{display:flex;align-items:center;gap:12px;font-size:13px;color:#d6e4f5}
-.ml-controls input{width:180px;accent-color:#b9d4f2}
+.ml-controls label{display:flex;align-items:center;gap:12px;font-size:13px;color:#e0e5eb}
+.ml-controls input{width:180px;accent-color:#cbd5e0}
 @media(max-width:640px){.ml-stage{aspect-ratio:4/5}.ml-controls{padding:14px 16px 0}.ml-controls input{width:140px}}

@@ -43,11 +43,11 @@ export default function ModelLab({ lang, paused }: { lang: 'es' | 'en'; paused: 
 
     const key = new THREE.DirectionalLight('#fff1dc', 3.2); key.position.set(-2.5, 3.5, -3);
     const rim = new THREE.DirectionalLight('#7fb4ff', 3.4); rim.position.set(2.5, 2, 3);
-    const fill = new THREE.HemisphereLight('#9ec3ff', '#141d33', 0.9);
+    const fill = new THREE.HemisphereLight('#9ec3ff', '#1f2128', 0.9);
     scene.add(key, rim, fill);
     const shadowCanvas = document.createElement('canvas'); shadowCanvas.width = shadowCanvas.height = 128;
     const sctx = shadowCanvas.getContext('2d')!; const grad = sctx.createRadialGradient(64, 64, 0, 64, 64, 64);
-    grad.addColorStop(0, 'rgba(4,8,20,.75)'); grad.addColorStop(1, 'rgba(4,8,20,0)'); sctx.fillStyle = grad; sctx.fillRect(0, 0, 128, 128);
+    grad.addColorStop(0, 'rgba(6,7,12,.75)'); grad.addColorStop(1, 'rgba(6,7,12,0)'); sctx.fillStyle = grad; sctx.fillRect(0, 0, 128, 128);
     const floor = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1.6), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(shadowCanvas), transparent: true, depthWrite: false }));
     floor.rotation.x = -Math.PI / 2;
     scene.add(floor);

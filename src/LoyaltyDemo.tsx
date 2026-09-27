@@ -187,7 +187,7 @@ export default function LoyaltyDemo({ lang }: { lang: 'es' | 'en' }) {
      <button disabled={!member} onClick={() => advance('weeks')}>{t('+5 semanas sin venir', '+5 weeks away')}<small>{t('lo invita a volver', 'invites them back')}</small></button>
      <button disabled={!member} onClick={() => advance('birthday')}>{t('Su cumpleaños', 'Their birthday')}<small>{t('7 días antes', '7 days before')}</small></button>
     </div>
-    <p className="ld-label">{t('Desde el panel del restaurante', 'From the restaurant panel')}</p>
+    <p className="ld-label">{t('Desde el panel del local', 'From the business panel')}</p>
     <button className="ld-campaign" disabled={!member} onClick={campaign}>{t('Enviar campaña: 2×1 el viernes', 'Send campaign: Friday 2-for-1')}</button>
     <button className="ld-reset" onClick={reset}>{t('Empezar de nuevo', 'Start over')}</button>
     {!member && <p className="ld-tip">{t('Empieza apoyando el celular en el chip.', 'Start by tapping the phone on the chip.')}</p>}

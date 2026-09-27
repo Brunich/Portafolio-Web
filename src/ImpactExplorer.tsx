@@ -63,7 +63,7 @@ export default function ImpactExplorer({ lang, paused }: { lang: 'es' | 'en'; pa
     <svg viewBox="0 0 920 400" role="group" aria-label={es ? `Grafo de importaciones. Cambio en ${changed}; afecta a ${affected.map(n => n.id).join(', ') || 'ningún archivo'}.` : `Import graph. Change in ${changed}; affects ${affected.map(n => n.id).join(', ') || 'no files'}.`}>
      <defs>
       <filter id="ie-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-      <marker id="ie-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L8 4 L0 8 z" fill="#5d7aa3"/></marker>
+      <marker id="ie-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L8 4 L0 8 z" fill="#737e8d"/></marker>
      </defs>
      <text className="ie-col" x="120" y="28" textAnchor="middle">{es ? 'INTERFAZ' : 'INTERFACE'}</text>
      <text className="ie-col" x="350" y="28" textAnchor="middle">{es ? 'ESTADO' : 'STATE'}</text>

@@ -15,6 +15,8 @@ import ClubPreview from './ClubPreview';
 import LoopVideo from './LoopVideo';
 import HeroShowcase from './HeroShowcase';
 import './pages.css';
+import './theme.css';
+import { useMotion } from './motion';
 
 const PROJECT_ORDER = ['club', 'csv', 'vibe', 'punto'];
 type Project = ReturnType<typeof professional>['projects'][number];
@@ -36,6 +38,7 @@ export default function App() {
  const projects = [...p.projects].sort((a, b) => PROJECT_ORDER.indexOf(a.id) - PROJECT_ORDER.indexOf(b.id));
  const project = r.page === 'project' ? projects.find(x => x.slug === r.slug) : undefined;
  const home = r.page === 'home' || (r.page === 'project' && !project);
+ useMotion(`${r.page}:${project?.id ?? ''}:${lang}`);
  useEffect(() => { document.documentElement.lang = lang; try { localStorage.setItem('bruno-language', lang); } catch { /* Preferencia opcional. */ } }, [lang]);
  useEffect(() => { document.documentElement.dataset.motion = paused ? 'paused' : 'active'; }, [paused]);
  useEffect(() => { const pref = matchMedia('(prefers-reduced-motion: reduce)'); const change = () => setPaused(pref.matches); pref.addEventListener('change', change); return () => pref.removeEventListener('change', change); }, []);
@@ -45,6 +48,7 @@ export default function App() {
 
  return <>
   <a className="skip-link" href="#main">{copy[lang].skip}</a>
+  <div className="scroll-progress" aria-hidden="true"/>
   <header className="site-header wrap"><a className="identity" href="/">{personal.portrait && <img src={personal.portrait} alt="Bruno Salas" width="72" height="72"/>}<span><strong>Bruno Salas</strong><small>{p.role}</small></span></a><div className="header-right"><div className="language-control" aria-label={es ? 'Idioma' : 'Language'}>{(['es', 'en'] as const).map(l => <button key={l} aria-label={l === 'es' ? 'Cambiar a español' : 'Switch to English'} aria-pressed={lang === l} onClick={() => setLang(l)}>{l.toUpperCase()}</button>)}</div><a className="header-contact inline-link" href={home ? '#contact' : '/#contact'}>{copy[lang].contact}<ArrowUpRight size={19}/></a></div></header>
   {home ? <Home lang={lang} paused={paused} setPaused={setPaused} projects={projects}/>
    : project ? <ProjectPage lang={lang} project={project} projects={projects}/>
