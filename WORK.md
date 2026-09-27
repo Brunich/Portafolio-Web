@@ -17,3 +17,8 @@ Planes existentes: carpeta hermana Mapa de impacto y Programming Brunich/Proyect
 ## Reencuadre 2026-09-26 (noche)
 Hecho en local, commit 7ef045a, SIN publicar en Vercel: bosque sin HUD, retrato recortado a la cara, Punto U en vista móvil con marco de teléfono, acentos rotos del mapa de impacto (7 bytes latin-1 en App.tsx). Build y 5/5 Playwright en verde. Antes/ahora en qa/antes-ahora.png.
 Siguiente acción: que Bruno apruebe el encuadre y publicar (vercel --prod); luego elegir mejoras interactivas de la lista entregada en el chat.
+
+## Interactivos 2026-09-26 (noche, 2ª tanda)
+Sin fondos blancos (Punto U y VibeMap en oscuro). Nuevo: río de código bajo la portada (CodeRiver), sección Datos con analizador CSV + mapa mental (árbol en móvil), explorador de impacto animado en Flujos, Punto U en vivo (iframe), comparador por parejas con lupa ×3 y carrusel de 5 panorámicas. Build y 6/6 Playwright+axe en verde. SIN publicar.
+Hallazgos: el Supabase de Punto U no existe (NXDOMAIN) → la app no guarda perfiles. El logo cortado es Punto U/src/PuntoU.jsx:705-706 (justifyContent center en contenedor con scroll; arreglo: "safe center").
+Siguiente acción: Bruno lo ve y aprueba publicar; decidir si se capturan más escenas del juego para el comparador (requiere lanzar Godot con --windowed).

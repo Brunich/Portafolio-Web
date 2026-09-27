@@ -19,3 +19,13 @@
 - rogue-forest-overview.webp y rogue-forest-first-person.webp: recortadas de nuevo desde las mismas capturas (primer monitor) para dejar fuera el HUD de depuración (FPS/FOV, minimapa y barra de vida). Recorte 1928×1205 → 1600×1000, sin retoque. La mira central de primera persona sigue visible.
 - bruno-face.jpg: recorte cuadrado de bruno.jpg centrado en la cara; excluye a la persona del borde izquierdo. Sin edición.
 - punto-u.webp: nueva captura de https://punto-u-app.vercel.app a 390×1000 px (escala 2), sin crear cuenta ni escribir datos. Con 844 px de alto la propia app corta su logo; con 1000 px sale entero.
+
+## Panorámicas (2026-09-26)
+Recortes 21:9 sin retoque de capturas existentes en IA Rogue DEFINITIVE/screenshots (no se lanzó el juego):
+- templo-portico.webp: antorchas_SINESFERA_a/patio/02_escalera.png
+- costa-atardecer.webp: arrival_fall/02_t4.2s.png
+- ciudad-noche.webp: lejania/orto_zoom_b_con.png
+- costa-facetada.webp: facetado_entorno/costa_a_sin.png
+- isla-ciudad.webp: audit_levels/generated_cyber_square.png
+Descartadas: reference_video_analysis/* (vídeo de referencia, no es trabajo de Bruno) y las que llevan texto de depuración encima.
+La tarjeta de VibeMap usa un esquema dibujado (VibeSketch.tsx), rotulado «Esquema del resultado»: la app real sólo tiene tema claro.
