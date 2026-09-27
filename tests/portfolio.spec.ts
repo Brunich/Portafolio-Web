@@ -76,3 +76,25 @@ test('csv mind map, impact explorer and panoramas respond',async({page})=>{
  await page.keyboard.press('Escape');
  await expect(page.locator('.pano-dialog')).toBeHidden();
 });
+
+test('customer club demo joins, stamps once per day and sends each message',async({page})=>{
+ await page.goto('/');
+ const club=page.locator('#club');await club.scrollIntoViewIfNeeded();
+ const chip=club.getByRole('button',{name:/Apoyar el celular en el chip/});
+ await chip.click();
+ await club.getByRole('button',{name:'Agregar a mi Wallet'}).click();
+ await expect(club.locator('.ld-pass-count')).toHaveText('1/8');
+ await chip.click(); // mismo día: no suma
+ await expect(club.locator('.ld-pass-count')).toHaveText('1/8');
+ await expect(club.locator('.ld-log')).toContainText('no suma sello');
+ await club.getByRole('button',{name:/\+2 horas/}).click();
+ await expect(club.locator('.ld-chat')).toContainText('una reseña nos ayuda');
+ await club.getByRole('button',{name:'Dejar reseña en Google'}).click();
+ await expect(club.locator('.ld-kpis div').nth(3).locator('dd')).toHaveText('1');
+ await club.getByRole('button',{name:/Su cumpleaños/}).click();
+ await expect(club.locator('.ld-chat')).toContainText('cumpleaños');
+ await club.getByRole('button',{name:/Enviar campaña/}).click();
+ await club.getByRole('button',{name:'Reservar mesa'}).click();
+ await expect(club.locator('.ld-chat')).toContainText('4 personas');
+ await expect(page.locator('.pano-thumbs button')).toHaveCount(2);
+});

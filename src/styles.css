@@ -42,7 +42,7 @@ html[data-motion=paused] .vs-node,html[data-motion=paused] .vs-edge,html[data-mo
 .data-section .section-heading{margin-bottom:34px}
 
 .data-section .dw-workbench{max-width:none}
-@media(max-width:480px){.floating-nav a[href="#skills"]{display:none}}
+@media(max-width:480px){.floating-nav a[href="#automation"],.floating-nav a[href="#about"]{display:none}}
 .project-featured .project-media.media-rogue{padding:0;background:#0e1829}
 .project-featured .media-rogue img{object-fit:cover;height:100%}
 .project-rogue{grid-template-columns:1fr 1.25fr}

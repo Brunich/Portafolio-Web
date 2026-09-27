@@ -4,8 +4,9 @@ Sitio personal: https://bruno-portfolio-azure.vercel.app
 
 Estudiante de Ingeniería en Software (UANL). El sitio muestra proyectos que se pueden probar ahí mismo:
 
+- **Club de clientes con NFC** (`src/LoyaltyDemo.tsx`): simulación de un club para restaurantes: registro al primer toque, tarjeta de sellos en el Wallet, un sello por día y mensajes de WhatsApp programados (reseña, regreso, cumpleaños, campañas).
 - **Analizador de CSV** (`src/quality.ts`, `src/csv.ts`): encuentra duplicados, valores escritos de varias formas, fechas mezcladas y reglas de negocio rotas; corrige lo mecánico y marca lo que requiere criterio. Todo corre en el navegador.
-- **Comparador 3D** (`src/ModelLab.tsx`): el protagonista de IA Rogue en pixel art, cel shading y 3D con three.js.
+- **Game development** · **Comparador 3D** (`src/ModelLab.tsx`): el protagonista de IA Rogue en pixel art, cel shading y 3D con three.js.
 - **Mapa de impacto** (`src/ImpactExplorer.tsx`): qué archivos se ven afectados por un cambio, siguiendo las importaciones.
 
 ## Correr
