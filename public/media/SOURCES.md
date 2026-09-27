@@ -14,3 +14,8 @@
 - rogue-forest-first-person.webp: captura de Bruno de 2026-09-26 18:27:06, mismo procedimiento. El segundo monitor y su contenido privado no se incluyen.
 - La escena aislada de roca/agua fue rechazada por Bruno y sus renders se retiraron de public/media. No usar como comparación del juego.
 - shader-original/forest_0.webp, forest_1.webp y forest_3.webp: capturas 1600×900 del bosque_definitive_jugable.tscn con MainRenderer original, cámara fija y presets 0/1/3 de DisplayResolution. Sol y ambiente originales, tiempo de escena fijado; exportación WebP calidad 95. Capturador temporal tmp/portfolio_real_capture.gd; sin cambios a escenas ni shaders. No representan un interruptor de iluminación.
+
+## Reencuadre 2026-09-26
+- rogue-forest-overview.webp y rogue-forest-first-person.webp: recortadas de nuevo desde las mismas capturas (primer monitor) para dejar fuera el HUD de depuración (FPS/FOV, minimapa y barra de vida). Recorte 1928×1205 → 1600×1000, sin retoque. La mira central de primera persona sigue visible.
+- bruno-face.jpg: recorte cuadrado de bruno.jpg centrado en la cara; excluye a la persona del borde izquierdo. Sin edición.
+- punto-u.webp: nueva captura de https://punto-u-app.vercel.app a 390×1000 px (escala 2), sin crear cuenta ni escribir datos. Con 844 px de alto la propia app corta su logo; con 1000 px sale entero.
