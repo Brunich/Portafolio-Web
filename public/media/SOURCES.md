@@ -35,3 +35,9 @@ La tarjeta de VibeMap usa un esquema dibujado (VibeSketch.tsx), rotulado «Esque
 - 2026-09-27 (tarde): costa-atardecer.webp se sustituye por `tmp/cascada_portafolio/cascada_diagonal_h048.png` tras rehacer la cascada (commit 4088c89f en IA Rogue): recorte 21:9 desde y=190, escalado a 1600×686, sin retoque.
 - punto-u-mapa.webp: captura de Punto U corriendo en local (127.0.0.1) con un perfil de prueba y las misiones de demostración; 390×1000 a escala 2, sin datos reales.
 - bruno-retrato.jpg: recorte 4:5 de bruno.jpg (x 44–424, y 0–475), sin la persona del borde; saturación 0,92, sin otra edición.
+
+## Escenas por cámara (2026-09-27)
+Capturas de la sesión de IA Rogue con `tools/capture_portafolio_v2.gd` (ruta real main_renderer, sin HUD, 2560×1440), en `IA Rogue DEFINITIVE/tmp/portafolio_v2/`:
+- escenas/templo-{dia,noche}-{pixel,suave}.webp: cámara 1 de frente, misma toma e instante en cada pareja; recorte 1600×900 desde (480,0) a tamaño nativo, para dejar fuera el aviso «[E] Open system board» que sale al pie.
+- escenas/bosque-camara-1/2, arbol-camara-1/2/3, bosque-oscuro, bosque-oscuro-claro-de-la-espada, espada-de-cerca, lago, arana-jefa: escaladas a 1600×900, sin retoque.
+Descartadas: bosque_camara_3 (planos de luz translúcidos cruzan la toma) y agua_desde_arriba_espuma (no muestra líneas de espuma).
