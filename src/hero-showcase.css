@@ -1,0 +1,20 @@
+.hs{min-width:0}
+.hs-stage{position:relative;aspect-ratio:1.18;perspective:1400px}
+.hs-card{position:absolute;inset:6% 9% 6% 9%;display:block;overflow:hidden;border-radius:18px;border:1px solid #48648d;background:radial-gradient(ellipse 80% 70% at 50% 30%,#2b4671,#132038 72%);box-shadow:0 30px 60px #040a1699;transition:transform .8s cubic-bezier(.2,.8,.2,1),opacity .8s,filter .8s}
+.hs-card img{width:100%;height:100%;object-fit:cover;object-position:top}
+.hs-phone{display:flex;align-items:center;justify-content:center;padding:22px}
+.hs-phone img{width:auto;max-width:100%;height:100%;object-fit:contain;border:5px solid #0b1220;border-radius:26px;box-shadow:0 20px 50px #04091480,0 0 0 1px #3d5a85}
+.hs-club .ld-preview{min-height:0;height:100%}
+.hs-pos0{z-index:3;transform:none}
+.hs-pos1{z-index:2;transform:translate(11%,-4%) scale(.9) rotate(4deg);opacity:.75;filter:saturate(.7) brightness(.75);pointer-events:none}
+.hs-pos2{z-index:1;transform:translate(-11%,-6%) scale(.84) rotate(-5deg);opacity:.5;filter:saturate(.5) brightness(.6);pointer-events:none}
+.hs-pos0:hover{transform:translateY(-4px)}
+.hs-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.hs-tabs button{position:relative;overflow:hidden;text-align:left;background:transparent;border:1px solid #33496b;border-radius:10px;padding:10px 12px;color:var(--text);transition:border-color .25s,background .25s}
+.hs-tabs button[aria-selected=true]{background:#1d2e4a;border-color:#8fb0e0}
+.hs-tabs strong{display:block;font:650 13.5px/1.3 var(--display)}
+.hs-tabs small{display:block;margin-top:2px;font-size:11.5px;line-height:1.35;color:var(--muted)}
+.hs-progress{position:absolute;left:0;bottom:0;height:2px;width:100%;background:#b9d4f2;transform-origin:left;animation:hs-progress 5.2s linear both}
+@keyframes hs-progress{from{transform:scaleX(0)}}
+@media(max-width:640px){.hs-stage{aspect-ratio:1}.hs-card{inset:4% 6%}.hs-tabs small{display:none}}
+@media(prefers-reduced-motion:reduce){.hs-card{transition:none}.hs-progress{display:none}}

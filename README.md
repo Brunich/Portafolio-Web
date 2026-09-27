@@ -2,7 +2,8 @@
 
 Sitio personal: https://bruno-portfolio-azure.vercel.app
 
-Estudiante de Ingeniería en Software (UANL). El sitio muestra proyectos que se pueden probar ahí mismo:
+Estudiante de Ingeniería en Software (UANL). La portada resume y cada proyecto tiene su página (`/proyectos/punto-u`, `/proyectos/club-nfc`, `/proyectos/analizador-csv`, `/proyectos/vibemap`, `/propuestas`) con su demo. Las rutas las resuelve `src/App.tsx` y Vercel las reescribe a `index.html` (`vercel.json`).
+
 
 - **Club de clientes con NFC** (`src/LoyaltyDemo.tsx`): simulación de un club para restaurantes: registro al primer toque, tarjeta de sellos en el Wallet, un sello por día y mensajes de WhatsApp programados (reseña, regreso, cumpleaños, campañas).
 - **Analizador de CSV** (`src/quality.ts`, `src/csv.ts`): encuentra duplicados, valores escritos de varias formas, fechas mezcladas y reglas de negocio rotas; corrige lo mecánico y marca lo que requiere criterio. Todo corre en el navegador.
