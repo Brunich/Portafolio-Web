@@ -4,6 +4,7 @@ import './original-scenes.css';
 
 const PANORAMAS: { file: string; title: [string, string]; note: [string, string] }[] = [
  { file: 'templo-portico', title: ['Pórtico del templo', 'Temple portico'], note: ['Antorchas, piedra y agua de noche', 'Torches, stone and water at night'] },
+ { file: 'costa-atardecer', title: ['Costa al atardecer', 'Coast at sunset'], note: ['Llegada junto al acantilado', 'Arrival by the cliff'] },
  { file: 'costa-facetada', title: ['Costa facetada', 'Faceted coast'], note: ['Iluminación cel facetada', 'Faceted cel lighting'] },
 ];
 
