@@ -108,7 +108,7 @@ section{scroll-margin-top:96px}
 .contact-section{border-top:0;padding-block:clamp(72px,8vw,112px) clamp(56px,6vw,80px)}
 .about-grid{grid-template-columns:minmax(200px,260px) minmax(0,1fr);align-items:start}
 .portrait{position:sticky;top:110px}
-.portrait img{aspect-ratio:1/1}
+.portrait img{aspect-ratio:4/5}
 .portrait figcaption{display:flex;flex-direction:column;gap:2px;padding:14px 16px 12px;border-radius:0 0 24px 24px;background:#15171e}
 .portrait figcaption strong{font:650 15px/1.2 var(--display)}
 .portrait figcaption span{font-size:12.5px;color:var(--muted)}
@@ -116,3 +116,6 @@ section{scroll-margin-top:96px}
 @media(max-width:980px){.portrait{position:static;width:min(240px,60%)}}
 .portrait{width:100%}.portrait img{height:auto;width:100%}
 @media(max-width:980px){.about-grid{grid-template-columns:1fr}}
+
+/* VibeMap: captura real del mapa mental */
+.vibe-shot{display:block;width:100%;height:auto!important;border-radius:14px}

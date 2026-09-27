@@ -15,7 +15,7 @@ Estudiante de Ingeniería en Software en la UANL (2023–2028). Este repositorio
 | **NFC para negocios** | Atención a clientes con un tap: sellos en el Wallet y mensajes de WhatsApp en el momento justo (reseña, regreso, cumpleaños). | [/proyectos/club-nfc](https://bruno-portfolio-azure.vercel.app/proyectos/club-nfc) | [`LoyaltyDemo.tsx`](src/LoyaltyDemo.tsx) |
 | **Analizador de CSV** | Encuentra duplicados, valores mal escritos, fechas mezcladas y reglas rotas; corrige lo mecánico con un clic y dibuja cómo está organizado el archivo. | [/proyectos/analizador-csv](https://bruno-portfolio-azure.vercel.app/proyectos/analizador-csv) | [`quality.ts`](src/quality.ts) · [`csv.ts`](src/csv.ts) · [`DataWorkbench.tsx`](src/DataWorkbench.tsx) |
 | **Entrega de turno** | Incidencias de calidad con responsable, evidencia y cierre; al final del turno sale el resumen de lo pendiente. | [/proyectos/entrega-de-turno](https://bruno-portfolio-azure.vercel.app/proyectos/entrega-de-turno) | [`ShiftHandover.tsx`](src/ShiftHandover.tsx) |
-| **VibeMap** | Hackathon, equipo de 3: diagrama numerado de cómo fluye el código de un proyecto. | [/proyectos/vibemap](https://bruno-portfolio-azure.vercel.app/proyectos/vibemap) | [Repositorio del equipo](https://github.com/CharlsMex24/VibeMap_Hackathon) |
+| **VibeMap** | Hackathon, equipo de 3: sueltas la carpeta de un proyecto y lo ves como mapa mental (entrada, quién usa a quién, alertas). TS, JS, Python y GDScript. | [vibemap-brunich.vercel.app](https://vibemap-brunich.vercel.app) | [Brunich/VibeMap](https://github.com/Brunich/VibeMap) |
 | **Punto U** | Estudiantes de la UANL publican favores en un mapa del campus. Web y Android. | [punto-u-app.vercel.app](https://punto-u-app.vercel.app) | [Punto-U-app](https://github.com/Brunich/Punto-U-app) |
 | **IA Rogue** | Game dev: roguelike 3D en Godot. Aquí, el comparador de estilos sobre el protagonista y la galería por cámaras. | [Game dev](https://bruno-portfolio-azure.vercel.app/#graphics) | [`ModelLab.tsx`](src/ModelLab.tsx) (three.js) |
 
@@ -49,6 +49,5 @@ Las pruebas de Playwright recorren cada demo (el club, el analizador y la entreg
 2. **Entrega de turno, con persistencia:** guardar incidencias, permisos por rol y exportar la entrega a PDF.
 3. **Analizador de CSV como paquete propio:** soporte para XLSX y una CLI.
 4. **Punto U:** volver a conectar su base de datos y publicar el APK.
-5. **VibeMap:** una demo en vivo que no dependa de una clave propia.
 
 Los datos de ejemplo son sintéticos y de empresas ficticias. La procedencia de cada imagen está en [`public/media/SOURCES.md`](public/media/SOURCES.md).
