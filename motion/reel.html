@@ -129,7 +129,7 @@ function s3(g, t) {
  const gr = g.createLinearGradient(-160, -130, 160, 130); gr.addColorStop(0, '#5e2414'); gr.addColorStop(1, '#a24a26');
  roundRect(g, -160, -130, 320, 260, 26); g.fillStyle = gr; g.fill();
  roundRect(g, -134, -104, 46, 46, 10); g.fillStyle = '#fff4ea'; g.fill(); text(g, 'EC', -111, -72, 20, '#8a3a1f', 800, 'center');
- text(g, 'El Cerrito', -76, -80, 26, '#fff4ea', 750); text(g, `${Math.min(8, Math.floor(seg(t, 6.3, 7.3) * 8 + (t > 6.3 ? 1 : 0)))}/8`, 136, -80, 26, '#fff4ea', 800, 'right');
+ text(g, 'El Cerro', -76, -80, 26, '#fff4ea', 750); text(g, `${Math.min(8, Math.floor(seg(t, 6.3, 7.3) * 8 + (t > 6.3 ? 1 : 0)))}/8`, 136, -80, 26, '#fff4ea', 800, 'right');
  for (let i = 0; i < 8; i++) {
   const sx = -105 + (i % 4) * 70, sy = 10 + Math.floor(i / 4) * 70, k = outBack(seg(t, 6.3 + i * .12, 6.55 + i * .12), 2.2);
   g.strokeStyle = hex('#ffe2cc', .5); g.lineWidth = 2; g.setLineDash([6, 6]); g.beginPath(); g.arc(sx, sy, 26, 0, 7); g.stroke(); g.setLineDash([]);

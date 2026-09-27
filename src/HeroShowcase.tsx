@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import ClubPreview from './ClubPreview';
-import LoopVideo from './LoopVideo';
+import CsvChart from './CsvChart';
 import './hero-showcase.css';
 
 // Portada: tres proyectos reales apilados que rotan solos. La tarjeta del frente lleva a su página.
 const SLIDES = [
- { slug: 'club-nfc', title: 'Club NFC', note: ['Clientes que vuelven con un toque', 'Customers who return with one tap'], kind: 'club' },
- { slug: 'analizador-csv', title: 'Analizador CSV', note: ['Limpia reportes en el navegador', 'Cleans reports in the browser'], kind: 'shot', img: '/media/analizador.webp' },
+ { slug: 'club-nfc', title: 'NFC para negocios', note: ['Atención a clientes rápida con un tap', 'Fast customer care with one tap'], kind: 'club' },
+ { slug: 'analizador-csv', title: 'Analizador CSV', note: ['Limpia reportes en el navegador', 'Cleans reports in the browser'], kind: 'chart' },
  { slug: 'punto-u', title: 'Punto U', note: ['Red de favores entre estudiantes', 'A favor network for students'], kind: 'phone', img: '/media/punto-u.webp' },
 ] as const;
 
@@ -26,7 +26,7 @@ export default function HeroShowcase({ lang, paused }: { lang: 'es' | 'en'; paus
     const pos = (i - front + SLIDES.length) % SLIDES.length;
     return <a key={s.slug} href={`/proyectos/${s.slug}`} className={`hs-card hs-${s.kind} hs-pos${pos}`} tabIndex={pos === 0 ? 0 : -1} aria-hidden={pos !== 0}
      aria-label={`${s.title} — ${s.note[L]}. ${es ? 'Ver proyecto' : 'View project'}`}>
-     {s.kind === 'club' ? <ClubPreview lang={lang}/> : s.kind === 'shot' ? <LoopVideo name="analizador" paused={paused || pos !== 0}/> : <img src={s.img} alt="" loading={i ? 'lazy' : undefined}/>}
+     {s.kind === 'club' ? <ClubPreview lang={lang}/> : s.kind === 'chart' ? <CsvChart lang={lang}/> : <img src={s.img} alt="" loading={i ? 'lazy' : undefined}/>}
     </a>;
    })}
   </div>

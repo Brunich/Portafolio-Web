@@ -19,3 +19,4 @@
 @media(max-width:640px){.hs-stage{aspect-ratio:1}.hs-card{inset:4% 6%}.hs-tabs small{display:none}}
 @media(prefers-reduced-motion:reduce){.hs-card{transition:none}.hs-progress{display:none}}
 .hs-club .ld-preview-chip{top:auto;bottom:30px;right:auto;left:30px}
+.hs-chart .cc{min-height:0;height:100%}

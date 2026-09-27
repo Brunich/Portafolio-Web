@@ -33,3 +33,5 @@ La tarjeta de VibeMap usa un esquema dibujado (VibeSketch.tsx), rotulado «Esque
 ## Cascada arreglada (2026-09-27)
 - costa-atardecer.webp: nueva captura `IA Rogue DEFINITIVE/tmp/cascada_portafolio/costa_atardecer.png` (2560×1440, sin HUD, por la ruta real del juego) tras el arreglo de la cascada (commit b2464478 en Antigravity_Version: cara del acantilado recta detrás de la cortina y sin los cilindros de arriba). Recorte 21:9 desde y=40, escalado a 1600×686, sin retoque.
 - 2026-09-27 (tarde): costa-atardecer.webp se sustituye por `tmp/cascada_portafolio/cascada_diagonal_h048.png` tras rehacer la cascada (commit 4088c89f en IA Rogue): recorte 21:9 desde y=190, escalado a 1600×686, sin retoque.
+- punto-u-mapa.webp: captura de Punto U corriendo en local (127.0.0.1) con un perfil de prueba y las misiones de demostración; 390×1000 a escala 2, sin datos reales.
+- bruno-retrato.jpg: recorte 4:5 de bruno.jpg (x 44–424, y 0–475), sin la persona del borde; saturación 0,92, sin otra edición.
