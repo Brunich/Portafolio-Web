@@ -13,3 +13,7 @@ Deployment dpl_AKLhpGPSENrkMeYVMxSeWw1Hznh9 READY. Servidor local 127.0.0.1:5173
 ## Pendientes y siguiente acción
 Comparador basado en imágenes reales, no ejecución de shaders en navegador. Capturador temporal en IA Rogue/tmp/portfolio_real_capture.gd; produjo las tres imágenes pero el lanzador reporta cinco errores preexistentes de propiedades Terrain3D. No se declara limpia la ejecución del motor ni se repararon asuntos ajenos.
 Planes existentes: carpeta hermana Mapa de impacto y Programming Brunich/Proyectos/PROYECTOS CODIGO/Proyecto_Trazabilidad_Calidad. Validar un caso concreto con Bruno antes de implementar los productos. Sin métricas ni integraciones productivas inventadas. Siguiente acción: revisar con Bruno el encuadre publicado antes de ampliar escenas.
+
+## Reencuadre 2026-09-26 (noche)
+Hecho en local, commit 7ef045a, SIN publicar en Vercel: bosque sin HUD, retrato recortado a la cara, Punto U en vista móvil con marco de teléfono, acentos rotos del mapa de impacto (7 bytes latin-1 en App.tsx). Build y 5/5 Playwright en verde. Antes/ahora en qa/antes-ahora.png.
+Siguiente acción: que Bruno apruebe el encuadre y publicar (vercel --prod); luego elegir mejoras interactivas de la lista entregada en el chat.
