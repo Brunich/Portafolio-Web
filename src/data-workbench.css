@@ -73,7 +73,7 @@
 .dw-footer{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:14px;font-size:13px;color:var(--dw-muted)}
 .dw-workbench .dw-link{min-height:0;border:0;background:none;padding:0 0 0 10px;color:var(--dw-accent);text-decoration:underline}
 .dw-note{margin:12px 0 0;font-size:12.5px;color:var(--dw-muted)}
-@keyframes dw-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes dw-in{from{transform:translateY(6px)}to{transform:none}}
 html[data-motion=paused] .dw-issue,html[data-motion=paused] .dw-history li{animation:none}
 @media(max-width:860px){.dw-issues>ul{grid-template-columns:1fr}.dw-kpis{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:540px){.dw-workbench{padding:16px;border-radius:14px}.dw-kpis dd{font-size:23px}.dw-footer{flex-direction:column;align-items:stretch}}
