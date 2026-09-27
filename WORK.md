@@ -26,3 +26,8 @@ Siguiente acción: Bruno lo ve y aprueba publicar; decidir si se capturan más e
 ## 3ª tanda 2026-09-27
 Fuera «Definitive» del sitio. Comparador 3D en WebGL sobre Null (classic_null_v2.glb): pixel art / cel / 3D, división, giro, zoom y tamaño de píxel; ~240 fps en la RTX 4070 tras arreglar un bucle de render que se duplicaba (daba 0,5 fps). OJO: la malla base de Null viene de un modelo de referencia (README del donante): el sitio no dice que Bruno la modeló. VibeMap: esquema con su formato real (flechas numeradas por función, sin metáforas). Punto U: texto de favores; en vivo funciona en modo local (PuntoU.jsx:159/171). Analizador CSV rehecho (quality.ts, samples.ts). 6/6 pruebas. SIN publicar.
 Siguiente acción: Bruno revisa en local; con su «publica», `vercel --prod`.
+
+## 4ª tanda 2026-09-27
+Proyectos = Punto U, Analizador de CSV, VibeMap, IA Rogue (Mapa de impacto y Continuidad quedan como propuestas en Flujos). Métricas sólo verificables: IA Rogue 18→55 fps, 13,3→7,1 ms, 831 baterías (NO se usa el conteo de líneas). 12 pruebas unitarias (npm run test:unit) + 6 Playwright, verdes. CI en .github/workflows/ci.yml: sin validar hasta que exista remoto en GitHub.
+Punto U (otro proyecto, sin git propio): PuntoU.jsx:706 justifyContent "safe center"; logo de -30 px a 24 px a 390x844. Compilado en local, NO desplegado.
+Siguiente acción: Bruno aprueba publicar el portafolio y el arreglo de Punto U; crear repo en GitHub para el CI.
