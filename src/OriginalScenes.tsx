@@ -7,7 +7,7 @@ const PANORAMAS: { file: string; title: [string, string]; note: [string, string]
  { file: 'rogue-forest-overview', title: ['El bosque', 'The forest'], note: ['Vista tres cuartos, sol entre los árboles', 'Three-quarter view, sunlight through the trees'] },
  { file: 'rogue-forest-first-person', title: ['El bosque al anochecer', 'The forest at dusk'], note: ['Primera persona, niebla y luna', 'First person, fog and moon'] },
  { file: 'panoramas/templo-portico', title: ['Pórtico del templo', 'Temple portico'], note: ['Antorchas, piedra y agua de noche', 'Torches, stone and water at night'] },
- { file: 'panoramas/costa-atardecer', title: ['Costa al atardecer', 'Coast at sunset'], note: ['Llegada junto al acantilado', 'Arrival by the cliff'] },
+ { file: 'panoramas/costa-atardecer', title: ['La cascada al atardecer', 'The waterfall at sunset'], note: ['Agua que cae por delante del acantilado y cambia con la hora', 'Water falling in front of the cliff, changing with the time of day'] },
  { file: 'panoramas/costa-facetada', title: ['Costa facetada', 'Faceted coast'], note: ['Iluminación cel facetada', 'Faceted cel lighting'] },
 ];
 
