@@ -9,11 +9,11 @@ const TOKENS = (csvSource.match(/[A-Za-z_]\w*|\d+(?:\.\d+)?|'[^'\n]{1,14}'|[{}()
 type Drop = { text: string; lane: number; x: number; speed: number; phase: number; size: number; color: string; alpha: number; width: number; dy: number; vy: number };
 
 function colorOf(token: string) {
- if (KEYWORDS.has(token)) return '#b9d4ff';
- if (token.startsWith("'")) return '#9ddbc9';
- if (/^\d/.test(token)) return '#f2c98f';
- if (/^[A-Za-z_]/.test(token)) return '#7f9dc4';
- return '#56709a';
+ if (KEYWORDS.has(token)) return '#c9b8ff';
+ if (token.startsWith("'")) return '#86e3c8';
+ if (/^\d/.test(token)) return '#ffc58a';
+ if (/^[A-Za-z_]/.test(token)) return '#9aa1b3';
+ return '#5d6376';
 }
 
 export default function CodeRiver({ lang, paused }: { lang: 'es' | 'en'; paused: boolean }) {
@@ -66,13 +66,13 @@ export default function CodeRiver({ lang, paused }: { lang: 'es' | 'en'; paused:
    for (let lane = 0; lane < LANES; lane++) {
     ctx.beginPath();
     for (let x = 0; x <= width; x += 16) { const y = laneY(lane, x, time) + 9; x ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
-    ctx.strokeStyle = `rgba(122,160,214,${0.05 + 0.05 * Math.sin(time * 0.8 + lane)})`;
+    ctx.strokeStyle = `rgba(150,156,176,${0.05 + 0.05 * Math.sin(time * 0.8 + lane)})`;
     ctx.stroke();
    }
    for (const r of ripples) {
     const age = time - r.t, radius = age * 150, fade = Math.max(0, 1 - age / 1.6);
     ctx.beginPath(); ctx.ellipse(r.x, r.y, radius, radius * 0.38, 0, 0, Math.PI * 2);
-    ctx.strokeStyle = `rgba(169,200,255,${0.35 * fade})`; ctx.stroke();
+    ctx.strokeStyle = `rgba(134,227,200,${0.35 * fade})`; ctx.stroke();
    }
    while (ripples.length && time - ripples[0].t > 1.6) ripples.shift();
    for (let lane = 0; lane < LANES; lane++) tails[lane] += laneSpeed(lane) * dt;

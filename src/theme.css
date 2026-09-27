@@ -1,0 +1,80 @@
+/* Tema: tinta neutra con tres acentos (menta, violeta, ámbar) y movimiento al hacer scroll. */
+:root{--bg:#111319;--surface:#181b23;--surface-2:#1e222c;--line:#2a2f3b;--text:#eef0f5;--muted:#a3a9b8;
+ --mint:#7fe3c6;--violet:#b9a7ff;--amber:#ffbd7a;--coral:#ff8e7c;--accent:var(--mint);
+ background:var(--bg);color:var(--text)}
+body{background:var(--bg)}
+::selection{background:var(--violet);color:#111319}
+
+/* Luces de fondo que se mueven despacio: dan color sin tapar el contenido */
+body::before{content:'';position:fixed;inset:-20vmax;z-index:-1;pointer-events:none;
+ background:radial-gradient(38vmax 30vmax at 12% 8%,#7fe3c61a,transparent 70%),radial-gradient(34vmax 28vmax at 88% 22%,#b9a7ff1c,transparent 70%),radial-gradient(40vmax 30vmax at 70% 92%,#ffbd7a14,transparent 70%);
+ animation:aurora 26s ease-in-out infinite alternate}
+@keyframes aurora{to{transform:translate3d(-3vmax,2vmax,0) rotate(6deg) scale(1.06)}}
+html[data-motion=paused] body::before{animation:none}
+
+/* Barra de progreso de lectura */
+.scroll-progress{position:fixed;left:0;top:0;height:2px;width:100%;z-index:60;transform-origin:left;transform:scaleX(var(--p,0));background:linear-gradient(90deg,var(--mint),var(--violet),var(--amber))}
+
+/* Espacio: más aire y menos cajas */
+.section-space{padding-block:140px}
+.site-header{border-bottom-color:transparent}
+.section-heading{margin-bottom:56px}
+.section-heading h2,.about-intro h2,.skills>h2{letter-spacing:-.04em}
+.project-grid{gap:96px 48px}
+.hero{padding-block:110px 120px}
+
+/* Título: el acento en degradado vivo y cada línea que sube al cargar */
+.hero h1 span{background:linear-gradient(100deg,var(--mint),var(--violet) 45%,var(--amber) 90%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 9s ease-in-out infinite alternate}
+@keyframes shine{to{background-position:100% 0}}
+.hero h1{overflow:hidden}
+.hero h1,.hero-copy>p,.hero-actions,.hero-facts{animation:rise 1s cubic-bezier(.16,1,.3,1) both}
+.hero-copy>p{animation-delay:.12s}.hero-actions{animation-delay:.22s}.hero-facts{animation-delay:.3s}
+.hero-workbench{animation:rise-in 1.2s cubic-bezier(.16,1,.3,1) .15s both}
+@keyframes rise{from{transform:translateY(40px)}}
+@keyframes rise-in{from{transform:translateY(60px) scale(.96)}}
+.hero-facts{color:#8d93a3}
+
+/* Botones y enlaces con los acentos */
+.button.primary{background:var(--mint);border-color:var(--mint);color:#0d1a16}
+.button.primary:hover{background:#a5efd9;transform:translateY(-2px);box-shadow:0 10px 30px #7fe3c633}
+.button.secondary{border-color:#3a4050}
+.button.secondary:hover{border-color:var(--violet);transform:translateY(-2px)}
+.inline-link:hover{color:var(--mint)}
+.floating-nav{background:#181b23e6;backdrop-filter:blur(14px);border-color:#343947}
+.floating-nav>a.active,.floating-nav>a:hover{background:#262a35}
+.floating-nav .nav-contact{background:var(--mint);color:#0d1a16}
+
+/* Un color por proyecto */
+.project-club{--c:var(--amber)}.project-csv{--c:var(--mint)}.project-vibe{--c:var(--violet)}.project-punto{--c:#8fb8ff}
+.project .project-kind{color:var(--c);letter-spacing:.06em;text-transform:uppercase;font-size:11px;font-weight:600}
+.project-metrics div{border:0;border-left:2px solid var(--c,var(--mint));border-radius:0;background:transparent;padding:4px 0 4px 14px}
+.project-metrics dt{color:var(--c,#fff)}
+.project .tags span,.case .tags span{border-color:#343947;color:#c6cad6;background:transparent}
+.project-media{background:var(--surface);border-radius:18px}
+.project-featured .project-media,.project-featured .project-media.media-punto{background:radial-gradient(ellipse 80% 70% at 50% 30%,#262a36,#15171e 72%)}
+.project-media::after{content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;opacity:0;transition:opacity .4s;background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),color-mix(in srgb,var(--c,#fff) 18%,transparent),transparent 60%)}
+.project-media:hover::after{opacity:1}
+.project-media{transition:transform .5s cubic-bezier(.16,1,.3,1)}
+.project-media:hover{transform:translateY(-4px)}
+.proposals-strip{border-style:solid;border-color:#2e3340;background:var(--surface)}
+.proposals-strip:hover{border-color:var(--violet)}
+.proposals-kicker{color:var(--violet)}
+
+/* Game dev y páginas de proyecto */
+.gamedev-kicker{color:var(--amber)}
+.gamedev-metrics div{background:transparent;border:0;border-left:2px solid var(--amber);border-radius:0;padding:4px 0 4px 16px}
+.case-story h2{color:var(--mint)}
+.case-demo{background:linear-gradient(180deg,#0d0f14,var(--bg));border-color:#262a35}
+.case-next a{background:var(--surface);border-color:#2e3340}
+.case-next a:hover{border-color:var(--mint)}
+.case-back{color:#c6cad6}
+
+/* Aparición al hacer scroll: sólo transform y recorte, para no bajar el contraste */
+.reveal{transform:translateY(48px);clip-path:inset(0 0 12% 0);transition:transform 1s cubic-bezier(.16,1,.3,1),clip-path 1s cubic-bezier(.16,1,.3,1)}
+.reveal.is-in{transform:none;clip-path:inset(-80px)}
+html[data-motion=paused] .reveal{transform:none;clip-path:none;transition:none}
+@media(prefers-reduced-motion:reduce){.reveal{transform:none;clip-path:none}.hero h1,.hero-copy>p,.hero-actions,.hero-facts,.hero-workbench{animation:none}}
+@media(max-width:760px){.section-space{padding-block:96px}.project-grid{gap:72px}.hero{padding-block:64px 80px}}
+.about-section{background:linear-gradient(180deg,transparent,#161920 18%,#161920 82%,transparent)}
+.skills{border-top-color:transparent}
+.dw-primary{background:var(--mint)!important;border-color:var(--mint)!important;color:#0d1a16!important}.dw-primary:hover{background:#a5efd9!important}

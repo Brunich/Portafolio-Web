@@ -1,6 +1,6 @@
 import type { ColumnKind, ColumnProfile } from './csv';
 
-const KIND_COLOR: Record<ColumnKind, string> = { number: '#f2c98f', date: '#c9b3ff', category: '#9ddbc9', text: '#a9c8ff' };
+const KIND_COLOR: Record<ColumnKind, string> = { number: '#f2c98f', date: '#c9b3ff', category: '#9ddbc9', text: '#c4cfe4' };
 const W = 960, H = 470, CX = W / 2, CY = H / 2;
 const cut = (s: string, n: number) => s.length > n ? `${s.slice(0, n - 1)}…` : s;
 const textWidth = (s: string, size: number) => s.length * size * 0.56 + 26;
@@ -27,7 +27,7 @@ export default function CsvMindMap({ lang, file, rows, columns, hover, onHover, 
  let delay = 0;
  return <div className="dw-mindmap" key={runKey}>
   <svg viewBox={`0 0 ${W} ${H}`} role="group" aria-label={es ? `Mapa mental de ${rootLabel}: ${shown.map(c => `${c.name}, ${kindLabel[c.kind]}`).join('; ')}` : `Mind map of ${rootLabel}: ${shown.map(c => `${c.name}, ${kindLabel[c.kind]}`).join('; ')}`}>
-   <defs><radialGradient id="mm-glow"><stop offset="0" stopColor="#3b5f94" stopOpacity=".55"/><stop offset="1" stopColor="#142139" stopOpacity="0"/></radialGradient></defs>
+   <defs><radialGradient id="mm-glow"><stop offset="0" stopColor="#5a5f75" stopOpacity=".55"/><stop offset="1" stopColor="#21232c" stopOpacity="0"/></radialGradient></defs>
    <circle cx={CX} cy={CY} r="190" fill="url(#mm-glow)"/>
    {shown.map((c, i) => {
     const left = i < leftCount;
