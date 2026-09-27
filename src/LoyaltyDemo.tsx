@@ -9,11 +9,11 @@ const DAY = 24 * 60 * 60 * 1000;
 const START = new Date(2026, 9, 6, 14, 10).getTime(); // martes 6 de octubre, 14:10
 
 const BUILD: { title: [string, string]; text: [string, string]; tech: string }[] = [
- { title: ['El chip', 'The chip'], text: ['Cada carpeta de la cuenta lleva un chip que abre una URL. iPhone y Android la leen sin instalar nada. El chip genera un código distinto en cada lectura, así que copiar el enlace no sirve para sumar sellos.', 'Each bill folder carries a chip that opens a URL. iPhone and Android read it with nothing installed. The chip signs every read with a new code, so copying the link cannot add stamps.'], tech: 'NFC NTAG 424 DNA · SUN / AES-CMAC' },
- { title: ['La primera visita', 'The first visit'], text: ['Una página ligera identifica al local y a la mesa. Si el cliente es nuevo pide sólo nombre, WhatsApp y cumpleaños, con su consentimiento explícito.', 'A light page identifies the venue and table. A new customer only gives name, WhatsApp and birthday, with explicit consent.'], tech: 'React · API en Node · Postgres' },
- { title: ['La tarjeta', 'The pass'], text: ['El servidor firma un pase para Apple Wallet y crea el objeto en Google Wallet. Cada sello actualiza la tarjeta por notificación push, sin que el cliente toque nada.', 'The server signs an Apple Wallet pass and creates the Google Wallet object. Each stamp updates the pass via push, with no customer action.'], tech: 'PassKit (.pkpass) · Google Wallet API' },
- { title: ['Las reglas', 'The rules'], text: ['Un sello por día y por cliente, premios por local o por cadena, y cada visita queda registrada con hora y mesa para el panel del dueño.', 'One stamp per customer per day, rewards per venue or per chain, and every visit is logged with time and table for the owner’s dashboard.'], tech: 'Postgres · restricciones únicas · RLS' },
- { title: ['Los mensajes', 'The messages'], text: ['Una cola de trabajos programados envía la reseña 2 h después, el «te extrañamos» a los 30 días y la promoción 7 días antes del cumpleaños, con plantillas aprobadas por WhatsApp y baja automática.', 'A scheduled job queue sends the review request 2 h later, the “we miss you” at 30 days and the promo 7 days before the birthday, using WhatsApp-approved templates and automatic opt-out.'], tech: 'WhatsApp Cloud API · cron / colas' },
+ { title: ['El chip', 'The chip'], text: ['Abre una URL sin instalar nada. Cada lectura trae un código nuevo: copiar el enlace no suma sellos.', 'Opens a URL with nothing installed. Every read carries a new code: copying the link adds no stamps.'], tech: 'NFC NTAG 424 DNA · SUN / AES-CMAC' },
+ { title: ['La primera visita', 'The first visit'], text: ['Pide sólo nombre, WhatsApp y cumpleaños, con consentimiento.', 'Asks only for name, WhatsApp and birthday, with consent.'], tech: 'React · API en Node · Postgres' },
+ { title: ['La tarjeta', 'The pass'], text: ['Pase firmado para Apple y Google Wallet. Cada sello lo actualiza solo.', 'Signed pass for Apple and Google Wallet. Each stamp updates it automatically.'], tech: 'PassKit (.pkpass) · Google Wallet API' },
+ { title: ['Las reglas', 'The rules'], text: ['Un sello al día, premios por local o cadena, y cada visita registrada.', 'One stamp a day, rewards per venue or chain, and every visit logged.'], tech: 'Postgres · restricciones únicas · RLS' },
+ { title: ['Los mensajes', 'The messages'], text: ['Reseña a las 2 h, «te extrañamos» a los 30 días y promo antes del cumpleaños.', 'Review at 2 h, “we miss you” at 30 days and a promo before the birthday.'], tech: 'WhatsApp Cloud API · cron / colas' },
 ];
 
 type Msg ={ id: number; at: number; text: [string, string]; action?: 'review' | 'reserve'; done?: boolean };
@@ -157,7 +157,7 @@ export default function LoyaltyDemo({ lang }: { lang: 'es' | 'en' }) {
        {rewards > 0 && <p className="ld-reward">{t(`${rewards} comida${rewards > 1 ? 's' : ''} gratis lista${rewards > 1 ? 's' : ''} para canjear`, `${rewards} free meal${rewards > 1 ? 's' : ''} ready to redeem`)}</p>}
        <div className="ld-pass-foot"><span>{member.name}</span><span>{t('Miembro desde oct 2026', 'Member since Oct 2026')}</span></div>
       </div>
-      <p className="ld-hint">{t('La tarjeta vive en el Wallet del celular: no hay app que instalar ni tarjeta de cartón que perder.', 'The pass lives in the phone’s Wallet: no app to install, no paper card to lose.')}</p>
+      <p className="ld-hint">{t('Vive en el Wallet: sin app ni tarjeta de cartón.', 'Lives in the Wallet: no app, no paper card.')}</p>
      </div>}
      {screen === 'chat' && <div className="ld-chat">
       <div className="ld-chat-head"><span className="ld-brand" aria-hidden="true">EC</span><div><strong>El Cerrito</strong><small>{t('Cuenta de empresa', 'Business account')}</small></div></div>
@@ -221,7 +221,7 @@ export default function LoyaltyDemo({ lang }: { lang: 'es' | 'en' }) {
     </li>)}
    </ol>
   </div>
-  <p className="ld-note">{t('Simulación en tu navegador: la taquería es ficticia y no se envía ningún WhatsApp. Idea inspirada en un producto que vi presentar a un restaurante; el diseño y el código de esta versión son míos.', 'A simulation in your browser: the taquería is fictional and no WhatsApp is sent. Inspired by a product I saw pitched to a restaurant; this version’s design and code are mine.')}</p>
+  <p className="ld-note">{t('Simulación: la taquería es ficticia y no se envía ningún WhatsApp. Inspirado en un producto real; esta versión es mía.', 'Simulation: the taquería is fictional and no WhatsApp is sent. Inspired by a real product; this version is mine.')}</p>
  </div>;
 }
 

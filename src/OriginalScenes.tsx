@@ -12,9 +12,9 @@ const PANORAMAS: { file: string; title: [string, string]; note: [string, string]
 ];
 
 const GAME_METRICS: [string, [string, string]][] = [
- ['18 → 55 fps', ['al dejar de crear 195 materiales en cada cuadro', 'by no longer creating 195 materials every frame']],
- ['13,3 → 7,1 ms', ['por cuadro en el bosque: el cielo y el minimapa eran el costo, no los árboles', 'per frame in the forest: the sky and minimap were the cost, not the trees']],
- ['831', ['baterías de pruebas automáticas que avisan si algo vuelve', 'automated test batteries that warn if something comes back']],
+ ['18 → 55 fps', ['sin crear materiales en cada cuadro', 'by not creating materials every frame']],
+ ['13,3 → 7,1 ms', ['por cuadro: el costo era el cielo, no los árboles', 'per frame: the cost was the sky, not the trees']],
+ ['831', ['baterías de pruebas automáticas', 'automated test batteries']],
 ];
 
 export default function OriginalScenes({ lang, paused }: { lang: 'es' | 'en'; paused: boolean }) {
@@ -31,9 +31,9 @@ export default function OriginalScenes({ lang, paused }: { lang: 'es' | 'en'; pa
  }, [paused, open, hovering]);
  useEffect(() => { if (open) dialog.current?.showModal(); else dialog.current?.close(); }, [open]);
 
- return <section id="graphics" className="wrap section-space gamedev"><div className="section-heading"><div><span className="gamedev-kicker">Game development</span><h2>{es ? 'IA Rogue, mi videojuego en Godot.' : 'IA Rogue, my Godot game.'}</h2><p>{es ? 'Un roguelike 3D que hago como hobby profesional: dirijo lo visual, armo las escenas, escribo los shaders y mido el rendimiento antes de tocar código.' : 'A 3D roguelike I build as a professional hobby: I direct the visuals, build the scenes, write the shaders and measure performance before touching code.'}</p><div className="tags gamedev-tags">{(es ? ['Dirección visual', 'Game dev', 'Modelado 3D', 'Shaders', 'Hobby profesional'] : ['Visual direction', 'Game dev', '3D modeling', 'Shaders', 'Professional hobby']).map(tag => <span key={tag}>{tag}</span>)}</div></div></div>
+ return <section id="graphics" className="wrap section-space gamedev"><div className="section-heading"><div><span className="gamedev-kicker">Game development</span><h2>{es ? 'IA Rogue, mi videojuego en Godot.' : 'IA Rogue, my Godot game.'}</h2><p>{es ? 'Un roguelike 3D que hago como hobby profesional.' : 'A 3D roguelike I build as a professional hobby.'}</p><div className="tags gamedev-tags">{(es ? ['Dirección visual', 'Game dev', 'Modelado 3D', 'Shaders', 'Hobby profesional'] : ['Visual direction', 'Game dev', '3D modeling', 'Shaders', 'Professional hobby']).map(tag => <span key={tag}>{tag}</span>)}</div></div></div>
   <dl className="gamedev-metrics">{GAME_METRICS.map(([value, label]) => <div key={value}><dt>{value}</dt><dd>{label[L]}</dd></div>)}</dl>
-  <div className="original-compare-heading"><h3>{es ? 'Un personaje, tres estilos.' : 'One character, three styles.'}</h3><p>{es ? 'Compara pixel art, cel shading y 3D realista sobre el mismo modelo. Gíralo, acércate y cambia el tamaño del píxel en tiempo real.' : 'Compare pixel art, cel shading and realistic 3D on the same model. Rotate it, zoom in and change the pixel size in real time.'}</p></div>
+  <div className="original-compare-heading"><h3>{es ? 'Un personaje, tres estilos.' : 'One character, three styles.'}</h3><p>{es ? 'Gíralo, acércate y cambia el tamaño del píxel.' : 'Rotate it, zoom in and change the pixel size.'}</p></div>
   <ModelLab lang={lang} paused={paused}/>
 
   <div className="original-compare-heading"><h3>{es ? 'Escenas del juego.' : 'Scenes from the game.'}</h3><p>{es ? 'Capturas del juego, sin retoque. Toca una para verla completa.' : 'In-game captures, untouched. Tap one to see it in full.'}</p></div>

@@ -39,7 +39,7 @@ test('landing stays a summary: heavy demos live on their own pages', async ({pag
  await expect(page.locator('.ld-stage')).toHaveCount(0);
  await expect(page.locator('.ie-scenarios')).toHaveCount(0);
  expect(await page.evaluate(()=>document.documentElement.scrollHeight)).toBeLessThan(10000);
- await page.locator('.hs-tabs button').nth(2).click();
+ await page.locator('.hs-tabs button').nth(1).click();
  await page.locator('.hs-pos0').click();
  await expect(page).toHaveURL(/\/proyectos\/analizador-csv$/);
 });

@@ -100,7 +100,7 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
    </div>
   </header>
   {sample && <div className="dw-yours">
-   <p><strong>{t('Esto es un ejemplo', 'This is a sample')}</strong> {t('con el formato de un reporte real de planta; los datos son inventados. Con tu propio archivo verás lo mismo sobre tus datos.', 'shaped like a real plant report; the data is made up. With your own file you get the same analysis on your data.')}</p>
+   <p><strong>{t('Esto es un ejemplo', 'This is a sample')}</strong> {t('con formato de reporte real; los datos son inventados.', 'shaped like a real report; the data is made up.')}</p>
    <div><button className="dw-primary" onClick={() => upload.current?.click()}>{t('Sube el tuyo', 'Upload yours')} <span aria-hidden="true">↑</span></button><a href={`mailto:${personal.email}?subject=${encodeURIComponent(t('CSV para revisar', 'CSV to review'))}`}>{t('o mándamelo y lo reviso', 'or send it to me')}</a></div>
   </div>}
   {error && <p className="dw-error" role="alert">{error} {t('Se conserva el análisis anterior.', 'The previous analysis is kept.')}</p>}
@@ -152,6 +152,6 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
    <span>{t(`${visible.length} de ${rows.length} filas`, `${visible.length} of ${rows.length} rows`)}{!showAll && matches.length > 10 && <button className="dw-link" onClick={() => setShowAll(true)}>{t('ver todas', 'show all')}</button>}</span>
    <button className="dw-primary" onClick={download}>{t('Descargar CSV limpio', 'Download clean CSV')} <span aria-hidden="true">↓</span></button>
   </div>
-  <p className="dw-note">{t('Todo ocurre en tu navegador: el archivo no se sube a ningún servidor. Lo que requiere criterio (vacíos, reglas de negocio) se marca, no se inventa.', 'Everything runs in your browser: the file is never uploaded. What needs judgment (blanks, business rules) is flagged, never made up.')}</p>
+  <p className="dw-note">{t('Lo que requiere criterio se marca, no se inventa.', 'What needs judgment is flagged, never made up.')}</p>
  </div>;
 }

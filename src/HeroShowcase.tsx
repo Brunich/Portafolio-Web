@@ -4,9 +4,9 @@ import './hero-showcase.css';
 
 // Portada: tres proyectos reales apilados que rotan solos. La tarjeta del frente lleva a su página.
 const SLIDES = [
- { slug: 'punto-u', title: 'Punto U', note: ['Red de favores entre estudiantes', 'A favor network for students'], kind: 'phone', img: '/media/punto-u.webp' },
  { slug: 'club-nfc', title: 'Club NFC', note: ['Clientes que vuelven con un toque', 'Customers who return with one tap'], kind: 'club' },
  { slug: 'analizador-csv', title: 'Analizador CSV', note: ['Limpia reportes en el navegador', 'Cleans reports in the browser'], kind: 'shot', img: '/media/analizador.webp' },
+ { slug: 'punto-u', title: 'Punto U', note: ['Red de favores entre estudiantes', 'A favor network for students'], kind: 'phone', img: '/media/punto-u.webp' },
 ] as const;
 
 export default function HeroShowcase({ lang, paused }: { lang: 'es' | 'en'; paused: boolean }) {
