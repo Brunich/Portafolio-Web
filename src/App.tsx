@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { ArrowUpRight, ArrowDown, ArrowLeft, ArrowRight, DownloadSimple, GithubLogo, EnvelopeSimple, LinkedinLogo, WhatsappLogo, Pause, Play } from '@phosphor-icons/react';
 import { copy, certificates } from './content';
 import type { Lang } from './content';
@@ -6,10 +6,13 @@ import { professional } from './professional-content';
 import { personal } from './personal';
 import OriginalScenes from './OriginalScenes';
 import CodeRiver from './CodeRiver';
-import DataWorkbench from './DataWorkbench';
-import ImpactExplorer from './ImpactExplorer';
+// Las demos pesadas se cargan sólo en su página.
+const DataWorkbench = lazy(() => import('./DataWorkbench'));
+const ImpactExplorer = lazy(() => import('./ImpactExplorer'));
+const LoyaltyDemo = lazy(() => import('./LoyaltyDemo'));
 import VibeSketch from './VibeSketch';
-import LoyaltyDemo, { ClubPreview } from './LoyaltyDemo';
+import ClubPreview from './ClubPreview';
+import LoopVideo from './LoopVideo';
 import HeroShowcase from './HeroShowcase';
 import './pages.css';
 
@@ -56,14 +59,14 @@ function Home({ lang, paused, setPaused, projects }: { lang: Lang; paused: boole
  useEffect(() => { const observer = new IntersectionObserver(entries => { for (const e of entries) if (e.isIntersecting) setActive(e.target.id); }, { rootMargin: '-10% 0px -65% 0px' }); document.querySelectorAll('main > section[id]').forEach(el => observer.observe(el)); return () => observer.disconnect(); }, []);
  return <>
   <main id="main">
-   <section id="home" className="hero wrap"><div className="hero-copy"><h1>{p.title}<span>{p.accent}</span></h1><p>{p.intro}</p><div className="hero-actions"><a className="button primary" href="#projects">{c.view}<ArrowDown size={19}/></a><a className="button secondary" href="/cv/Bruno-Salas-EN.pdf" download>{es ? 'CV en inglés' : 'Download CV'}<DownloadSimple size={19}/></a></div><p className="hero-facts">{es ? 'Monterrey, N. L. · UANL 2023–2028 · Español, inglés y portugués' : 'Monterrey, Mexico · UANL 2023–2028 · Spanish, English & Portuguese'}</p></div><div className="hero-workbench"><HeroShowcase lang={lang} paused={paused}/></div></section>
+   <section id="home" className="hero wrap"><div className="hero-copy"><h1>{p.title}<span>{p.accent}</span></h1><p>{p.intro}</p><div className="hero-actions"><a className="button primary" href="#projects">{c.view}<ArrowDown size={19}/></a><a className="button secondary" href={es ? "/cv/Bruno-Salas-ES.pdf" : "/cv/Bruno-Salas-EN.pdf"} download>{es ? "Descargar CV" : "Download CV"}<DownloadSimple size={19}/></a></div><p className="hero-facts">{es ? 'Monterrey, N. L. · UANL 2023–2028 · Español, inglés y portugués' : 'Monterrey, Mexico · UANL 2023–2028 · Spanish, English & Portuguese'}</p></div><div className="hero-workbench"><HeroShowcase lang={lang} paused={paused}/></div></section>
    <CodeRiver lang={lang} paused={paused}/>
    <section id="projects" className="wrap section-space"><div className="section-heading"><div><h2>{p.projectsTitle}</h2><p>{p.projectsIntro}</p></div><a className="inline-link" href={personal.github} {...external(personal.github)}>GitHub<GithubLogo size={21}/></a></div>
-    <div className="project-grid">{projects.map(project => <ProjectCard key={project.id} lang={lang} project={project} featured={project.id === 'club' || project.id === 'punto'}/>)}</div>
+    <div className="project-grid">{projects.map(project => <ProjectCard key={project.id} lang={lang} paused={paused} project={project} featured={project.id === 'club' || project.id === 'punto'}/>)}</div>
     <a className="proposals-strip" href="/propuestas"><div><span className="proposals-kicker">{es ? 'Ideas en diseño' : 'Ideas in design'}</span><strong>{es ? 'Propuestas de automatización' : 'Automation proposals'}</strong><p>{es ? '¿Qué se rompe si toco este archivo? Un mapa de impacto interactivo y un flujo entre turnos.' : 'What breaks if I touch this file? An interactive impact map and a shift handover flow.'}</p></div><ArrowRight size={26}/></a>
    </section>
    <section id="skills" className="wrap section-space"><div className="skills"><h2>{p.techTitle}</h2><div className="skills-grid">{p.skills.map(s => <div key={s.name}><h3>{s.name}</h3><p>{s.desc}</p><div className="tags">{s.tools.map(tool => <span key={tool}>{tool}</span>)}</div></div>)}</div><section className="language-section"><h3>{es ? 'Idiomas' : 'Languages'}</h3><p>{c.languages}</p></section></div></section>
-   <section id="about" className="about-section section-space"><div className="wrap"><div className="about-intro"><div><h2>{p.aboutTitle}</h2><p>{p.about}</p><p>{p.about2}</p><a className="inline-link" href="/cv/Bruno-Salas-EN.pdf" download>{es ? 'CV en inglés' : 'Download CV'}<DownloadSimple size={20}/></a></div><dl className="profile-points">{p.profilePoints.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></div><div className="experience-grid"><div><h3>{c.timelineTitle}</h3>{c.experience.map(e => <div className="experience-row" key={e.year}><span className="year">{e.year}</span><div><h4>{e.role}</h4><span className="org">{e.org}</span><p>{e.text}</p></div></div>)}</div><div><h3>{c.learning}</h3>{certificates.map(cert => <a className="certificate" key={cert.title} href={cert.url} {...external(cert.url)}><div><h4>{cert.title}</h4><p>{cert.org}</p><span>{cert.year}</span></div><ArrowUpRight size={22}/></a>)}</div></div></div></section>
+   <section id="about" className="about-section section-space"><div className="wrap"><div className="about-intro"><div><h2>{p.aboutTitle}</h2><p>{p.about}</p><p>{p.about2}</p><a className="inline-link" href={es ? "/cv/Bruno-Salas-ES.pdf" : "/cv/Bruno-Salas-EN.pdf"} download>{es ? "Descargar CV" : "Download CV"}<DownloadSimple size={20}/></a></div><dl className="profile-points">{p.profilePoints.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></div><div className="experience-grid"><div><h3>{c.timelineTitle}</h3>{c.experience.map(e => <div className="experience-row" key={e.year}><span className="year">{e.year}</span><div><h4>{e.role}</h4><span className="org">{e.org}</span><p>{e.text}</p></div></div>)}</div><div><h3>{c.learning}</h3>{certificates.map(cert => <a className="certificate" key={cert.title} href={cert.url} {...external(cert.url)}><div><h4>{cert.title}</h4><p>{cert.org}</p><span>{cert.year}</span></div><ArrowUpRight size={22}/></a>)}</div></div></div></section>
    <OriginalScenes lang={lang} paused={paused}/>
    <Contact lang={lang}/>
   </main>
@@ -71,11 +74,11 @@ function Home({ lang, paused, setPaused, projects }: { lang: Lang; paused: boole
  </>;
 }
 
-function ProjectCard({ lang, project, featured }: { lang: Lang; project: Project; featured: boolean }) {
+function ProjectCard({ lang, paused, project, featured }: { lang: Lang; paused: boolean; project: Project; featured: boolean }) {
  const es = lang === 'es', page = `/proyectos/${project.slug}`;
  return <article className={`project ${featured ? 'project-featured' : ''} project-${project.id}`}>
   <a className={`project-media media-${project.id}`} href={page} aria-label={`${project.title} — ${es ? 'ver proyecto' : 'view project'}`}>
-   {project.media === 'vibemap' ? <VibeSketch lang={lang}/> : project.media === 'club' ? <ClubPreview lang={lang}/> : <img src={`/media/${project.media}.webp`} alt="" loading="lazy"/>}
+   {project.media === 'vibemap' ? <VibeSketch lang={lang}/> : project.media === 'club' ? <ClubPreview lang={lang}/> : project.media === 'analizador' ? <LoopVideo name="analizador" paused={paused}/> : <img src={`/media/${project.media}.webp`} alt="" loading="lazy"/>}
    <span className="media-open"><ArrowUpRight size={24}/></span>
   </a>
   <div className="project-info"><span className="project-kind">{project.kind}</span><h3><a href={page}>{project.title}</a></h3><p>{project.desc}</p>
@@ -101,12 +104,12 @@ function ProjectPage({ lang, project, projects }: { lang: Lang; project: Project
     {project.metrics.length > 0 && <dl className="project-metrics case-metrics">{project.metrics.map(([value, label]) => <div key={value + label}><dt>{value}</dt><dd>{label}</dd></div>)}</dl>}
    </header>
   </div>
-  <section className="case-demo" aria-label={es ? 'Demostración' : 'Demo'}><div className="wrap">
+  <section className="case-demo" aria-label={es ? 'Demostración' : 'Demo'}><div className="wrap"><Suspense fallback={<p className="case-loading">{es ? 'Cargando demo…' : 'Loading demo…'}</p>}>
    {project.id === 'punto' && <div className="demo-punto"><div className="case-phone"><iframe src={project.link} title={es ? 'Punto U en vivo' : 'Punto U live'}/></div><div className="demo-punto-copy"><h2>{es ? 'Pruébala aquí mismo.' : 'Try it right here.'}</h2><p>{es ? 'La app real, en vivo. En modo demostración: lo que crees se guarda sólo en tu navegador.' : 'The real app, live. In demo mode: what you create stays in your browser.'}</p><a className="inline-link" href={project.link} {...external(project.link)}>{es ? 'Abrir en otra pestaña' : 'Open in a new tab'}<ArrowUpRight size={18}/></a></div></div>}
    {project.id === 'club' && <LoyaltyDemo lang={lang}/>}
    {project.id === 'csv' && <><div className="case-demo-head"><h2>{es ? 'Tus datos, en un mapa.' : 'Your data, as a map.'}</h2><p>{es ? 'Sube o arrastra tu CSV. Se analiza en tu navegador y nada sale de tu equipo.' : 'Upload or drag your CSV. It is analyzed in your browser and nothing leaves your device.'}</p></div><DataWorkbench lang={lang}/></>}
    {project.id === 'vibe' && <div className="demo-vibe"><VibeSketch lang={lang}/><p>{es ? 'La salida de VibeMap sobre el código de este sitio: cada flecha es una función real.' : 'VibeMap’s output on this site’s code: every arrow is a real function.'}</p></div>}
-  </div></section>
+  </Suspense></div></section>
   <section className="case-story wrap" aria-label={es ? 'Cómo está construido' : 'How it is built'}>
    {[[c.challenge, project.challenge], [c.contribution, project.work], [c.result, project.result]].map(([title, text]) => <div key={title}><h2>{title}</h2><p>{text}</p></div>)}
   </section>
@@ -127,7 +130,7 @@ function Proposals({ lang, paused }: { lang: Lang; paused: boolean }) {
   <div className="wrap"><a className="case-back" href="/#projects"><ArrowLeft size={18}/>{es ? 'Volver al inicio' : 'Back home'}</a>
    <header className="case-head"><div><span className="project-kind">{es ? 'Ideas en diseño · aún no construidas' : 'Ideas in design · not built yet'}</span><h1>{p.automationTitle}</h1><p>{p.automationIntro}</p></div></header>
   </div>
-  <section id="automation" className="wrap case-demo-plain"><div className="automation-layout"><div className="automation-options" aria-label={es ? 'Propuestas de automatización' : 'Automation proposals'}>{p.automations.map((item, i) => <button key={item.title} aria-pressed={i === automation} onClick={() => { setAutomation(i); setStep(0); }}>{item.title}<ArrowUpRight size={21}/></button>)}</div><div className="automation-detail" aria-live="polite"><span className="proposal-status">{es ? 'Diseño del flujo' : 'Workflow design'}</span><h3>{a.title}</h3><p>{a.who}</p><div className="workflow-map" aria-label={es ? 'Pasos del proceso' : 'Process steps'}>{a.steps.map((label, i) => <button key={label} aria-pressed={step === i} onClick={() => setStep(i)}><span>0{i + 1}</span>{label}</button>)}</div><p className="step-explanation">{explanations[step]}</p><h4>{es ? 'Resultado del recorrido' : 'Workflow output'}</h4><p>{a.deliverable}</p><p className="automation-stack">{a.stack}</p><p className="automation-boundary">{a.boundary}</p></div></div>{automation === 0 && <ImpactExplorer lang={lang} paused={paused}/>}</section>
+  <section id="automation" className="wrap case-demo-plain"><div className="automation-layout"><div className="automation-options" aria-label={es ? 'Propuestas de automatización' : 'Automation proposals'}>{p.automations.map((item, i) => <button key={item.title} aria-pressed={i === automation} onClick={() => { setAutomation(i); setStep(0); }}>{item.title}<ArrowUpRight size={21}/></button>)}</div><div className="automation-detail" aria-live="polite"><span className="proposal-status">{es ? 'Diseño del flujo' : 'Workflow design'}</span><h3>{a.title}</h3><p>{a.who}</p><div className="workflow-map" aria-label={es ? 'Pasos del proceso' : 'Process steps'}>{a.steps.map((label, i) => <button key={label} aria-pressed={step === i} onClick={() => setStep(i)}><span>0{i + 1}</span>{label}</button>)}</div><p className="step-explanation">{explanations[step]}</p><h4>{es ? 'Resultado del recorrido' : 'Workflow output'}</h4><p>{a.deliverable}</p><p className="automation-stack">{a.stack}</p><p className="automation-boundary">{a.boundary}</p></div></div>{automation === 0 && <Suspense fallback={null}><ImpactExplorer lang={lang} paused={paused}/></Suspense>}</section>
  </main>;
 }
 
