@@ -103,3 +103,18 @@ test('stamp card with PIN: a wrong PIN does not redeem, the right one does', asy
  await page.getByRole('button', { name: 'Sí, canjeado' }).click();
  await expect(page.locator('.st-count')).toHaveText('0/3');
 });
+
+test('on a phone every project header is one column, the title fits and the floating button waits until you scroll up', async ({ page }) => {
+ await page.setViewportSize({ width: 390, height: 844 });
+ for (const slug of ['club-nfc', 'analizador-csv', 'planta', 'inventario', 'entrega-de-turno', 'vibemap', 'punto-u']) {
+  await page.goto(`/proyectos/${slug}`);
+  const head = await page.locator('.case-head').evaluate(e => ({ cols: getComputedStyle(e).gridTemplateColumns.split(' ').length, h1: e.querySelector('h1')!.getBoundingClientRect().right, doc: document.documentElement.scrollWidth }));
+  expect(head.cols, slug).toBe(1);
+  expect(head.h1, slug).toBeLessThanOrEqual(390);
+  expect(head.doc, slug).toBe(390);
+ }
+ await expect(page.locator('.zone-nav')).toHaveClass(/is-hidden/);
+ await page.mouse.wheel(0, 1200); await page.waitForTimeout(300);
+ await page.mouse.wheel(0, -400);
+ await expect(page.locator('.zone-nav')).not.toHaveClass(/is-hidden/);
+});

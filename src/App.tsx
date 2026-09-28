@@ -108,17 +108,26 @@ function ZoneNav({ lang, routeKey }: { lang: Lang; routeKey: string }) {
  const es = lang === 'es';
  const [next, setNext] = useState<HTMLElement | null>(null);
  const [label, setLabel] = useState('');
+ const [hidden, setHidden] = useState(false);
  useEffect(() => {
+  let lastY = scrollY;
+  // En celular no hay margen libre: arranca oculto y aparece al subir.
+  setHidden(!document.documentElement.classList.contains('paged') && matchMedia('(max-width:760px)').matches);
   const update = () => {
    const zones = [...document.querySelectorAll<HTMLElement>('main [data-zone]')];
    const n = zones.find(z => z.getBoundingClientRect().top > 110) ?? null;
    setNext(n); setLabel(n?.dataset.zone ?? (es ? 'Arriba' : 'Top'));
+   // Fuera de la portada por zonas se esconde mientras bajas leyendo, para no tapar texto; vuelve al subir o al final.
+   const y = scrollY, end = y > 240 && y + innerHeight > document.documentElement.scrollHeight - 80;
+   if (!document.documentElement.classList.contains('paged') && Math.abs(y - lastY) > 6) setHidden(y > lastY && y > 240 && !end);
+   if (end) setHidden(false);
+   lastY = y;
   };
   update(); const late = setTimeout(update, 600);
   addEventListener('scroll', update, { passive: true }); addEventListener('resize', update);
   return () => { clearTimeout(late); removeEventListener('scroll', update); removeEventListener('resize', update); };
  }, [routeKey, es]);
- return <button className={`zone-nav${next ? '' : ' is-top'}`} onClick={() => { if (next) void glideTo(next); else void glide(0); }} aria-label={next ? `${es ? 'Bajar a' : 'Go to'} ${label}` : (es ? 'Volver arriba' : 'Back to top')}>
+ return <button className={`zone-nav${next ? '' : ' is-top'}${hidden ? ' is-hidden' : ''}`} onClick={() => { if (next) void glideTo(next); else void glide(0); }} aria-label={next ? `${es ? 'Bajar a' : 'Go to'} ${label}` : (es ? 'Volver arriba' : 'Back to top')}>
   <span className="zone-label">{label}</span><span className="zone-arrow" aria-hidden="true"><ArrowDown size={18} weight="bold"/></span>
  </button>;
 }
