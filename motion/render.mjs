@@ -25,8 +25,8 @@ else {
  const total = Math.round(FPS * await page.evaluate(() => window.DUR));
  rmSync(frames, { recursive: true, force: true }); mkdirSync(frames);
  for (let f = 0; f < total; f++) { await grab(f / FPS, join(frames, `f${String(f).padStart(5, '0')}.png`), true); if (f % 300 === 0) console.log(`${f}/${total}`); }
- const r = spawnSync('ffmpeg', ['-v', 'error', '-y', '-framerate', String(FPS), '-i', join(frames, 'f%05d.png'), '-c:v', 'libx264', '-preset', 'slow', '-crf', '16', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', join(out, 'bruno-salas-reel.mp4')], { stdio: 'inherit' });
+ await browser.close(); // libera memoria: con el navegador abierto, x264 se quedó sin ella
+ const r = spawnSync('ffmpeg', ['-v', 'error', '-y', '-framerate', String(FPS), '-i', join(frames, 'f%05d.png'), '-c:v', 'libx264', '-preset', 'slow', '-crf', '16', '-threads', '4', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', join(out, 'bruno-salas-reel.mp4')], { stdio: 'inherit' });
  if (r.status !== 0) process.exit(r.status ?? 1);
  console.log('listo:', join(out, 'bruno-salas-reel.mp4'));
-}
-await browser.close();
+} else await browser.close();
