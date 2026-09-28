@@ -4,50 +4,27 @@ import './stamp.css';
 
 // Tarjeta de sellos real: un chip NFC (o un QR) abre /sello con los datos del negocio en el enlace.
 // El sello se guarda en el celular del cliente: uno al día, y al llenar la tarjeta se canjea el premio.
-export type Biz = { name: string; goal: number; prize: string; color: string; review: string; wa: string; pin?: string };
-
-// PIN de canje: en el enlace sólo va una huella del PIN (SHA-256 con el nombre del negocio), no el PIN.
-export async function pinHash(name: string, pin: string) {
- const bytes = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${slug(name)}:${pin}`)));
- return [...bytes.slice(0, 5)].map(b => b.toString(16).padStart(2, '0')).join('');
-}
-type Card = { stamps: number; last: string; rewards: number; visits: number };
+import { COLORS, bizFrom, pinHash, slug, today, initials, emptyCard, applyVisit } from './stamp-logic';
+import type { Biz, Card, VisitStatus } from './stamp-logic';
+export { COLORS, bizFrom, bizLink, pinHash } from './stamp-logic';
+export type { Biz } from './stamp-logic';
+import { bizLink } from './stamp-logic';
 type Lang = 'es' | 'en';
 
-export const COLORS = ['8f7cf0', '5fcfa9', 'e46a8b', '5aa7e6', 'e8b04a', '4b4fb8'];
-const slug = (s: string) => s.toLocaleLowerCase('es').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'negocio';
-const today = () => new Date().toLocaleDateString('sv');
-const initials = (s: string) => s.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'N';
-
-export function bizFrom(search: string): Biz {
- const q = new URLSearchParams(search);
- const goal = Math.min(12, Math.max(3, Number(q.get('m')) || 8));
- const c = (q.get('c') ?? '').replace(/[^0-9a-f]/gi, '');
- return { name: q.get('n')?.trim() || 'El Cerro', goal, prize: q.get('p')?.trim() || 'Postre de la casa', color: c.length === 6 ? c : COLORS[0], review: q.get('r') ?? '', pin: (q.get('k') ?? '').replace(/[^0-9a-f]/g, '') || undefined, wa: (q.get('w') ?? '').replace(/\D/g, '') };
-}
-export function bizLink(b: Biz, origin = location.origin) {
- const q = new URLSearchParams({ n: b.name, m: String(b.goal), p: b.prize, c: b.color });
- if (b.review) q.set('r', b.review);
- if (b.wa) q.set('w', b.wa);
- if (b.pin) q.set('k', b.pin);
- return `${origin}/sello?${q}`;
-}
 export function Qr({ text, label }: { text: string; label: string }) {
  const svg = useMemo(() => { const qr = qrcode(0, 'M'); qr.addData(text); qr.make(); return qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true }); }, [text]);
  return <div className="st-qr" role="img" aria-label={label} dangerouslySetInnerHTML={{ __html: svg }}/>;
 }
 
-const read = (key: string): Card => { try { const c = JSON.parse(localStorage.getItem(key) ?? ''); if (typeof c.stamps === 'number') return c; } catch { /* tarjeta nueva */ } return { stamps: 0, last: '', rewards: 0, visits: 0 }; };
+const read = (key: string): Card => { try { const c = JSON.parse(localStorage.getItem(key) ?? ''); if (typeof c.stamps === 'number') return c; } catch { /* tarjeta nueva */ } return emptyCard(); };
 const write = (key: string, c: Card) => { try { localStorage.setItem(key, JSON.stringify(c)); } catch { /* sin almacenamiento: la tarjeta vive sólo en esta visita */ } };
 // El sello se aplica una sola vez por carga de página (React en modo estricto monta dos veces).
-const visits = new Map<string, { card: Card; status: 'new' | 'today' | 'full' }>();
+const visits = new Map<string, { card: Card; status: VisitStatus }>();
 function visit(key: string, goal: number) {
  if (!visits.has(key)) {
-  const c = read(key);
-  let status: 'new' | 'today' | 'full' = 'today';
-  if (c.stamps >= goal) status = 'full';
-  else if (c.last !== today()) { c.stamps += 1; c.last = today(); c.visits += 1; status = c.stamps >= goal ? 'full' : 'new'; write(key, c); }
-  visits.set(key, { card: c, status });
+  const r = applyVisit(read(key), goal, today());
+  if (r.status === 'new' || (r.status === 'full' && r.card.last === today() && r.card.visits > 0)) write(key, r.card);
+  visits.set(key, r);
  }
  return visits.get(key)!;
 }

@@ -1,32 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
-import { compressToEncodedURIComponent as pack, decompressFromEncodedURIComponent as unpack } from 'lz-string';
+import { DEMO, menuLink, readMenu, money, FLAGS, chipFor } from './menu-logic';
+import type { Item, MenuData } from './menu-logic';
+export { DEMO, menuLink } from './menu-logic';
 import { Plus, Minus, WhatsappLogo, Trash, Leaf, Fire } from '@phosphor-icons/react';
 import { Qr, COLORS } from './Stamp';
 import './menu.css';
 
 // Menú digital: el mismo chip NFC (o un QR en la mesa) abre la carta; el cliente arma su pedido
 // y lo manda por WhatsApp al negocio. El menú viaja comprimido en el enlace: no hace falta servidor.
-export type Item = [name: string, price: number, desc: string, flags: string];
-export type MenuData = { n: string; c: string; w: string; s: [string, Item[]][] };
 type Lang = 'es' | 'en';
-
-export const DEMO: MenuData = { n: 'El Cerro', c: '8f7cf0', w: '', s: [
- ['Entradas', [['Guacamole con totopos', 95, 'Aguacate, cebolla, cilantro y chile serrano.', 'vp'], ['Queso fundido con chorizo', 110, 'Con tortillas de harina recién hechas.', 'l'], ['Sopa de tortilla', 85, 'Caldo de jitomate, aguacate, crema y queso.', 'l']]],
- ['Tacos', [['Al pastor (4)', 89, 'Con piña, cebolla y cilantro.', 'p'], ['De bistec (4)', 95, 'En tortilla de maíz, con frijoles charros.', ''], ['De nopales (4)', 79, 'Nopal asado con queso fresco.', 'vl']]],
- ['Platos fuertes', [['Cabrito al pastor', 320, 'Estilo Monterrey, con guacamole y frijoles.', ''], ['Arrachera 300 g', 290, 'Con cebollitas asadas y papa al horno.', ''], ['Enchiladas verdes', 150, 'Rellenas de pollo, con crema y queso.', 'lp']]],
- ['Postres', [['Flan napolitano', 65, 'Casero, con caramelo.', 'l'], ['Churros con cajeta', 70, 'Cinco piezas.', 'gl']]],
- ['Bebidas', [['Agua fresca 1 L', 40, 'Jamaica, horchata o limón.', 'v'], ['Café de olla', 38, 'Con canela y piloncillo.', 'v'], ['Refresco', 35, 'De lata.', '']]],
-] };
-export const menuLink = (m: MenuData, mesa = '', origin = location.origin) => `${origin}/menu${mesa ? `?mesa=${encodeURIComponent(mesa)}` : ''}#${pack(JSON.stringify(m))}`;
-const read = (): MenuData => { try { const raw = location.hash.slice(1); if (raw) { const m = JSON.parse(unpack(raw) ?? ''); if (m?.n && Array.isArray(m.s)) return m; } } catch { /* menú de ejemplo */ } return DEMO; };
-const money = (n: number) => `$${n.toLocaleString('es-MX')}`;
-const FLAGS: Record<string, [string, string]> = { v: ['Vegetariano', 'Vegetarian'], p: ['Picante', 'Spicy'], l: ['Lácteos', 'Dairy'], g: ['Gluten', 'Gluten'], n: ['Nueces', 'Nuts'] };
-// Chips NFC: cuánto cabe en cada uno (bytes útiles para un enlace).
-export const chipFor = (bytes: number) => bytes <= 132 ? 'NTAG213' : bytes <= 492 ? 'NTAG215' : bytes <= 868 ? 'NTAG216' : null;
 
 export function MenuPage({ lang }: { lang: Lang }) {
  const es = lang === 'es', t = (a: string, b: string) => es ? a : b;
- const menu = useMemo(read, []);
+ const menu = useMemo(() => readMenu(location.hash), []);
  const mesa = new URLSearchParams(location.search).get('mesa') ?? '';
  const [cat, setCat] = useState(0);
  const [order, setOrder] = useState<Record<string, number>>({});

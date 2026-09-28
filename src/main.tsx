@@ -5,6 +5,7 @@ import '@fontsource-variable/dm-sans';
 import '@fontsource-variable/bricolage-grotesque/opsz.css';
 import '@fontsource/instrument-serif/400.css';
 import '@fontsource/instrument-serif/400-italic.css';
+import '@fontsource-variable/jetbrains-mono';
 import './styles.css';
 import App from './App';
 import { intro } from './transition';
