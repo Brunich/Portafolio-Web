@@ -87,7 +87,7 @@ export default function App() {
  return <>
   <a className="skip-link" href="#main">{c.skip}</a>
   <div className="scroll-progress" aria-hidden="true"/>
-  <header className="topbar"><div className="topbar-inner wrap">
+  <header className="topbar" aria-label={es ? 'Navegación del portafolio' : 'Portfolio navigation'}><div className="topbar-inner wrap">
    <a className="brand" href="/" data-title="Bruno Salas" aria-label="Bruno Salas — inicio"><span className="brand-name"><span className="brand-top"><b>Bruno Salas</b><em>{es ? 'portafolio' : 'portfolio'}</em></span><small>{p.role}</small></span></a>
    <nav className="topnav" aria-label={es ? 'Secciones' : 'Sections'}>{[['projects', es ? 'Proyectos' : 'Projects'], ['about', es ? 'Perfil' : 'Profile'], ['graphics', 'Game dev'], ['motion', 'Motion']].map(([id, label]) => <a key={id} href={at(id)}>{label}</a>)}</nav>
    <div className="topbar-tools">
@@ -99,7 +99,7 @@ export default function App() {
   {r.page === 'nfc' ? <NfcPage lang={lang}/> : project ? <ProjectPage lang={lang} project={project} projects={projects}/> : <Home lang={lang} paused={paused} projects={projects}/>}
   <ZoneNav lang={lang} routeKey={`${r.page}:${project?.id ?? ''}`}/>
   {pg.paged && <ZoneDots labels={pg.labels} current={pg.current}/>}
-  <footer className="site-footer wrap">© {new Date().getFullYear()} Bruno Salas Rodríguez <span>{c.location}</span></footer>
+  <footer className="site-footer wrap" aria-label={es ? 'Pie del portafolio' : 'Portfolio footer'}>© {new Date().getFullYear()} Bruno Salas Rodríguez <span>{c.location}</span></footer>
  </>;
 }
 
@@ -198,7 +198,7 @@ function ProjectPage({ lang, project, projects }: { lang: Lang; project: Project
  const es = lang === 'es';
  const next = projects[(projects.indexOf(project) + 1) % projects.length];
  useEffect(() => { scrollTo(0, 0); }, [project.id]);
- return <main id="main" data-c className={`case case-${project.id} project-${project.id}`}>
+ return <main id="main" data-c className={`case case-${project.id} project-${project.id}`} aria-label={project.title}>
   <div className="wrap">
    <a className="case-back" href="/#projects" data-title={es ? 'Proyectos' : 'Projects'}><ArrowLeft size={18}/>{es ? 'Todos los proyectos' : 'All projects'}</a>
    <header className="case-head" data-zone={project.title}>
