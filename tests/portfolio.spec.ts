@@ -44,10 +44,10 @@ test('landing stays a summary: heavy demos live on their own pages', async ({pag
  await expect(page.locator('.dw-workbench')).toHaveCount(0);
  await expect(page.locator('.ld-stage')).toHaveCount(0);
  await expect(page.locator('.sh')).toHaveCount(0);
- // Sólo el asistente local lleva «en desarrollo» (lo pidió Bruno); ningún otro proyecto debe parecer a medias.
+ // «En desarrollo» sólo en su apartado (y la fila del asistente): ningún proyecto de la lista principal debe parecer a medias.
  const withDev = await page.evaluate(()=>[...document.querySelectorAll('body *')]
   .filter(el=>el.children.length===0 && /en desarrollo|in development/i.test(el.textContent ?? ''))
-  .map(el=>el.closest('.project-agente') ? 'project-agente' : (el.parentElement?.className ?? el.tagName)));
+  .map(el=>el.closest('.project-agente, .others.is-dev, .zone-dots') ? 'project-agente' : (el.parentElement?.className ?? el.tagName)));
  expect(withDev.length).toBeGreaterThan(0);
  for (const c of withDev) expect(c).toContain('project-agente');
  // Siete proyectos, cada uno en su pantalla: el límite cuida que no vuelvan los apartados largos.
@@ -115,8 +115,14 @@ test('3D style comparison responds to keyboard and style pairs',async({page})=>{
 
 test('csv analyzer page: mind map, automatic fixes and second sample',async({page})=>{
  await page.goto('/proyectos/analizador-csv');
+ // Lo primero que se ve al entrar a la demo es lo encontrado, arriba de la tabla; el mapa vive en «Columnas».
+ const found=await page.locator('.cf').boundingBox(), table=await page.locator('.dw-tablewrap').boundingBox();
+ expect(found!.y).toBeLessThan(table!.y);
+ await expect(page.locator('.cf-chip.fix')).toContainText('6 con arreglo automático');
+ await page.getByRole('tab',{name:'Columnas'}).click();
  const map=page.locator('.dw-mindmap');await map.scrollIntoViewIfNeeded();
  await expect(map.locator('.mm-branch')).toHaveCount(10);
+ await page.getByRole('tab',{name:'Revisar y limpiar'}).click();
  const problems=page.locator('.dw-kpis div').nth(3).locator('dd');
  await expect(problems).toHaveText('7');
  await page.getByRole('button',{name:/Arreglar lo automático/}).click();
