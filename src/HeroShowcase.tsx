@@ -20,7 +20,7 @@ export function ProjectIcon({ kind }: { kind: string }) {
 }
 
 // El celular baja sobre el chip, salen las ondas y en su pantalla cae el sello del día.
-function NfcTap({ lang }: { lang: 'es' | 'en' }) {
+export function NfcTap({ lang }: { lang: 'es' | 'en' }) {
  const es = lang === 'es';
  return <div className="nt" aria-hidden="true">
   <div className="nt-tag"><ProjectIcon kind="nfc"/><span>NFC</span></div>

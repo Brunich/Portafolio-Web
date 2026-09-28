@@ -93,6 +93,7 @@ export default function ModelLab({ lang, paused }: { lang: 'es' | 'en'; paused: 
     const apply = (style: Style) => entries.forEach(e => { e.mesh.material = e[style]; e.outline.visible = style !== 'pbr'; });
 
     const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableZoom = false; // la rueda recorre la página; el zoom va con los botones
     controls.enablePan = false; controls.enableDamping = true; controls.dampingFactor = 0.08; controls.zoomSpeed = 1.4;
     controls.target.set(0, size.y * 0.52, 0);
     const home = new THREE.Vector3(size.y * 0.95, size.y * 0.68, -size.y * 1.95); // Null mira hacia -Z: tres cuartos de frente

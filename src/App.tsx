@@ -13,12 +13,13 @@ const ShiftHandover = lazy(() => import('./ShiftHandover'));
 import ClubPreview from './ClubPreview';
 import CsvChart from './CsvChart';
 import TurnoPreview from './TurnoPreview';
-import HeroShowcase from './HeroShowcase';
+import HeroShowcase, { NfcTap } from './HeroShowcase';
 import './pages.css';
 import './theme.css';
 import './layout.css';
 import { useMotion } from './motion';
 import { curtain } from './transition';
+import { usePaging, glide, glideTo, zoneList } from './paging';
 import { StampPage, NfcSetup, Qr, bizLink, bizFrom } from './Stamp';
 import './brand.css';
 
@@ -62,6 +63,7 @@ export default function App() {
  const [lang, setLang] = useState<Lang>(() => { try { return localStorage.getItem('bruno-language') === 'en' ? 'en' : 'es'; } catch { return 'es'; } });
  const [paused, setPaused] = useState(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
  useNavigation();
+ const pg = usePaging(location.pathname === '/' || location.pathname === '', `${location.pathname}:${lang}`);
  const es = lang === 'es', p = professional(lang), c = copy[lang], r = route();
  const projects = [...p.projects].sort((a, b) => PROJECT_ORDER.indexOf(a.id) - PROJECT_ORDER.indexOf(b.id));
  const project = r.page === 'project' ? projects.find(x => x.slug === r.slug) : undefined;
@@ -88,17 +90,12 @@ export default function App() {
   </div></header>
   {r.page === 'nfc' ? <NfcPage lang={lang}/> : project ? <ProjectPage lang={lang} project={project} projects={projects}/> : <Home lang={lang} paused={paused} projects={projects}/>}
   <ZoneNav lang={lang} routeKey={`${r.page}:${project?.id ?? ''}`}/>
+  {pg.paged && <ZoneDots labels={pg.labels} current={pg.current}/>}
   <footer className="site-footer wrap">© {new Date().getFullYear()} Bruno Salas Rodríguez <span>{c.location}</span></footer>
  </>;
 }
 
 // Botón de zonas: baja con animación a la siguiente parte de la página; en la última, vuelve arriba.
-function glide(y: number) {
- const from = scrollY, dist = y - from, start = performance.now(), ms = Math.min(1100, 500 + Math.abs(dist) * .35);
- if (document.documentElement.dataset.motion === 'paused') { scrollTo({ top: y, behavior: 'instant' }); return; }
- const step = (now: number) => { const t = Math.min(1, (now - start) / ms), e = t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; scrollTo({ top: from + dist * e, behavior: 'instant' }); if (t < 1) requestAnimationFrame(step); };
- requestAnimationFrame(step);
-}
 function ZoneNav({ lang, routeKey }: { lang: Lang; routeKey: string }) {
  const es = lang === 'es';
  const [next, setNext] = useState<HTMLElement | null>(null);
@@ -113,9 +110,14 @@ function ZoneNav({ lang, routeKey }: { lang: Lang; routeKey: string }) {
   addEventListener('scroll', update, { passive: true }); addEventListener('resize', update);
   return () => { clearTimeout(late); removeEventListener('scroll', update); removeEventListener('resize', update); };
  }, [routeKey, es]);
- return <button className={`zone-nav${next ? '' : ' is-top'}`} onClick={() => glide(next ? next.getBoundingClientRect().top + scrollY - 84 : 0)} aria-label={next ? `${es ? 'Bajar a' : 'Go to'} ${label}` : (es ? 'Volver arriba' : 'Back to top')}>
+ return <button className={`zone-nav${next ? '' : ' is-top'}`} onClick={() => { if (next) void glideTo(next); else void glide(0); }} aria-label={next ? `${es ? 'Bajar a' : 'Go to'} ${label}` : (es ? 'Volver arriba' : 'Back to top')}>
   <span className="zone-label">{label}</span><span className="zone-arrow" aria-hidden="true"><ArrowDown size={18} weight="bold"/></span>
  </button>;
+}
+
+// Guía lateral: una marca por zona; la actual se alarga y muestra su nombre.
+function ZoneDots({ labels, current }: { labels: string[]; current: number }) {
+ return <nav className="zone-dots" aria-label="Zonas">{labels.map((l, i) => <button key={l + i} className={i === current ? 'on' : ''} aria-current={i === current ? 'true' : undefined} onClick={() => void glideTo(zoneList()[i])}><span>{l}</span></button>)}</nav>;
 }
 
 // Arte de fondo de la portada: órbitas de línea fina con puntos que las recorren.
@@ -132,8 +134,9 @@ function Home({ lang, paused, projects }: { lang: Lang; paused: boolean; project
  const cv = es ? '/cv/Bruno-Salas-ES.pdf' : '/cv/Bruno-Salas-EN.pdf';
  return <main id="main">
   <section id="home" className="hero wrap" data-zone={es ? 'Inicio' : 'Home'}><HeroArt/><div className="hero-copy"><h1>{p.title}<em>{p.accent}</em></h1><p>{p.intro}</p><div className="hero-actions"><a className="button primary" href="#projects">{c.view}<ArrowDown size={19}/></a><a className="button secondary" href={cv} download>{es ? 'Descargar CV' : 'Download CV'}<DownloadSimple size={19}/></a></div><p className="hero-facts">{es ? 'Monterrey, N. L. · UANL 2023–2028 · Español, inglés y portugués' : 'Monterrey, Mexico · UANL 2023–2028 · Spanish, English & Portuguese'}</p></div><div className="hero-workbench"><HeroShowcase lang={lang} paused={paused}/></div></section>
-  <section id="projects" className="wrap section-space"><div className="section-heading" data-num="01" data-zone={es ? 'Proyectos' : 'Projects'}><div><span className="kicker">01 · {es ? 'Proyectos' : 'Projects'}</span><h2>{p.projectsTitle}</h2><p>{p.projectsIntro}</p></div><a className="inline-link" href={personal.github} {...external(personal.github)}>GitHub<GithubLogo size={21}/></a></div>
-   <div className="rows">{projects.map((project, i) => <ProjectRow key={project.id} lang={lang} project={project} flip={i % 2 === 1}/>)}</div>
+  <section id="projects" className="wrap section-space"><div className="projects-intro" data-zone={es ? 'Proyectos' : 'Projects'}><div className="section-heading" data-num="01"><div><span className="kicker">01 · {es ? 'Proyectos' : 'Projects'}</span><h2>{p.projectsTitle}</h2><p>{p.projectsIntro}</p></div><a className="inline-link" href={personal.github} {...external(personal.github)}>GitHub<GithubLogo size={21}/></a></div>
+   <ol className="project-index">{projects.map((x, i) => <li key={x.id} className={`project-${x.id}`}><button onClick={() => void glideTo(document.getElementById(`p-${x.id}`))}><span className="pi-num">{String(i + 1).padStart(2, '0')}</span><span className="pi-main"><strong>{x.title}</strong><em>{x.pitch}</em></span><span className="pi-kind">{x.kind}</span><ArrowDown size={18}/></button></li>)}</ol></div>
+   <div className="rows">{projects.map((project, i) => <ProjectRow key={project.id} lang={lang} project={project} flip={i % 2 === 1} n={i + 1} of={projects.length}/>)}</div>
   </section>
   <section id="about" className="about-section section-space"><div className="wrap">
    <div className="about-grid" data-zone={es ? 'Perfil' : 'Profile'}>
@@ -160,11 +163,11 @@ function Media({ lang, project }: { lang: Lang; project: Project }) {
  }
 }
 
-function ProjectRow({ lang, project, flip }: { lang: Lang; project: Project; flip: boolean }) {
+function ProjectRow({ lang, project, flip, n, of }: { lang: Lang; project: Project; flip: boolean; n: number; of: number }) {
  const es = lang === 'es', page = `/proyectos/${project.slug}`;
- return <article data-c data-zone={project.title} className={`row project project-${project.id}${flip ? ' flip' : ''}${project.id === 'vibe' ? ' wide' : ''}`}>
+ return <article id={`p-${project.id}`} data-c data-zone={project.title} className={`row project project-${project.id}${flip ? ' flip' : ''}${project.id === 'vibe' ? ' wide' : ''}`}>
   <a className={`project-media media-${project.id}`} href={page} data-title={project.title} aria-label={`${project.title} — ${es ? 'ver proyecto' : 'view project'}`}><Media lang={lang} project={project}/><span className="media-open"><ArrowUpRight size={22}/></span></a>
-  <div className="project-info"><span className="project-kind">{project.kind}<em>{project.status}</em></span><h3><a href={page} data-title={project.title}>{project.title}</a></h3><p className="pitch">{project.pitch}</p><p>{project.desc}</p>
+  <div className="project-info"><span className="row-num">{String(n).padStart(2, '0')}<i>/ {String(of).padStart(2, '0')}</i></span><span className="project-kind">{project.kind}<em>{project.status}</em></span><h3><a href={page} data-title={project.title}>{project.title}</a></h3><p className="pitch">{project.pitch}</p><p>{project.desc}</p>
    {project.metrics.length > 0 && <dl className="project-metrics">{project.metrics.map(([value, label]) => <div key={value + label}><dt>{value}</dt><dd>{label}</dd></div>)}</dl>}
    <div className="project-links"><a className="button primary" href={page} data-title={project.title}>{es ? 'Ver proyecto' : 'View project'}<ArrowRight size={18}/></a>{project.link.startsWith('http') && <a className="inline-link" href={project.link} {...external(project.link)}>{project.action}<ArrowUpRight size={18}/></a>}</div>
   </div>
@@ -180,10 +183,11 @@ function ProjectPage({ lang, project, projects }: { lang: Lang; project: Project
    <a className="case-back" href="/#projects" data-title={es ? 'Proyectos' : 'Projects'}><ArrowLeft size={18}/>{es ? 'Todos los proyectos' : 'All projects'}</a>
    <header className="case-head" data-zone={project.title}>
     <div><span className="project-kind">{project.kind}<em>{project.status}</em></span><h1>{project.title}</h1><p className="pitch">{project.pitch}</p><p>{project.desc}</p>
+     {project.metrics.length > 0 && <dl className="project-metrics case-metrics">{project.metrics.map(([value, label]) => <div key={value + label}><dt>{value}</dt><dd>{label}</dd></div>)}</dl>}
      <div className="tags">{project.tags.map(t => <span key={t}>{t}</span>)}</div>
      {project.link.startsWith('http') && <a className="button primary case-action" href={project.link} {...external(project.link)}>{project.action}<ArrowUpRight size={18}/></a>}
     </div>
-    {project.metrics.length > 0 && <dl className="project-metrics case-metrics">{project.metrics.map(([value, label]) => <div key={value + label}><dt>{value}</dt><dd>{label}</dd></div>)}</dl>}
+    <div className={`case-visual media-${project.id}`} aria-hidden="true">{project.id === 'club' ? <NfcTap lang={lang}/> : <Media lang={lang} project={project}/>}</div>
    </header>
    <section className="how" data-zone={es ? 'Cómo funciona' : 'How it works'} aria-label={es ? 'Cómo funciona' : 'How it works'}><h2>{es ? 'Cómo funciona' : 'How it works'}</h2><ol>{project.how.map(([title, text], i) => <li key={title}><span>{String(i + 1).padStart(2, '0')}</span><strong>{title}</strong><p>{text}</p></li>)}</ol></section>
   </div>
