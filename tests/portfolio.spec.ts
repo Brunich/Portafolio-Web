@@ -68,7 +68,8 @@ test('shift handover: an incident cannot be closed without evidence, and the han
  await expect(board.locator('.c-closed')).toContainText('INC-233');
  await board.getByRole('button',{name:'Entregar turno'}).click();
  await expect(board.locator('.sh-summary')).toContainText('INC-231');
- await expect(board.locator('.sh-summary')).not.toContainText('INC-233');
+ await expect(board.locator('.sh-summary > ol')).not.toContainText('INC-233'); // no está pendiente…
+ await expect(board.locator('.sh-proofs')).toContainText('INC-233'); // …sale con su evidencia
  await page.goto('/');
  await expect(page.locator('a[download]').first()).toHaveAttribute('href','/cv/Bruno-Salas-ES.pdf');
  await page.getByRole('button', { name:'Switch to English' }).click();

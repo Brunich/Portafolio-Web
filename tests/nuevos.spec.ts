@@ -186,3 +186,43 @@ test('inventory: EAN-8 labels are read from a photo, internal codes keep letters
  await page.getByRole('button', { name: 'Deshacer' }).click();
  await expect(page.locator('.inv-products > li')).toHaveCount(1);
 });
+
+test('shift handover on a touch phone: a card goes from open to closed with taps only', async ({ browser }) => {
+ const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+ const page = await ctx.newPage();
+ await page.addInitScript(() => sessionStorage.setItem('bruno-intro', '1'));
+ await page.goto('/proyectos/entrega-de-turno');
+ const board = page.locator('.sh');
+ // En celular se ve una columna a la vez.
+ await expect(board.locator('.sh-col.c-doing')).toBeHidden();
+ const card = board.locator('.sh-card', { hasText: 'INC-231' });
+ await card.getByRole('button', { name: 'Pasar a en curso' }).tap(); // sin responsable: no se mueve y se abre para asignarlo
+ await card.getByLabel('Responsable').selectOption('A. Cantú');
+ await board.getByRole('tab', { name: /En curso/ }).tap();
+ const doing = board.locator('.c-doing .sh-card', { hasText: 'INC-231' });
+ await expect(doing).toBeVisible();
+ await doing.getByRole('button', { name: 'Tomar foto de evidencia' }).tap();
+ await page.locator('input[type=file][accept="image/*"]').setInputFiles({ name: 'foto.png', mimeType: 'image/png', buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64') });
+ await doing.getByRole('button', { name: 'Cerrar incidencia' }).tap();
+ await board.getByRole('tab', { name: /Cerradas/ }).tap();
+ await expect(board.locator('.c-closed .sh-card').first()).toContainText('INC-231');
+ await ctx.close();
+});
+
+test('shift handover with 60 incidents: filters by line and severity, and long columns fold', async ({ page }) => {
+ await page.addInitScript(() => {
+  const now = Date.now(), H = 36e5, sev = ['Crítica', 'Mayor', 'Menor'];
+  const items = Array.from({ length: 60 }, (_, n) => ({ id: `INC-${300 + n}`, line: `L${1 + n % 3}`, lot: String(4400 + n), defect: `Defecto ${n}`, sev: sev[Math.floor(n / 3) % 3], status: n % 4 === 0 ? 'closed' : n % 4 === 1 ? 'doing' : 'open', owner: n % 4 < 2 ? 'R. Garza' : '', action: '', photo: n % 4 === 0 ? 'demo' : '', at: now - (n % 20) * H / 4 }));
+  localStorage.setItem('bruno-turno-v3', JSON.stringify({ items, log: [] }));
+ });
+ await page.goto('/proyectos/entrega-de-turno');
+ const open = page.locator('.sh-col.c-open');
+ await expect(open.locator('h3 span')).toHaveText('30');
+ await expect(open.locator('.sh-card')).toHaveCount(6);
+ await open.getByRole('button', { name: 'Ver 24 más' }).click();
+ await expect(open.locator('.sh-card')).toHaveCount(30);
+ await page.locator('.sh-filters').getByRole('button', { name: 'L2', exact: true }).click();
+ await page.locator('.sh-filters').getByRole('button', { name: 'Crítica', exact: true }).click();
+ await expect(open.locator('h3 span')).toHaveText('4'); // abiertas de L2 y críticas en los datos de arriba
+ await expect(open.locator('.sh-card')).toHaveCount(4);
+});

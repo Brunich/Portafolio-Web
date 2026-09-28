@@ -141,3 +141,49 @@ html[data-motion=paused] .sh *{animation:none!important}
 .shp-log li{animation:shp-type 9s steps(28) calc(var(--i) * 3s) infinite;white-space:nowrap;overflow:hidden}
 @keyframes shp-type{0%{clip-path:inset(0 100% 0 0)}12%,100%{clip-path:inset(0 0 0 0)}}
 html[data-motion=paused] .shp *{animation-play-state:paused!important}
+/* Filtros por línea y severidad */
+.sh-filters{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:2px}
+.sh-filters>span{width:1px;height:22px;background:#ffffff1f;margin:0 4px}
+.sh-filters button{min-height:36px;padding:6px 12px;border-radius:99px;border:1px solid #ffffff1f;background:transparent;color:#cfc6dc;font:600 12.5px 'DM Sans Variable',sans-serif;cursor:pointer}
+.sh-filters button[aria-pressed=true]{background:#a894f02e;border-color:#a894f088;color:var(--text)}
+/* Mover sin arrastrar: un botón visible en cada tarjeta */
+.sh-next{display:flex;align-items:center;justify-content:center;gap:6px;width:calc(100% - 20px);margin:0 10px 10px;min-height:40px;border-radius:10px;border:1px solid color-mix(in srgb,var(--nk) 45%,transparent);background:color-mix(in srgb,var(--nk) 10%,transparent);color:color-mix(in srgb,var(--nk) 70%,#fff);font:600 12.5px 'DM Sans Variable',sans-serif;cursor:pointer}
+.sh-next.to-doing{--nk:var(--doing)}.sh-next.to-closed{--nk:var(--closed)}
+.sh-next:hover{background:color-mix(in srgb,var(--nk) 20%,transparent)}
+.sh-more{min-height:40px;border-radius:10px;border:1px dashed #ffffff26;background:transparent;color:#cfc6dc;font:600 12.5px 'DM Sans Variable',sans-serif;cursor:pointer}
+/* Pestañas de columna: sólo en celular */
+.sh-coltabs{display:none}
+@media(max-width:760px){
+ .sh-filters{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;mask-image:linear-gradient(90deg,#000 88%,transparent)}
+ .sh-filters button{flex:none}
+ .sh-coltabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:4px;border-radius:14px;background:#0f0b18;border:1px solid #ffffff14;position:sticky;top:64px;z-index:3}
+ .sh-coltabs button{display:flex;align-items:center;justify-content:center;gap:6px;min-height:44px;border:0;border-radius:10px;background:transparent;color:#cfc6dc;font:600 13px 'DM Sans Variable',sans-serif}
+ .sh-coltabs b{display:grid;place-items:center;min-width:22px;height:20px;padding:0 5px;border-radius:10px;background:color-mix(in srgb,var(--k) 20%,transparent);color:var(--k);font:700 11px var(--mono)}
+ .sh-coltabs button[aria-selected=true]{background:color-mix(in srgb,var(--k) 18%,#231c35);color:var(--text);box-shadow:inset 0 -2px 0 var(--k)}
+ .sh-board[data-tab=open] .sh-col:not(.c-open),.sh-board[data-tab=doing] .sh-col:not(.c-doing),.sh-board[data-tab=closed] .sh-col:not(.c-closed){display:none}
+ .sh-col{min-height:0}
+}
+.sh-coltabs .tab-open{--k:var(--open)}.sh-coltabs .tab-doing{--k:var(--doing)}.sh-coltabs .tab-closed{--k:var(--closed)}
+@media(max-width:760px){.sh-coltabs button{font-size:12.5px;gap:4px;white-space:nowrap}.sh-col h3{display:none}}
+/* Cerradas con su foto, en el resumen de entrega */
+.sh-sum-sub{margin:14px 0 6px;font:700 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--closed)}
+.sh-proofs{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.sh-proofs li{display:grid;gap:4px;padding:8px;border-radius:12px;background:#ffffff06;border:1px solid #ffffff10;font-size:12.5px}
+.sh-proofs img,.sh-proofs .sh-demo-photo{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px}
+.sh-proofs small{color:var(--muted)}
+/* Impresión o PDF: sólo la hoja de entrega, en papel claro para que se lea y no gaste tinta */
+@media print{
+ @page{margin:14mm}
+ body:has(.sh-summary){background:#fff!important}
+ /* Fuera todo lo que no sea la hoja ni un contenedor suyo: sin páginas en blanco */
+ body:has(.sh-summary) *:not(:has(.sh-summary)):not(.sh-summary):not(.sh-summary *){display:none!important}
+ body:has(.sh-summary) :has(.sh-summary):not(html):not(body){display:block!important;position:static!important;margin:0!important;padding:0!important;min-height:0!important;background:none!important;border:0!important;box-shadow:none!important;animation:none!important;transform:none!important;opacity:1!important;clip-path:none!important;visibility:visible!important;overflow:visible!important;height:auto!important}
+ .sh-summary,.sh-summary *{visibility:visible!important}
+ .sh-summary{width:100%;background:#fff!important;color:#111!important;border:0!important;box-shadow:none!important;padding:0!important}
+ .sh-summary *{color:#111!important;background:transparent!important;box-shadow:none!important;animation:none!important}
+ .sh-summary li{break-inside:avoid;border-bottom:1px solid #ccc!important}
+ .sh-proofs li{border:1px solid #ccc!important}
+ .sh-send{display:none!important}
+}
+.sh-summary .sh-proofs li{grid-template-columns:1fr}
+.sh-summary .sh-proofs li small{grid-column:auto}
