@@ -24,6 +24,7 @@ Estudiante de Ingeniería en Software en la UANL (2023–2028). Hago herramienta
 | Proyecto | Qué será |
 |---|---|
 | **Asistente de IA local** | Atiende clientes y consulta la base interna con un modelo abierto instalado en el negocio: sin pagar por mensaje y sin que los datos salgan. [Ver la demo](https://bruno-portfolio-azure.vercel.app/proyectos/asistente-ia-local). |
+| **Portal de empleados** | Cada empleado con su cuenta y su foto: peticiones, documentos y avisos, con bloqueo por intentos fallidos, segundo paso y aviso de privacidad. |
 | **Apps Android nativas** | NFC para negocios, Inventario y Entrega de turno como apps de Android, con el lector NFC, la cámara y las notificaciones del teléfono. |
 
 ## Otros códigos

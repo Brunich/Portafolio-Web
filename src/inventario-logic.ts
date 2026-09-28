@@ -1,5 +1,5 @@
 // Inventario: productos con código de barras (EAN-13, EAN-8, UPC-A o códigos internos), movimientos y lo que hay que resurtir.
-export type Product = { code: string; name: string; stock: number; min: number; counted?: number };
+export type Product = { code: string; name: string; stock: number; min: number; counted?: number; price?: number };
 export type Move = { at: number; code: string; name: string; delta: number; mode: Mode };
 export type Mode = 'in' | 'out' | 'count';
 
@@ -59,11 +59,41 @@ export function labelSvg(p: Product, module = 2) {
 
 // Tienda de ejemplo (productos genéricos, códigos inventados con dígito verificador válido).
 export const SAMPLE: Product[] = [
- ['750100000001', 'Agua natural 1 L', 34, 24], ['750100000002', 'Refresco de cola 600 ml', 12, 24], ['750100000003', 'Leche entera 1 L', 18, 12],
- ['750100000004', 'Pan de caja grande', 6, 8], ['750100000005', 'Huevo blanco 12 pzas', 9, 6], ['750100000006', 'Frijol negro 1 kg', 15, 6],
- ['750100000007', 'Arroz blanco 1 kg', 4, 6], ['750100000008', 'Aceite vegetal 1 L', 11, 5], ['750100000009', 'Café soluble 120 g', 3, 4],
- ['750100000010', 'Papel higiénico 4 rollos', 20, 10],
-].map(([twelve, name, stock, min]) => ({ code: makeEan(twelve as string), name: name as string, stock: stock as number, min: min as number }));
+ ['750100000001', 'Agua natural 1 L', 34, 24, 14], ['750100000002', 'Refresco de cola 600 ml', 12, 24, 19], ['750100000003', 'Leche entera 1 L', 18, 12, 29],
+ ['750100000004', 'Pan de caja grande', 6, 8, 52], ['750100000005', 'Huevo blanco 12 pzas', 9, 6, 48], ['750100000006', 'Frijol negro 1 kg', 15, 6, 38],
+ ['750100000007', 'Arroz blanco 1 kg', 4, 6, 31], ['750100000008', 'Aceite vegetal 1 L', 11, 5, 45], ['750100000009', 'Café soluble 120 g', 3, 4, 89],
+ ['750100000010', 'Papel higiénico 4 rollos', 20, 10, 42],
+].map(([twelve, name, stock, min, price]) => ({ code: makeEan(twelve as string), name: name as string, stock: stock as number, min: min as number, price: price as number }));
+
+// Catálogo del proveedor (Excel o CSV): reconoce columnas por nombre y actualiza lo que ya existe.
+// Las existencias sólo cambian si el archivo trae esa columna; si no, se respeta lo contado en la tienda.
+const plain = (h: string) => h.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+const pick = (headers: string[], words: string[]) => headers.findIndex(h => words.some(w => plain(h).includes(w)));
+const num = (v: string | undefined) => { const n = Number((v ?? '').replace(/[$,\s]/g, '')); return Number.isFinite(n) ? n : NaN; };
+export function importCatalog(products: Product[], headers: string[], rows: string[][]) {
+ const c = { code: pick(headers, ['codigo', 'code', 'ean', 'sku', 'barras', 'upc']), name: pick(headers, ['producto', 'nombre', 'descripcion', 'name', 'articulo']),
+  stock: pick(headers, ['existencia', 'stock', 'inventario', 'cantidad']), min: pick(headers, ['minimo', 'min']), price: pick(headers, ['precio', 'price', 'pvp']) };
+ if (c.code < 0 || c.name < 0) return { products, added: 0, updated: 0, skipped: rows.length, missing: [c.code < 0 ? 'código' : '', c.name < 0 ? 'producto' : ''].filter(Boolean) };
+ const out = products.map(p => ({ ...p })), at = new Map(out.map((p, i) => [p.code, i]));
+ let added = 0, updated = 0, skipped = 0;
+ for (const r of rows) {
+  const code = normalizeCode(r[c.code] ?? ''), name = (r[c.name] ?? '').trim();
+  if (!code || !name) { skipped++; continue; }
+  const stock = c.stock >= 0 ? num(r[c.stock]) : NaN, min = c.min >= 0 ? num(r[c.min]) : NaN, price = c.price >= 0 ? num(r[c.price]) : NaN;
+  const i = at.get(code);
+  if (i === undefined) { out.push({ code, name, stock: Number.isFinite(stock) ? stock : 0, min: Number.isFinite(min) ? min : 5, ...(Number.isFinite(price) ? { price } : {}) }); at.set(code, out.length - 1); added++; }
+  else { const p = out[i]; p.name = name; if (Number.isFinite(stock)) p.stock = stock; if (Number.isFinite(min)) p.min = min; if (Number.isFinite(price)) p.price = price; updated++; }
+ }
+ return { products: out, added, updated, skipped, missing: [] as string[] };
+}
+
+// Valor del inventario (a precio de venta) y lo vendido hoy.
+export const stockValue = (ps: Product[]) => ps.reduce((s, p) => s + p.stock * (p.price ?? 0), 0);
+export function soldToday(ps: Product[], moves: Move[], now = Date.now()) {
+ const start = new Date(now); start.setHours(0, 0, 0, 0);
+ const price = new Map(ps.map(p => [p.code, p.price ?? 0]));
+ return moves.filter(m => m.mode === 'out' && m.at >= start.getTime()).reduce((s, m) => s + -m.delta * (price.get(m.code) ?? 0), 0);
+}
 
 // Lo que hay que pedir: llevar cada producto bajo mínimo al doble del mínimo.
 export const shopping = (ps: Product[]) => ps.filter(p => p.stock < p.min).map(p => ({ ...p, order: p.min * 2 - p.stock }));

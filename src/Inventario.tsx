@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Barcode, Camera, CameraSlash, ImageSquare, Plus, Minus, ListChecks, Printer, WhatsappLogo, DownloadSimple, ArrowCounterClockwise, MagnifyingGlass, Trash, WarningCircle } from '@phosphor-icons/react';
-import { SAMPLE, codeKind, labelSvg, normalizeCode, printable, shopping } from './inventario-logic';
+import { Barcode, Camera, CameraSlash, ImageSquare, Plus, Minus, ListChecks, Printer, WhatsappLogo, DownloadSimple, ArrowCounterClockwise, MagnifyingGlass, Trash, WarningCircle, UploadSimple, CheckCircle } from '@phosphor-icons/react';
+import { SAMPLE, codeKind, importCatalog, labelSvg, normalizeCode, printable, shopping, soldToday, stockValue } from './inventario-logic';
+import { readTable, TABLE_ACCEPT } from './read-file';
 import type { Move, Mode, Product } from './inventario-logic';
 import './inventario.css';
 
@@ -8,7 +9,7 @@ import './inventario.css';
 // Todo se guarda en este navegador; la lista de compras sale sola de lo que está bajo el mínimo.
 const KEY = 'bruno-inventario-v1';
 type Store = { products: Product[]; moves: Move[] };
-const load = (): Store => { try { const s = JSON.parse(localStorage.getItem(KEY) ?? ''); if (Array.isArray(s.products)) return s; } catch { /* tienda de ejemplo */ } return { products: SAMPLE, moves: [] }; };
+const load = (): Store => { try { const s = JSON.parse(localStorage.getItem(KEY) ?? ''); if (Array.isArray(s.products)) { const known = new Map(SAMPLE.map(p => [p.code, p.price])); return { ...s, products: s.products.map((p: Product) => p.price === undefined && known.has(p.code) ? { ...p, price: known.get(p.code) } : p) }; } } catch { /* tienda de ejemplo */ } return { products: SAMPLE, moves: [] }; };
 
 export default function Inventario({ lang }: { lang: 'es' | 'en' }) {
  const es = lang === 'es', t = (a: string, b: string) => es ? a : b;
@@ -35,6 +36,19 @@ export default function Inventario({ lang }: { lang: 'es' | 'en' }) {
 
  const low = useMemo(() => shopping(store.products), [store.products]);
  const units = store.products.reduce((s, p) => s + p.stock, 0);
+ const money = (n: number) => n.toLocaleString(es ? 'es-MX' : 'en-US', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 });
+ const catalog = useRef<HTMLInputElement>(null);
+ const [importNote, setImportNote] = useState('');
+ async function loadCatalog(file: File | undefined) {
+  if (!file) return;
+  try {
+   const g = await readTable(file);
+   const r = importCatalog(store.products, g.headers, g.rows);
+   if (r.missing.length) { setImportNote(t(`Falta la columna de ${r.missing.join(' y ')}.`, `Missing column: ${r.missing.join(' and ')}.`)); return; }
+   setStore(s => ({ ...s, products: r.products }));
+   setImportNote(t(`${r.added} nuevos · ${r.updated} actualizados${r.skipped ? ` · ${r.skipped} filas sin código` : ''}`, `${r.added} new · ${r.updated} updated${r.skipped ? ` · ${r.skipped} rows without code` : ''}`));
+  } catch { setImportNote(t('No pude leer el archivo. Usa Excel o CSV.', 'Could not read the file. Use Excel or CSV.')); }
+ }
  const counted = store.products.filter(p => p.counted !== undefined);
  const diffs = counted.filter(p => p.counted !== p.stock);
 
@@ -83,7 +97,7 @@ export default function Inventario({ lang }: { lang: 'es' | 'en' }) {
  const setField = (code: string, p: Partial<Product>) => setStore(s => ({ ...s, products: s.products.map(x => x.code === code ? { ...x, ...p } : x) }));
  function closeCount() { setStore(s => ({ products: s.products.map(p => p.counted === undefined ? p : { ...p, stock: p.counted, counted: undefined }), moves: [...s.products.filter(p => p.counted !== undefined && p.counted !== p.stock).map(p => ({ at: Date.now(), code: p.code, name: p.name, delta: p.counted! - p.stock, mode: 'count' as Mode })), ...s.moves].slice(0, 300) })); setView('all'); }
  const list = t('Lista de compras', 'Shopping list') + '\n' + low.map(p => `• ${p.name}: ${p.order}`).join('\n');
- const csv = () => { const url = URL.createObjectURL(new Blob(['﻿' + ['codigo,producto,existencias,minimo', ...store.products.map(p => `${p.code},"${p.name.replace(/"/g, '""')}",${p.stock},${p.min}`)].join('\r\n')], { type: 'text/csv;charset=utf-8' })); const a = document.createElement('a'); a.href = url; a.download = 'inventario.csv'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); };
+ const csv = () => { const url = URL.createObjectURL(new Blob(['﻿' + ['codigo,producto,existencias,minimo,precio', ...store.products.map(p => `${p.code},"${p.name.replace(/"/g, '""')}",${p.stock},${p.min},${p.price ?? ''}`)].join('\r\n')], { type: 'text/csv;charset=utf-8' })); const a = document.createElement('a'); a.href = url; a.download = 'inventario.csv'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); };
  const q = find.trim().toLocaleLowerCase('es').normalize('NFD').replace(/[̀-ͯ]/g, '');
  const matchFind = (p: Product) => !q || p.code.toLowerCase().includes(q) || p.name.toLocaleLowerCase('es').normalize('NFD').replace(/[̀-ͯ]/g, '').includes(q);
  const shown = (view === 'low' ? store.products.filter(p => p.stock < p.min) : store.products).filter(matchFind);
@@ -97,7 +111,8 @@ export default function Inventario({ lang }: { lang: 'es' | 'en' }) {
    <div><dt>{t('Productos', 'Products')}</dt><dd>{store.products.length}</dd></div>
    <div><dt>{t('Piezas en tienda', 'Units in store')}</dt><dd>{units}</dd></div>
    <div className={low.length ? 'warn' : ''}><dt>{low.length > 0 && <WarningCircle size={14} weight="fill" aria-hidden="true"/>}{t('Bajo el mínimo', 'Below minimum')}</dt><dd>{low.length}</dd></div>
-   <div><dt>{t('Movimientos', 'Moves')}</dt><dd>{store.moves.length}</dd></div>
+   <div><dt>{t('Valor en tienda', 'Stock value')}</dt><dd>{money(stockValue(store.products))}</dd></div>
+   <div><dt>{t('Vendido hoy', 'Sold today')}</dt><dd>{money(soldToday(store.products, store.moves))}</dd></div>
   </dl>
 
   <div className="inv-main">
@@ -158,9 +173,12 @@ export default function Inventario({ lang }: { lang: 'es' | 'en' }) {
      </li>; })}</ul>
      {view === 'low' && low.length > 0 && <div className="inv-row"><a className="pl-wa" href={`https://wa.me/?text=${encodeURIComponent(list)}`} target="_blank" rel="noreferrer"><WhatsappLogo size={17}/>{t('Mandar lista al proveedor', 'Send list to supplier')}</a></div>}
     </>}
+    {importNote && <p className="inv-import" role="status"><CheckCircle size={16} weight="fill" aria-hidden="true"/>{importNote}</p>}
     <div className="inv-row inv-tools">
      <button onClick={() => labels ? setLabels(false) : showLabels()}><Printer size={17}/>{labels ? t('Ocultar etiquetas', 'Hide labels') : t('Etiquetas con código', 'Barcode labels')}</button>
      <button onClick={csv}><DownloadSimple size={17}/>CSV</button>
+     <input ref={catalog} type="file" accept={TABLE_ACCEPT} hidden onChange={e => { void loadCatalog(e.target.files?.[0]); e.target.value = ''; }}/>
+     <button onClick={() => catalog.current?.click()}><UploadSimple size={17}/>{t('Importar catálogo', 'Import catalog')}</button>
      <button onClick={() => { setStore({ products: SAMPLE, moves: [] }); setUnknown(null); }}><ArrowCounterClockwise size={17}/>{t('Tienda de ejemplo', 'Sample store')}</button>
     </div>
    </section>
