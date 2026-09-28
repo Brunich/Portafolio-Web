@@ -1,6 +1,9 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
+// La intro de la primera visita se salta: se prueba aparte.
+test.beforeEach(async ({ page }) => { await page.addInitScript(() => sessionStorage.setItem('bruno-intro', '1')); });
+
 test('portfolio has working bilingual navigation, project pages and CV', async ({ page, request }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', {level:1})).toContainText('Desarrollo web');
@@ -52,13 +55,16 @@ test('shift handover: an incident cannot be closed without evidence, and the han
  await board.getByLabel('Lote').fill('4480');
  await board.getByLabel('Defecto').fill('Soldadura incompleta');
  await board.getByRole('button',{name:'Registrar'}).click();
- const item=board.locator('.sh-item').first();
- await expect(item).toContainText('INC-233');
+ const item=board.locator('.c-open .sh-card',{hasText:'INC-233'});
+ await expect(item).toContainText('Soldadura incompleta');
+ await item.getByRole('button',{expanded:false}).click();
  await item.getByLabel('Responsable').selectOption('M. Salinas');
- await expect(item.getByRole('button',{name:'Cerrar'})).toBeDisabled();
- await item.getByRole('button',{name:'Adjuntar evidencia'}).click();
- await item.getByRole('button',{name:'Cerrar'}).click();
- await expect(item).toContainText('cerrada con evidencia');
+ const card=board.locator('.c-doing .sh-card',{hasText:'INC-233'});
+ await expect(card.getByRole('button',{name:'Sin evidencia no se cierra'})).toBeDisabled();
+ await card.getByRole('button',{name:'Tomar foto de evidencia'}).click();
+ await page.locator('input[type=file][accept="image/*"]').setInputFiles({name:'foto.png',mimeType:'image/png',buffer:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==','base64')});
+ await card.getByRole('button',{name:'Cerrar incidencia'}).click();
+ await expect(board.locator('.c-closed')).toContainText('INC-233');
  await board.getByRole('button',{name:'Entregar turno'}).click();
  await expect(board.locator('.sh-summary')).toContainText('INC-231');
  await expect(board.locator('.sh-summary')).not.toContainText('INC-233');
@@ -108,7 +114,7 @@ test('csv analyzer page: mind map, automatic fixes and second sample',async({pag
  await expect(problems).toHaveText('1'); // sólo queda la regla de negocio, que no se arregla sola
  await expect(page.locator('.dw-kpis div').first().locator('dd')).toHaveText('22');
  await page.getByRole('button',{name:'Organismo de agua'}).click();
- await expect(page.locator('.dw-issues')).toContainText('Negativos en «dias_para_atender»');
+ await expect(page.locator('.cf')).toContainText('Negativos en «dias_para_atender»');
 });
 
 test('customer club demo joins, stamps once per day and sends each message',async({page})=>{
@@ -130,4 +136,31 @@ test('customer club demo joins, stamps once per day and sends each message',asyn
  await club.getByRole('button',{name:/Enviar campaña/}).click();
  await club.getByRole('button',{name:'Reservar mesa'}).click();
  await expect(club.locator('.ld-chat')).toContainText('4 personas');
+});
+
+test('stamp card from the NFC chip: one stamp a day, and the reward resets it',async({page})=>{
+ await page.goto('/sello?n=Cafe%20Prueba&m=5&p=Un%20cafe&c=5fcfa9');
+ await expect(page.locator('.st-count')).toHaveText('1/5');
+ await expect(page.getByRole('heading',{level:1})).toHaveText('¡Sello de hoy listo!');
+ await page.reload();
+ await expect(page.locator('.st-count')).toHaveText('1/5');
+ await expect(page.getByRole('heading',{level:1})).toHaveText('Ya tienes el sello de hoy.');
+ await page.goto('/sello?n=Cafe%20Prueba&m=5&p=Un%20cafe&c=5fcfa9&demo');
+ for (let i=0;i<4;i++) await page.getByRole('button',{name:/Demo/}).click();
+ await expect(page.locator('.st-count')).toHaveText('5/5');
+ await page.getByRole('button',{name:'Canjear premio'}).click();
+ await page.getByRole('button',{name:'Sí, canjeado'}).click();
+ await expect(page.locator('.st-count')).toHaveText('0/5');
+ await page.goto('/nfc');
+ await page.getByLabel('Nombre del negocio').fill('Café Prueba');
+ await expect(page.getByLabel('Enlace del chip')).toHaveValue(/\/sello\?n=Caf%C3%A9\+Prueba&m=8/);
+});
+
+test('first visit shows the intro and it gets out of the way',async({browser})=>{
+ const page=await browser.newPage();
+ await page.goto('/');
+ await expect(page.locator('#intro')).toBeVisible();
+ await expect(page.locator('#intro')).toHaveCount(0,{timeout:6000});
+ await expect(page.getByRole('heading',{level:1})).toContainText('Desarrollo web');
+ await page.close();
 });

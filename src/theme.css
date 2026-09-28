@@ -1,13 +1,13 @@
 /* Tema: tinta neutra con tres acentos (menta, violeta, ámbar) y movimiento al hacer scroll. */
 :root{--bg:#111319;--surface:#181b23;--surface-2:#1e222c;--line:#2a2f3b;--text:#eef0f5;--muted:#a3a9b8;
- --mint:#7fe3c6;--violet:#b9a7ff;--amber:#ffbd7a;--coral:#ff8e7c;--accent:var(--mint);
+ --mint:#7fe3c6;--violet:#b9a7ff;--amber:#f5c84c;--coral:#ff6b8b;--accent:var(--mint);
  background:var(--bg);color:var(--text)}
 body{background:var(--bg)}
 ::selection{background:var(--violet);color:#111319}
 
 /* Luces de fondo que se mueven despacio: dan color sin tapar el contenido */
 body::before{content:'';position:fixed;inset:-20vmax;z-index:-1;pointer-events:none;
- background:radial-gradient(38vmax 30vmax at 12% 8%,#7fe3c61a,transparent 70%),radial-gradient(34vmax 28vmax at 88% 22%,#b9a7ff1c,transparent 70%),radial-gradient(40vmax 30vmax at 70% 92%,#ffbd7a14,transparent 70%);
+ background:radial-gradient(38vmax 30vmax at 12% 8%,#7fe3c61a,transparent 70%),radial-gradient(34vmax 28vmax at 88% 22%,#b9a7ff1c,transparent 70%),radial-gradient(40vmax 30vmax at 70% 92%,#f5c84c14,transparent 70%);
  animation:aurora 26s ease-in-out infinite alternate}
 @keyframes aurora{to{transform:translate3d(-3vmax,2vmax,0) rotate(6deg) scale(1.06)}}
 html[data-motion=paused] body::before{animation:none}
