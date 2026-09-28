@@ -362,3 +362,19 @@ html,body{overflow-x:clip}
 .native-note span{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;font-size:.8rem;padding:3px 10px;border-radius:99px;background:#b8a4ec26;color:#d8ccf6}
 a.native-note:hover{border-color:#b8a4ec88}
 .native-note.is-dev span{background:#d9c08a1f;color:#e6d3a3;border:1px dashed #d9c08a88}
+/* Tarjetas sin captura (Android, GitHub): sólo texto, del mismo alto que las demás. */
+.other-plain{grid-template-columns:1fr auto;align-items:center}
+.other-plain .other-copy{padding:22px 4px}
+.others.is-dev .other-card em{color:#e6d3a3}
+.other-github{--c:#b8a4ec}
+.others+.others{margin-top:clamp(28px,4vw,48px)}
+.other-icon{display:grid;place-content:center;justify-items:center;gap:12px;color:#b3c7e6}
+.other-icon small{font-size:12px;letter-spacing:.08em;color:var(--muted)}
+.other-github{grid-column:1/-1}
+.other-github .other-copy{padding:10px 4px}
+.other-github{grid-template-rows:auto;align-items:center;padding:14px 22px}
+.other-github svg{color:#b8a4ec}
+.case-cta{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-top:clamp(40px,6vw,72px);padding:22px 26px;border-radius:18px;background:var(--surface);border:1px solid color-mix(in srgb,var(--c) 30%,transparent)}
+.case-cta div{display:grid;gap:4px}
+.case-cta strong{font:650 20px/1.2 var(--display)}
+.case-cta span{color:var(--muted)}
