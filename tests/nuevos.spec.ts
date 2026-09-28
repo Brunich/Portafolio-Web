@@ -24,6 +24,19 @@ test('csv analyzer: charts from suggestions and SQL queries that can be charted'
  await expect(page.getByRole('button', { name: /Volver a todo el archivo/ })).toBeVisible();
 });
 
+test('csv analyzer opens what Excel in Spanish saves: accents, broken rows and .xlsx', async ({ page }) => {
+ await page.goto('/proyectos/analizador-csv');
+ const input = page.locator('.dw-workbench input[type=file]').first();
+ await input.setInputFiles({ name: 'excel.csv', mimeType: 'text/csv', buffer: Buffer.from('Línea;Estación;Piezas\r\nL1;Carrocería;120\r\nL2;Pintura\r\n\r\n', 'latin1') });
+ await expect(page.locator('.dw-workbench th', { hasText: 'Estación' })).toBeVisible();
+ await expect(page.locator('.dw-note')).toContainText('1 fila corta completada');
+ await expect(page.locator('.dw-error')).toHaveCount(0);
+ const XLSX = await import('xlsx');
+ const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Fecha', 'Línea', 'Piezas'], ['2026-03-01', 'L1', 120]]), 'Hoja1');
+ await input.setInputFiles({ name: 'reporte.xlsx', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', buffer: XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }) });
+ await expect(page.locator('.dw-workbench th', { hasText: 'Fecha' })).toBeVisible();
+});
+
 test('plant: three reports cross-check into exceptions and OEE per line', async ({ page }) => {
  await page.goto('/proyectos/planta');
  await expect(page.locator('.pl-line')).toHaveCount(3);
