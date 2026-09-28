@@ -1,0 +1,149 @@
+/* Las tres apps de la portada. Cada una tiene su aparato y su color; comparten sólo la barra de abajo. */
+.ha{position:absolute;inset:0;container-type:inline-size;font-family:'DM Sans Variable',sans-serif;color:#f4eef6}
+.ha-view{animation:ha-in .5s cubic-bezier(.16,1,.3,1) both}
+@keyframes ha-in{from{transform:translateY(8px);clip-path:inset(0 0 100% 0)}to{clip-path:inset(0 0 0 0)}}
+
+/* Barra de abajo, como en una app */
+.ha-nav{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:6px 6px 8px;border-top:1px solid #ffffff14;background:var(--nav-bg,#00000040)}
+.ha-nav button,.ha-nav a{display:grid;justify-items:center;gap:2px;padding:4px 2px;border:0;border-radius:9px;background:none;color:#ffffff8c;font:600 10px/1.1 'DM Sans Variable',sans-serif;cursor:pointer;transition:color .25s,background .25s}
+.ha-nav button[aria-pressed=true]{color:var(--a);background:color-mix(in srgb,var(--a) 14%,transparent)}
+.ha-nav button:hover,.ha-nav a:hover{color:#fff}
+.ha-nav :focus-visible{outline:2px solid var(--a);outline-offset:1px}
+
+/* ---------- NFC: celular del cliente, tonos café y rosa ---------- */
+.ha-nfc{--a:#e7a9c4;--nav-bg:#1a0d14}
+.ha-chip{position:absolute;left:14%;bottom:12%;width:22%;aspect-ratio:1.5;display:grid;place-items:center;gap:1px;border-radius:12px;background:linear-gradient(150deg,#f3e3d6,#d9b7a4);color:#4a2432;transform:perspective(500px) rotateX(48deg) rotate(-8deg);box-shadow:0 16px 26px #0009}
+.ha-chip .hs-icon{width:34%;height:auto}.ha-chip span{font:800 10px var(--display);letter-spacing:.14em}
+.ha-wave{position:absolute;left:25%;bottom:20%;width:20%;aspect-ratio:1;border-radius:50%;border:2px solid #e7a9c4;transform:translate(-50%,50%) scale(.2);opacity:0;animation:ha-wave 1.6s ease-out .45s both}
+.ha-wave.w2{animation-delay:.7s}
+@keyframes ha-wave{30%{opacity:.9}100%{opacity:0;transform:translate(-50%,50%) scale(2.6)}}
+.ha-phone{position:absolute;left:56%;top:5%;bottom:5%;aspect-ratio:9/17.5;transform:translateX(-50%);border-radius:28px;border:6px solid #0b0709;background:#0b0709;box-shadow:0 34px 60px #000b,0 0 0 1px #5a3a4a}
+.v-sum .ha-phone{animation:ha-tap .9s cubic-bezier(.65,0,.35,1) .1s both}
+@keyframes ha-tap{0%{transform:translateX(-50%)}45%{transform:translateX(-58%) translateY(4%) rotate(-5deg)}100%{transform:translateX(-50%)}}
+.ha-notch{position:absolute;top:6px;left:50%;width:30%;height:10px;border-radius:6px;background:#000;transform:translateX(-50%);z-index:3}
+.ha-screen{position:absolute;inset:0;border-radius:22px;overflow:hidden;display:grid;grid-template-rows:auto 1fr auto;grid-template-columns:minmax(0,1fr);background:linear-gradient(170deg,#43222f,#241219 60%,#1a0d14)}
+.ha-biz{display:flex;align-items:center;gap:8px;padding:26px 12px 8px}
+.ha-logo{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#e7a9c4;color:#3a1a26;font:800 10px var(--display)}
+.ha-biz b{display:block;font:700 12.5px/1.1 var(--display)}.ha-biz small{font-size:10px;color:#e8cdd8b0}
+.ha-nfc .ha-view{position:relative;display:grid;align-content:center;justify-items:center;gap:8px;padding:6px 12px;text-align:center}
+.ha-stamps{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;width:74%}
+.ha-stamps b{aspect-ratio:1;border-radius:50%;border:1.5px dashed #f3e3d680}
+.ha-stamps b.on{border:0;background:#f3e3d6}
+.ha-stamps b.new{border:0;background:#e7a9c4;animation:ha-pop .6s cubic-bezier(.34,1.56,.64,1) .75s both}
+@keyframes ha-pop{from{transform:scale(0)}}
+.ha-plus{font:800 16px/1 var(--display);animation:ha-rise .5s ease 1s both}
+.ha-left{font:italic 400 12px/1.2 var(--serif);color:#f3e3d6cc;animation:ha-rise .5s ease 1.15s both}
+@keyframes ha-rise{from{opacity:0;transform:translateY(6px)}}
+/* El WhatsApp que le llega arriba al cliente: el negocio ya tiene con quién hablar. */
+.ha-wa{position:absolute;left:7px;right:7px;top:22px;z-index:2;display:flex;gap:7px;align-items:flex-start;padding:8px 9px;border-radius:14px;background:#1f2c26f2;border:1px solid #25d36640;box-shadow:0 12px 24px #000a;text-align:left;animation:ha-drop 3.4s cubic-bezier(.16,1,.3,1) 1.3s both}
+.ha-wa svg{flex:none;color:#25d366;margin-top:1px}
+.ha-wa b{display:block;font:700 10px/1.2 'DM Sans Variable',sans-serif;color:#cfe9da}
+.ha-wa span{display:block;font-size:10.5px;line-height:1.3;color:#fff}.ha-wa i{font-style:normal;color:#f5c84c;letter-spacing:1px}
+@keyframes ha-drop{0%{transform:translateY(-150%)}12%,78%{transform:none}92%,100%{transform:translateY(-150%)}}
+.ha-nfc-full{align-content:start!important;justify-items:stretch!important;text-align:left!important}
+.ha-prog{margin:0;display:grid;gap:5px;font:700 12px var(--display)}
+.ha-prog i{height:6px;border-radius:4px;background:#ffffff1a;display:block}.ha-prog b{display:block;height:100%;width:66%;border-radius:4px;background:#e7a9c4;animation:ha-grow .8s cubic-bezier(.16,1,.3,1) .2s both}
+@keyframes ha-grow{from{transform:scaleX(0);transform-origin:left}}
+.ha-nfc-full ol{list-style:none;margin:0;padding:0;display:grid;gap:5px}
+.ha-nfc-full li{display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:9px;background:#ffffff0d;font-size:11.5px;animation:ha-rise .4s ease calc(.25s + var(--i) * .12s) both}
+.ha-nfc-full li svg{color:#e7a9c4}.ha-nfc-full li small{margin-left:auto;color:#e7a9c4;font-weight:700}
+.ha-prize{margin:0;display:flex;align-items:center;gap:6px;font-size:11.5px;color:#f5c84c}
+.ha-actions{display:flex;gap:6px}
+.ha-actions span{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:6px 8px;border-radius:9px;background:color-mix(in srgb,var(--a) 20%,transparent);color:var(--a);font:700 11px 'DM Sans Variable',sans-serif}
+
+/* ---------- Analizador: ventana de escritorio, menta sobre pizarra ---------- */
+.ha-csv{--a:#9fd0bf;--nav-bg:#0a1416;display:grid;place-items:center;padding:6% 5%}
+.ha-win{width:100%;height:100%;display:grid;grid-template-rows:auto 1fr auto;border-radius:14px;overflow:hidden;background:#0f1d1f;border:1px solid #9fd0bf2e;box-shadow:0 30px 60px #000a}
+.ha-titlebar{display:flex;align-items:center;gap:6px;padding:8px 12px;background:#0a1517;border-bottom:1px solid #ffffff10;font-size:11.5px}
+.ha-titlebar i{width:9px;height:9px;border-radius:50%;background:#ffffff26}
+.ha-titlebar i:first-child{background:#e58fa0b0}.ha-titlebar i:nth-child(2){background:#e2c27ab0}.ha-titlebar i:nth-child(3){background:#9fd0bfb0}
+.ha-titlebar b{margin-left:8px;font:600 12px 'JetBrains Mono Variable',monospace}.ha-titlebar small{margin-left:auto;color:#9fb8b2}
+.ha-csv-sum{display:grid;grid-template-columns:minmax(0,.75fr) minmax(0,1.7fr);gap:4%;align-items:center;padding:4% 5%}
+.ha-gauge{position:relative;display:grid;place-items:center}
+.ha-gauge svg{width:100%;transform:rotate(-90deg)}
+.ha-track{fill:none;stroke:#ffffff12;stroke-width:9}
+.ha-gauge .ha-arc{fill:none;stroke:var(--a);stroke-width:9;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:44px;animation:ha-arc .9s cubic-bezier(.16,1,.3,1) 1.7s both}
+@keyframes ha-arc{to{stroke-dashoffset:6px}}
+.ha-gauge>div{position:absolute;display:grid;justify-items:center;text-align:center}
+.ha-gauge b{position:relative;display:grid;font:800 clamp(24px,8cqw,40px)/1 var(--display)}
+.ha-gauge b span,.ha-gauge small span{grid-area:1/1}
+.ha-gauge small{display:grid;justify-items:center;font-size:10.5px;color:#b8d2cb;white-space:nowrap}
+.ha-gauge small span.b{display:inline-flex;align-items:center;gap:3px;color:#e2c27a}
+.ha-gauge .a{animation:ha-out .3s ease 1.8s both}.ha-gauge .b{animation:ha-rise .4s ease 2s both}
+@keyframes ha-out{to{opacity:0;transform:translateY(-6px)}}
+.ha-issues{display:grid;gap:5px}
+.ha-issue{display:grid;grid-template-columns:16px minmax(0,2fr) minmax(0,.8fr) 14px;gap:7px;align-items:center;font-size:11.5px;animation:ha-rise .35s ease calc(.1s + var(--i) * .08s) both}
+.ha-ico{display:grid;place-items:center}.ha-ico svg{grid-area:1/1}
+.ha-issue.fix .x{color:var(--a);animation:ha-out .25s ease calc(1.8s + var(--i) * .1s) both}
+.ha-issue.fix .y{color:var(--a);animation:ha-pop .4s cubic-bezier(.34,1.56,.64,1) calc(1.9s + var(--i) * .1s) both}
+.ha-issue.rule svg{color:#e2c27a}
+.ha-lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ha-bar{height:6px;border-radius:4px;background:#ffffff10;overflow:hidden}
+.ha-bar i{display:block;height:100%;width:var(--w);border-radius:4px;background:var(--a);transition:width .5s}
+.ha-issue.rule .ha-bar i{background:#e2c27a}
+.ha-issue.fix .ha-bar i{animation:ha-shrink .5s ease calc(1.85s + var(--i) * .1s) both}
+@keyframes ha-shrink{to{width:0}}
+.ha-issue.fix .ha-lbl,.ha-issue.fix .ha-n{animation:ha-dim .4s ease calc(1.9s + var(--i) * .1s) both}
+@keyframes ha-dim{to{color:#9fb8b2}}
+.ha-n{font:700 11px 'JetBrains Mono Variable',monospace;text-align:right}
+.ha-fix{justify-self:start;margin-top:4px;display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:9px;background:var(--a);color:#07201a;font:700 11.5px 'DM Sans Variable',sans-serif;animation:ha-press .5s ease 1.4s both}
+@keyframes ha-press{40%{transform:scale(.92);box-shadow:0 0 0 6px #9fd0bf40}100%{transform:none;box-shadow:0 0 0 0 transparent}}
+.ha-csv-full{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,.8fr);gap:4%;padding:4% 5%;align-items:start}
+.ha-csv-full table{width:100%;table-layout:fixed;border-collapse:collapse;font:500 10.5px 'JetBrains Mono Variable',monospace}
+.ha-csv-full th{text-align:left;padding:4px 5px;color:#9fb8b2;font-weight:600;border-bottom:1px solid #ffffff1a}
+.ha-csv-full td{padding:5px;border-bottom:1px solid #ffffff0a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:0}
+.ha-csv-full tr{animation:ha-rise .35s ease calc(.1s + var(--i) * .07s) both}
+.ha-csv-full td.fixed{background:#9fd0bf26;color:#dff5ee;animation:ha-flash 1.4s ease .6s both}
+@keyframes ha-flash{0%{background:#9fd0bf70}100%{background:#9fd0bf26}}
+.ha-csv-full td.rule{background:#e2c27a24;color:#f2dca6}
+.ha-mini{display:grid;grid-template-columns:repeat(3,1fr);align-items:end;gap:6px;height:100%;min-height:120px;padding:8px;border-radius:10px;background:#ffffff06;font-size:10px;color:#9fb8b2}
+.ha-mini span{grid-column:1/-1;align-self:start;font-weight:600;color:#cfe3de}
+.ha-mini i{display:grid;justify-items:center;gap:4px;font-style:normal;align-content:end}
+.ha-mini b{display:block;width:70%;height:calc(var(--h) * 1.1px);border-radius:5px 5px 2px 2px;background:var(--a);animation:ha-up .7s cubic-bezier(.16,1,.3,1) calc(.3s + var(--i) * .1s) both}
+@keyframes ha-up{from{transform:scaleY(0);transform-origin:bottom}}
+
+/* ---------- Planta: tableta de piso, ámbar sobre grafito ---------- */
+.ha-planta{--a:#e3b865;--nav-bg:#101116;display:grid;place-items:center;padding:6% 5%}
+.ha-tablet{width:100%;height:100%;display:grid;grid-template-rows:auto 1fr auto;border-radius:20px;overflow:hidden;background:linear-gradient(170deg,#1f2029,#15161c);border:7px solid #0a0a0e;box-shadow:0 30px 60px #000b,0 0 0 1px #3a3525}
+.ha-plhead{display:flex;align-items:baseline;gap:10px;padding:10px 14px 4px}
+.ha-plhead b{font:750 13px var(--display);color:#f6ead0}.ha-plhead small{font-size:10.5px;color:#b3a98f}
+.ha-pl-sum{display:grid;grid-template-rows:auto auto;gap:6px;align-content:center;padding:2% 5%}
+.ha-pl-total{display:flex;align-items:center;gap:6%}
+.ha-ring{position:relative;display:grid;place-items:center;width:clamp(46px,13cqw,70px)}
+.ha-ring.big{width:clamp(80px,26cqw,130px)}
+.ha-ring svg{width:100%;transform:rotate(-90deg)}
+.ha-ring .ha-arc{fill:none;stroke:var(--a);stroke-width:10;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:var(--o);animation:ha-ring 1.1s cubic-bezier(.16,1,.3,1) .2s both}
+@keyframes ha-ring{from{stroke-dashoffset:100px}}
+.ha-ring .ha-track{stroke-width:10}
+.ha-goal{fill:none;stroke:#f6ead0;stroke-width:14;stroke-dasharray:.7 99.3;stroke-dashoffset:-85px}
+.ha-ring b{position:absolute;font:800 clamp(13px,3.6cqw,18px)/1 var(--display)}
+.ha-ring.big b{font-size:clamp(24px,8cqw,38px)}
+.ha-ring b small{font-size:.55em;margin-left:1px;color:#b3a98f}
+.ha-pl-total p{margin:0;display:grid;gap:3px}
+.ha-pl-total strong{font:800 clamp(18px,5cqw,26px)/1 var(--display);color:var(--a)}
+.ha-pl-total span{font:italic 400 clamp(12px,3.2cqw,15px)/1.2 var(--serif);color:#f6ead0}
+.ha-pl-total em{font:600 10.5px 'JetBrains Mono Variable',monospace;font-style:normal;color:#b3a98f}
+.ha-pl-lines{display:flex;justify-content:space-around}
+.ha-pl-lines div{display:grid;justify-items:center;gap:3px;font-size:10.5px;color:#d6ccb2;animation:ha-rise .4s ease calc(.4s + var(--i) * .1s) both}
+.ha-pl-full{display:grid;gap:8px;align-content:center;padding:2% 5%}
+.ha-pl-h{margin:0;display:flex;align-items:center;justify-content:space-between;gap:8px;font:700 12.5px var(--display);color:#f6ead0}
+.ha-warn{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:99px;background:#e58fa024;color:#f2b8c4;font:600 10.5px 'DM Sans Variable',sans-serif}
+.ha-pl-full ol{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.ha-pl-full li{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) auto;gap:8px;align-items:center;font-size:11px;color:#e8dec4;animation:ha-rise .35s ease calc(.1s + var(--i) * .08s) both}
+.ha-pl-full li span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ha-pl-full li i{height:7px;border-radius:4px;background:#ffffff10;display:block}
+.ha-pl-full li b{display:block;height:100%;width:var(--w);border-radius:4px;background:var(--a);animation:ha-grow .7s cubic-bezier(.16,1,.3,1) calc(.2s + var(--i) * .1s) both}
+.ha-pl-full li em{min-width:6ch;text-align:right;font:700 10.5px 'JetBrains Mono Variable',monospace;font-style:normal}
+
+html[data-motion=paused] .ha *{animation-play-state:paused!important}
+@media(prefers-reduced-motion:reduce){.ha *{animation:none!important}}
+@media(max-width:640px){.ha-nav button,.ha-nav a{font-size:9px}.ha-csv-sum{grid-template-columns:1fr;justify-items:center}.ha-gauge{width:34%}.ha-issues{width:100%}.ha-csv-full{grid-template-columns:1fr}.ha-mini{display:none}.ha-phone{left:60%}}
+.ha-screen>.ha-view{min-height:0;overflow:hidden}
+@media(max-width:640px){
+ .ha-phone{top:3%;bottom:3%;left:58%}
+ .ha-biz{padding-top:22px}.ha-biz small{display:none}.ha-biz b{font-size:11.5px}
+ .ha-nfc-full li:nth-child(3),.ha-nfc-full .ha-actions{display:none}
+ .ha-csv-sum .ha-gauge{display:none}
+ .ha-csv-sum{padding:3% 4%}.ha-issue{font-size:11px}
+ .ha-pl-h{font-size:11.5px}
+}

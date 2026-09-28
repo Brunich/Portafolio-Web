@@ -14,7 +14,7 @@ let engine: Promise<SqlJsStatic> | undefined;
 const loadEngine = () => engine ??= Promise.all([import('sql.js'), import('sql.js/dist/sql-wasm.wasm?url')]).then(([m, w]) => m.default({ locateFile: () => w.default }));
 
 const CONFIG = `# agente.yaml — lo que el negocio decide, sin tocar código
-negocio: Refaccionaria Del Norte
+negocio: Suministros Industriales Norte
 modelo: qwen3:8b          # corre en el equipo del negocio con Ollama
 tono: amable, breve, de usted
 herramientas:
@@ -36,10 +36,10 @@ function Chat({ es }: { es: boolean }) {
  useEffect(() => { list.current?.scrollTo({ top: list.current.scrollHeight, behavior: 'smooth' }); }, [msgs]);
  const send = (q: string) => { if (!q.trim()) return; const r = answer(q); setMsgs(m => [...m, { from: 'user', text: q }, { from: 'bot', text: r.text, reply: r }]); setText(''); };
  const last = [...msgs].reverse().find(m => m.reply)?.reply;
- const tries = [t('¿Cuánto cuestan las balatas del Tsuru?', 'How much are the Tsuru brake pads?'), t('¿Tienen aceite 5W-30?', 'Do you have 5W-30 oil?'), t('Mi pedido P-1043', 'My order P-1043'), t('¿Hacen factura con otro RFC?', 'Can you invoice another tax ID?')];
+ const tries = [t('¿Cuánto cuesta el rodamiento 6205?', 'How much is the 6205 bearing?'), t('¿Tienen aceite hidráulico?', 'Do you have hydraulic oil?'), t('Mi pedido P-1043', 'My order P-1043'), t('¿Hacen factura con otro RFC?', 'Can you invoice another tax ID?')];
  return <div className="ag-chat">
   <div className="ag-phone">
-   <header><span className="ag-avatar">RN</span><div><strong>{SHOP.name}</strong><small><Lock size={11} weight="bold"/>{t('Asistente local · tus datos no salen', 'Local assistant · your data stays')}</small></div></header>
+   <header><span className="ag-avatar">SN</span><div><strong>{SHOP.name}</strong><small><Lock size={11} weight="bold"/>{t('Asistente local · tus datos no salen', 'Local assistant · your data stays')}</small></div></header>
    <ol ref={list} aria-live="polite">{msgs.map((m, i) => <li key={i} className={`ag-msg ${m.from}${m.reply?.escalate ? ' esc' : ''}`}>{m.text}{m.reply?.source && <small>{t('Fuente', 'Source')}: {m.reply.source}</small>}{m.reply?.escalate && <small><UserSwitch size={12}/> {t('Pasado a una persona', 'Handed to a person')}</small>}</li>)}</ol>
    <form onSubmit={e => { e.preventDefault(); send(text); }}><input value={text} onChange={e => setText(e.target.value)} placeholder={t('Escribe como cliente…', 'Type as a customer…')} aria-label={t('Mensaje', 'Message')}/><button type="submit" aria-label={t('Enviar', 'Send')}><PaperPlaneRight size={18} weight="fill"/></button></form>
   </div>

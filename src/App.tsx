@@ -35,7 +35,7 @@ import './brand.css';
 
 const PROJECT_ORDER = ['club', 'csv', 'planta', 'spc', 'inventario', 'turno', 'agente', 'vibe', 'punto'];
 // En la portada van al frente los que resuelven un problema de negocio; el hackathon y la app de estudiantes, abajo.
-const OTHER = ['vibe', 'punto'];
+const OTHER = ['spc', 'vibe', 'punto'];
 // Lo que todavía no está listo va en su propio apartado, para que la lista principal sea sólo lo que ya funciona.
 const DEV = ['agente'];
 type Project = ReturnType<typeof professional>['projects'][number];
@@ -97,7 +97,7 @@ export default function App() {
   <div className="scroll-progress" aria-hidden="true"/>
   <header className="topbar" aria-label={es ? 'Navegación del portafolio' : 'Portfolio navigation'}><div className="topbar-inner wrap">
    <a className="brand" href="/" data-title="Bruno Salas" aria-label="Bruno Salas — inicio"><span className="brand-name"><span className="brand-top"><b>Bruno Salas</b><em>{es ? 'portafolio' : 'portfolio'}</em></span><small>{p.role}</small></span></a>
-   <nav className="topnav" aria-label={es ? 'Secciones' : 'Sections'}>{[['projects', es ? 'Proyectos' : 'Projects'], ['about', es ? 'Perfil' : 'Profile'], ['graphics', 'Game dev'], ['motion', 'Motion']].map(([id, label]) => <a key={id} href={at(id)}>{label}</a>)}</nav>
+   <nav className="topnav" aria-label={es ? 'Secciones' : 'Sections'}>{[['projects', es ? 'Proyectos' : 'Projects'], ['about', 'CV'], ['graphics', 'Game dev'], ['motion', 'Motion']].map(([id, label]) => <a key={id} href={at(id)}>{label}</a>)}</nav>
    <div className="topbar-tools">
     <button className="icon-button" aria-label={paused ? c.play : c.pause} onClick={() => setPaused(!paused)}>{paused ? <Play size={16} weight="fill"/> : <Pause size={16} weight="fill"/>}</button>
     <div className="language-control" aria-label={es ? 'Idioma' : 'Language'}>{(['es', 'en'] as const).map(l => <button key={l} aria-label={l === 'es' ? 'Cambiar a español' : 'Switch to English'} aria-pressed={lang === l} onClick={() => setLang(l)}>{l.toUpperCase()}</button>)}</div>
@@ -170,19 +170,19 @@ function Home({ lang, paused, projects }: { lang: Lang; paused: boolean; project
      <div className="other-card other-plain project-android"><span className="other-media other-icon" aria-hidden="true"><AndroidLogo size={72} weight="duotone"/><small>NFC · CameraX · Compose</small></span><span className="other-copy"><em>{es ? 'En desarrollo' : 'In development'}</em><strong>{es ? 'Apps Android nativas' : 'Native Android apps'}</strong><span>{es ? 'NFC para negocios, Inventario y Entrega de turno, con el lector NFC, la cámara y los avisos del teléfono.' : 'NFC for businesses, Inventory and Shift handover, using the phone’s NFC reader, camera and alerts.'}</span></span></div></div>
    </div>
    <div className="others" data-zone={es ? 'Otros códigos' : 'Other code'}>
-    <div className="others-head"><span className="kicker">{es ? 'Otros códigos' : 'Other code'}</span><p>{es ? 'Un hackathon, una app para estudiantes y más en mi GitHub.' : 'A hackathon, a student app and more on my GitHub.'}</p></div>
+    <div className="others-head"><span className="kicker">{es ? 'Otros códigos' : 'Other code'}</span><p>{es ? 'Extras: gráficas de control, un hackathon, una app para estudiantes y más en mi GitHub.' : 'Extras: control charts, a hackathon, a student app and more on my GitHub.'}</p></div>
     <div className="others-grid">{others.map(x => <a key={x.id} className={`other-card project-${x.id}`} data-c href={`/proyectos/${x.slug}`} data-title={x.title}><span className={`other-media media-${x.id}`}><Media lang={lang} project={x}/></span><span className="other-copy"><em>{x.kind}</em><strong>{x.title}</strong><span>{x.pitch}</span></span><ArrowUpRight size={20}/></a>)}
      <a className="other-card other-plain other-github" href={personal.github} {...external(personal.github)}><span className="other-copy"><em>GitHub · Brunich</em><strong>{es ? 'Tengo más proyectos, pequeños y grandes' : 'I have more projects, small and large'}</strong><span>{es ? 'Juegos, herramientas y pruebas: todo el código.' : 'Games, tools and experiments: all the code.'}</span></span><GithubLogo size={26}/></a></div>
    </div>
   </section>
   <section id="about" className="about-section section-space"><div className="wrap">
-   <div className="about-grid" data-zone={es ? 'Perfil' : 'Profile'}>
+   <div className="about-grid" data-zone="CV">
     <figure className="portrait"><img src="/media/bruno-retrato.jpg" alt="Bruno Salas" width="560" height="700" loading="lazy"/><figcaption><strong>Bruno Salas</strong><span>Monterrey, N. L.</span></figcaption></figure>
-    <div className="about-copy"><span className="kicker">02 · {es ? 'Perfil' : 'Profile'}</span><h2>{p.aboutTitle}</h2><p>{p.about}</p><p>{p.about2}</p><a className="inline-link" href={cv} download>{es ? 'Descargar CV' : 'Download CV'}<DownloadSimple size={20}/></a>
+    <div className="about-copy"><span className="kicker">02 · CV</span><h2>{p.aboutTitle}</h2><p>{p.about}</p><p>{p.about2}</p><a className="inline-link" href={cv} download>{es ? 'Descargar CV' : 'Download CV'}<DownloadSimple size={20}/></a>
      <dl className="profile-points">{p.profilePoints.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></div>
    </div>
    <div className="experience-grid" data-zone={es ? 'Experiencia' : 'Experience'}><div><h3>{c.timelineTitle}</h3>{c.experience.map(e => <div className="experience-row" key={e.year}><span className="year">{e.year}</span><div><h4>{e.role}</h4><span className="org">{e.org}</span><p>{e.text}</p></div></div>)}</div><div><h3>{c.learning}</h3>{certificates.map(cert => <a className="certificate" key={cert.title} href={cert.url} {...external(cert.url)}><div><h4>{cert.title}</h4><p>{cert.org}</p><span>{cert.year}</span></div><ArrowUpRight size={22}/></a>)}</div></div>
-   <div className="skills tools-block" data-zone={es ? 'Herramientas' : 'Tools'}><h3>{p.techTitle}</h3><div className="skills-grid">{p.skills.map(s => <div key={s.name}><h4>{s.name}</h4><p>{s.desc}</p><div className="tags">{s.tools.map(tool => <span key={tool}>{tool}</span>)}</div></div>)}</div><p className="languages-line">{c.languages}</p></div>
+   <div className="skills tools-block" data-zone={es ? 'Herramientas que sé manejar' : 'Tools I work with'}><h3>{p.techTitle}</h3><div className="skills-grid">{p.skills.map(s => <div key={s.name}><h4>{s.name}</h4><p>{s.desc}</p><div className="tags">{s.tools.map(tool => <span key={tool}>{tool}</span>)}</div></div>)}</div><p className="languages-line">{c.languages}</p></div>
   </div></section>
   <OriginalScenes lang={lang} paused={paused}/>
   <Motion lang={lang}/>
@@ -219,7 +219,7 @@ function ProjectRow({ lang, project, flip, n, of }: { lang: Lang; project: Proje
 function ProjectPage({ lang, project, projects }: { lang: Lang; project: Project; projects: Project[] }) {
  const es = lang === 'es';
  const next = projects[(projects.indexOf(project) + 1) % projects.length];
- useEffect(() => { scrollTo(0, 0); }, [project.id]);
+ useEffect(() => { const d = location.hash && document.getElementById(location.hash.slice(1)); if (d) d.scrollIntoView(); else scrollTo(0, 0); }, [project.id]);
  return <main id="main" data-c className={`case case-${project.id} project-${project.id}`} aria-label={project.title}>
   <div className="wrap">
    <a className="case-back" href="/#projects" data-title={es ? 'Proyectos' : 'Projects'}><ArrowLeft size={18}/>{es ? 'Todos los proyectos' : 'All projects'}</a>
@@ -237,7 +237,7 @@ function ProjectPage({ lang, project, projects }: { lang: Lang; project: Project
    </header>
    <section className="how" data-zone={es ? 'Cómo funciona' : 'How it works'} aria-label={es ? 'Cómo funciona' : 'How it works'}><h2>{es ? 'Cómo funciona' : 'How it works'}</h2><ol style={{ '--n': project.how.length } as React.CSSProperties}>{project.how.map(([title, text], i) => <li key={title}><span>{String(i + 1).padStart(2, '0')}</span><strong>{title}</strong><p>{text}</p></li>)}</ol></section>
   </div>
-  <section className="case-demo" data-zone={es ? 'Pruébalo' : 'Try it'} aria-label={es ? 'Pruébalo' : 'Try it'}><div className="wrap"><Suspense fallback={<p className="case-loading">{es ? 'Cargando…' : 'Loading…'}</p>}>
+  <section id="demo" className="case-demo" data-zone={es ? 'Pruébalo' : 'Try it'} aria-label={es ? 'Pruébalo' : 'Try it'}><div className="wrap"><Suspense fallback={<p className="case-loading">{es ? 'Cargando…' : 'Loading…'}</p>}>
    {project.id === 'punto' && <PuntoDemo lang={lang} link={project.link}/>}
    {project.id === 'club' && <><div className="case-demo-head"><h2>{es ? 'Así se ve en el restaurante.' : 'This is how it looks at the restaurant.'}</h2><p>{es ? 'Apoya el celular en el chip y adelanta el tiempo: así junta sellos el cliente y así le da seguimiento el negocio.' : 'Tap the phone on the chip and fast-forward: this is how the customer collects stamps and how the business follows up.'}</p></div><LoyaltyDemo lang={lang}/><ClubReal lang={lang}/></>}
    {project.id === 'turno' && <ShiftHandover lang={lang}/>}

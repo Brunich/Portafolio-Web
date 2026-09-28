@@ -274,10 +274,10 @@ test('control charts: the sample flags the tool wear, and a plain column of read
 test('local AI assistant (in development): answers with a source, escalates the unknown, and the database is read-only', async ({ page }) => {
  await page.goto('/proyectos/asistente-ia-local');
  await expect(page.locator('.ag-dev')).toContainText('En desarrollo');
- await page.getByLabel('Mensaje').fill('¿Cuánto cuestan las balatas del Tsuru?');
+ await page.getByLabel('Mensaje').fill('¿Cuánto cuesta el rodamiento 6205?');
  await page.getByRole('button', { name: 'Enviar' }).click();
- await expect(page.locator('.ag-msg.bot').last()).toContainText('$489');
- await expect(page.locator('.ag-msg.bot').last()).toContainText('BAL-2211');
+ await expect(page.locator('.ag-msg.bot').last()).toContainText('$185');
+ await expect(page.locator('.ag-msg.bot').last()).toContainText('ROD-6205');
  await page.getByLabel('Mensaje').fill('¿Me pueden hacer factura con otro RFC?');
  await page.getByRole('button', { name: 'Enviar' }).click();
  await expect(page.locator('.ag-msg.bot').last()).toContainText('Pasado a una persona');
