@@ -336,3 +336,21 @@ html,body{overflow-x:clip}
 .zone-dots button{position:relative;width:44px}
 .zone-dots span{position:absolute;right:48px;top:50%;margin-top:-13px;pointer-events:none}
 .zone-dots button:hover span,.zone-dots button:focus-visible span{pointer-events:auto}
+/* Enlace a GitHub con el resto de proyectos */
+.more-link{gap:10px;max-width:280px;text-align:left;line-height:1.3}
+/* Otros proyectos: dos tarjetas compactas bajo los de negocio */
+.others{display:grid;align-content:center;gap:22px;padding-block:clamp(40px,6vh,72px)}
+.others-head p{margin-top:6px;color:var(--muted);max-width:60ch}
+.others-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.other-card{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto;gap:14px 12px;padding:14px;border-radius:22px;background:var(--surface);border:1px solid color-mix(in srgb,var(--c) 22%,transparent);color:var(--text);transition:border-color .3s,transform .3s}
+.other-card:hover{border-color:var(--c);transform:translateY(-3px)}
+.other-card>svg{grid-row:2;grid-column:2;align-self:end;color:var(--c)}
+.other-media{grid-column:1/-1;display:grid;place-items:center;height:220px;overflow:hidden;border-radius:14px;background:radial-gradient(ellipse 80% 70% at 50% 30%,#2e2447,#150f22 72%)}
+.other-media .phones{height:100%;display:flex;gap:10px;justify-content:center;padding:16px 0}
+.other-media .phones img{height:100%;width:auto;border:4px solid #0f0c15;border-radius:18px}
+.other-media .vibe-shot{width:92%;height:auto}
+.other-copy{display:grid;gap:4px}
+.other-copy em{font-style:normal;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--c)}
+.other-copy strong{font:720 24px/1.1 var(--display);letter-spacing:-.02em}
+.other-copy span{color:var(--muted);font:italic 400 17px var(--serif)}
+@media(max-width:760px){.others-grid{grid-template-columns:1fr}.other-media{height:180px}}
