@@ -81,7 +81,7 @@
 .pl-report{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:18px 20px;border-radius:20px;background:linear-gradient(120deg,#a894f01f,#150f22 60%);border:1px solid #a894f033}
 .pl-report p{margin:6px 0 0;font-size:14px;color:var(--muted);max-width:560px}
 .pl-report-actions{display:flex;gap:8px;flex-wrap:wrap}
-.pl-wa{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:8px 14px;border-radius:10px;background:#25d366;color:#08210f;font-weight:700;font-size:13.5px}
+.pl-wa{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 14px;border-radius:10px;background:#9fd0bf;color:#08210f;font-weight:700;font-size:13.5px}
 .pl-note{flex-basis:100%;margin:0;font-size:13px;color:var(--good)}
 @keyframes pl-in{from{transform:translateY(12px)}}
 @keyframes pl-grow{from{transform:scaleX(0)}}

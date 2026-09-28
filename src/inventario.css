@@ -57,7 +57,7 @@
 .inv .inv-stock input{width:52px;min-height:30px;padding:2px 6px;font-size:13px}
 .inv-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;justify-content:space-between}
 .inv-tools{justify-content:flex-start}
-.inv .pl-wa{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:8px 14px;border-radius:10px;background:#25d366;color:#08210f;font-weight:700;font-size:13.5px}
+.inv .pl-wa{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 14px;border-radius:10px;background:#9fd0bf;color:#08210f;font-weight:700;font-size:13.5px}
 .inv-count p{margin:0 0 10px;font-size:13.5px;color:var(--muted)}
 .inv-count table{width:100%;border-collapse:collapse;font-size:13.5px}
 .inv-count th{text-align:left;font-weight:600;color:var(--muted);padding:6px 8px;border-bottom:1px solid #ffffff1a}

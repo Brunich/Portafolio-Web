@@ -24,7 +24,7 @@ export default function Found({ lang, issues, rows, done, focus, runKey, onFix, 
 
  return <section className="cf" aria-label={t('Qué encontré', 'What I found')} key={runKey}>
   <header className="cf-head">
-   <div><h4>{t('Qué encontré', 'What I found')}</h4>
+   <div><h3>{t('Qué encontré', 'What I found')}</h3>
     <p>{!real.length ? t('Nada que corregir: el archivo está listo.', 'Nothing to fix: the file is ready.')
      : fixable.length ? t(`${fixable.length} se arreglan con un clic; el resto necesita que alguien decida.`, `${fixable.length} can be fixed in one click; the rest needs someone to decide.`)
      : t('Lo que queda necesita que alguien decida: se marca, no se inventa.', 'What remains needs someone to decide: it is flagged, never made up.')}</p></div>

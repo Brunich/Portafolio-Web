@@ -107,25 +107,25 @@ export default function Planta({ lang }: { lang: 'es' | 'en' }) {
     </dl>
    </section>
 
-   <h4 className="pl-h">{t('OEE por línea', 'OEE by line')}<span>{t('Disponibilidad × rendimiento × calidad. La marca del anillo es el 85 %.', 'Availability × performance × quality. The ring mark is 85%.')}</span></h4>
+   <h3 className="pl-h">{t('OEE por línea', 'OEE by line')}<span>{t('Disponibilidad × rendimiento × calidad. La marca del anillo es el 85 %.', 'Availability × performance × quality. The ring mark is 85%.')}</span></h3>
    <div className="pl-lines">{res.lines.map((l, i) => <LineCard key={l.linea} l={l} es={es} i={i}/>)}</div>
 
    <div className="pl-split">
     <section className="pl-ex">
-     <h4 className="pl-h">{t('Lo que no cuadra', 'What does not add up')}<span>{t('Revísalo antes de firmar el turno.', 'Check it before signing off the shift.')}</span></h4>
+     <h3 className="pl-h">{t('Lo que no cuadra', 'What does not add up')}<span>{t('Revísalo antes de firmar el turno.', 'Check it before signing off the shift.')}</span></h3>
      <label className="pl-limit">{t('Rechazo máximo', 'Max rejection')} <input type="range" min={1} max={8} step={0.5} value={limit} onChange={e => setLimit(+e.target.value)}/><b>{limit} %</b></label>
      <div className="pl-filter">{['', ...rules].map(r => <button key={r || 'all'} aria-pressed={filter === r} onClick={() => setFilter(r)}>{r ? ({ 'sin-inspeccion': t('Sin inspección', 'Not inspected'), 'sin-produccion': t('Lote no existe', 'Unknown batch'), revisadas: t('Revisadas > producidas', 'Inspected > produced'), rechazo: t('Rechazo alto', 'High rejection'), plan: t('Plan', 'Plan'), paro: t('Paro sin causa', 'Stop without cause'), dato: t('Dato raro', 'Odd value') } as Record<string, string>)[r] : t(`Todas (${res.exceptions.length})`, `All (${res.exceptions.length})`)}</button>)}</div>
      <ol>{shown.map((e, i) => <li key={i} className={`sev-${e.severity}`} style={{ ['--i' as string]: i }}><span>{e.severity === 'alta' ? t('Alta', 'High') : t('Media', 'Medium')}</span><div><strong>{e.text[L]}</strong><small>{e.where}</small></div></li>)}</ol>
      {!shown.length && <p className="pl-ok"><CheckCircle size={18}/>{t('Todo cuadra.', 'Everything adds up.')}</p>}
     </section>
     <section className="pl-pareto">
-     <h4 className="pl-h">{t('Paros por causa', 'Stops by cause')}<span>{t('Pareto: arriba lo que más tiempo se come.', 'Pareto: the biggest time-eaters first.')}</span></h4>
+     <h3 className="pl-h">{t('Paros por causa', 'Stops by cause')}<span>{t('Pareto: arriba lo que más tiempo se come.', 'Pareto: the biggest time-eaters first.')}</span></h3>
      {res.pareto.length ? <ol>{res.pareto.map(([c, m], i) => <li key={c} style={{ ['--i' as string]: i }}><span>{c}</span><i><b style={{ width: `${m / stopMax * 100}%` }}/></i><em>{m} min</em><small>{Math.round(res.pareto.slice(0, i + 1).reduce((s, x) => s + x[1], 0) / stopTotal * 100)} %</small></li>)}</ol> : <p className="pl-ok">{t('Sin reporte de paros.', 'No stops report.')}</p>}
     </section>
    </div>
 
    <section className="pl-report">
-    <div><h4 className="pl-h">{t('Reporte del turno', 'Shift report')}</h4><p>{t('Cuatro hojas de Excel: OEE, excepciones, consolidado y paros. O el resumen corto para el grupo de WhatsApp.', 'Four Excel sheets: OEE, exceptions, consolidated and stops. Or the short summary for the WhatsApp group.')}</p></div>
+    <div><h3 className="pl-h">{t('Reporte del turno', 'Shift report')}</h3><p>{t('Cuatro hojas de Excel: OEE, excepciones, consolidado y paros. O el resumen corto para el grupo de WhatsApp.', 'Four Excel sheets: OEE, exceptions, consolidated and stops. Or the short summary for the WhatsApp group.')}</p></div>
     <div className="pl-report-actions">
      <button className="dw-primary" onClick={() => void report()}><DownloadSimple size={17}/>{t('Descargar Excel', 'Download Excel')}</button>
      <button onClick={async () => { try { await navigator.clipboard.writeText(summaryText(res, es)); setNote(t('Resumen copiado.', 'Summary copied.')); } catch { setNote(''); } }}><Copy size={17}/>{t('Copiar resumen', 'Copy summary')}</button>

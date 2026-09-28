@@ -114,7 +114,8 @@ html:not(.paged) .zone-label{max-width:0;transition:max-width .35s cubic-bezier(
 /* Objetivos táctiles de al menos 44 px */
 .topbar .brand{display:inline-flex;align-items:center;min-height:44px}
 .case-code{min-height:44px;align-items:center}
-:root .dw-link,:root .pl-link{min-height:44px;padding-inline:8px}
+:root .dw-link,:root .pl-link{display:inline-flex;align-items:center;min-height:44px;padding-inline:8px}
+:root .dw-yours a{display:inline-flex;align-items:center;min-height:44px}
 :root .st-foot a{display:inline-flex;align-items:center;min-height:44px}
 html[data-motion=paused] .zone-arrow,html[data-motion=paused] .orbit,html[data-motion=paused] .spark{animation:none}
 
@@ -189,10 +190,10 @@ html[data-motion=paused] .row .ld-preview-chip{animation:none}
 .hero{overflow-x:clip}
 @media(max-width:980px){.portrait{max-width:280px}}
 /* El analizador también en la paleta nueva */
-.dw-workbench{--dw-bg:#1b1629;--dw-surface:#231c35;--dw-line:#30274a;border-color:#ffffff17;border-radius:24px}
+:root .dw-workbench{--dw-bg:#1b1629;--dw-surface:#231c35;--dw-line:#30274a;border-color:#ffffff17;border-radius:24px}
 .dw-workbench button{border-color:#ffffff2e;background:#231c35}
 .dw-workbench td{border-bottom-color:#2a2240}.dw-workbench th{background:#261f3b}
-.dw-search input{background:#0f0b18;border-color:#30274a}
+:root .dw-search input{background:#0f0b18;border-color:#30274a}
 .dw-col,.dw-yours{background:#1e182e}
 .cf-row:hover,.cf-row.is-open,.cf-row.is-focus{background:#261f3b}
 
@@ -298,3 +299,8 @@ html,body{overflow-x:clip}
 .motion-tag{align-self:flex-start;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--lilac);border:1px solid #a894f055;border-radius:99px;padding:4px 10px}
 @media(max-width:860px){.motion-grid{grid-template-columns:1fr}}
 .dw-note{margin:12px 0 0;padding:10px 14px;border-radius:12px;background:#9fd0bf14;border:1px solid #9fd0bf40;color:#cfe9df;font-size:14px}
+/* Los títulos internos de las demos pasaron de h4 a h3 (orden de títulos); no heredan el estilo de sección */
+:where(.dw-workbench,.pl,.sh,.ld,.inv) h3{letter-spacing:normal}
+/* «Cómo funciona»: una columna por paso (3, 4 o 5) para que ninguno quede huérfano abajo */
+@media(min-width:861px){.how ol{grid-template-columns:repeat(var(--n,3),minmax(0,1fr));gap:clamp(20px,3vw,40px)}}
+.pano-thumbs img{height:auto}

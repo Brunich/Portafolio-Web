@@ -120,7 +120,7 @@ export default function ShiftHandover({ lang }: { lang: 'es' | 'en' }) {
      return <section key={col} className={`sh-col c-${col}${over === col ? ' is-over' : ''}`} aria-label={label[col]}
       onDragOver={e => { if (drag) { e.preventDefault(); setOver(col); } }} onDragLeave={() => setOver(o => o === col ? null : o)}
       onDrop={e => { e.preventDefault(); setOver(null); const i = items.find(x => x.id === drag); if (i) move(i, col); setDrag(null); }}>
-      <h4><i aria-hidden="true"/>{label[col]}<span key={list.length}>{list.length}</span></h4>
+      <h3><i aria-hidden="true"/>{label[col]}<span key={list.length}>{list.length}</span></h3>
       {!list.length && <p className="sh-empty">{col === 'closed' ? t('Nada cerrado todavía.', 'Nothing closed yet.') : t('Suelta aquí una incidencia.', 'Drop an incident here.')}</p>}
       {list.map(i => {
        const open = openId === i.id, pct = Math.min(1, age(i) / SLA[i.sev]), overdue = col !== 'closed' && pct >= 1;
