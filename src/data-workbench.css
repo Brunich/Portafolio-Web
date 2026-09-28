@@ -218,3 +218,5 @@ html[data-motion=paused] .cf *{animation:none!important}
 .cmp-row{color:var(--dw-muted)}
 .cmp-foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px}
 @media(max-width:700px){.cmp-files{grid-template-columns:1fr}.cmp-arrow{transform:rotate(90deg);justify-self:center}.cmp-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.cmp-list li{grid-template-columns:1fr;gap:4px}}
+/* Celular: primero «Qué encontré» (lo que está mal), luego columnas y tabla */
+@media(max-width:700px){.dw-clean{display:flex;flex-direction:column}.dw-found-wrap{order:-1;margin-bottom:8px}}

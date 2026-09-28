@@ -154,7 +154,7 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
   {tab === 'chart' && <CsvCharts key={`${version}:${chartFrom ? 'sql' : 'all'}`} lang={lang} table={chartFrom ?? whole} onBack={chartFrom ? () => setChartFrom(null) : undefined}/>}
   {tab === 'compare' && <CsvCompare key={version} lang={lang} table={whole}/>}
   {tab === 'sql' && <CsvSql key={version} lang={lang} table={whole} onChart={r => { setChartFrom(r); setTab('chart'); }}/>}
-  {tab === 'clean' && <>
+  {tab === 'clean' && <div className="dw-clean">
 
   <section className="dw-structure" aria-label={t('Cómo está organizado', 'How it is organized')}>
    <h3>{t('Cómo está organizado', 'How it is organized')}</h3>
@@ -173,7 +173,7 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
   <div className="dw-tabletools" ref={tableTop}>
    <label className="dw-search"><span className="dw-visually-hidden">{t('Buscar en la tabla', 'Search the table')}</span><input type="search" value={query} onChange={e => { setQuery(e.target.value); setPage(0); }} placeholder={t('Buscar en la tabla…', 'Search the table…')}/></label>
    {focusIssue ? <button onClick={() => { setFocusIssue(null); setPage(0); }}>{t('Ver todas las filas', 'Show all rows')} ✕</button>
-    : issues.length > 0 && <button className="dw-jump" onClick={() => found.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>{t('Las celdas marcadas tienen algo raro · ver qué', 'Marked cells have something off · see what')} ↓</button>}
+    : issues.length > 0 && <button className="dw-jump" onClick={() => found.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>{t('Las celdas marcadas tienen algo raro · ver qué', 'Marked cells have something off · see what')}</button>}
   </div>
   <div className="dw-tablewrap" tabIndex={0} role="region" aria-label={t('Datos', 'Data')}><table>
    <thead><tr><th scope="col" className="dw-rownum">#</th>{headers.map((h, i) => <th key={i} scope="col" className={hover === i ? 'dw-hot' : ''} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}>{h}</th>)}</tr></thead>
@@ -186,9 +186,9 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
    </span>
    <button className="dw-primary" onClick={download}>{t('Descargar CSV limpio', 'Download clean CSV')} <span aria-hidden="true">↓</span></button>
   </div>
-  <div ref={found}><Found lang={lang} issues={issues} rows={rows.length} done={done} focus={focusIssue} runKey={`${version}`}
+  <div ref={found} className="dw-found-wrap"><Found lang={lang} issues={issues} rows={rows.length} done={done} focus={focusIssue} runKey={`${version}`}
    onFix={apply} onFixAll={applyAll} onUndo={() => { setRows(original.rows); setDone([]); }}
    onShow={id => { setFocusIssue(id); setPage(0); tableTop.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}/></div>
-  </>}
+  </div>}
  </div>;
 }
