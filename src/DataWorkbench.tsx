@@ -11,6 +11,7 @@ import type { Done } from './CsvFound';
 import { personal } from './personal';
 import CsvCharts from './CsvCharts';
 import type { Table } from './CsvCharts';
+import CsvCompare from './CsvCompare';
 import CsvSql from './CsvSql';
 import './data-workbench.css';
 
@@ -62,7 +63,7 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
  const [page, setPage] = useState(0);
  const upload = useRef<HTMLInputElement>(null);
  const tableTop = useRef<HTMLDivElement>(null), found = useRef<HTMLDivElement>(null);
- const [tab, setTab] = useState<'clean' | 'chart' | 'sql'>('clean');
+ const [tab, setTab] = useState<'clean' | 'chart' | 'sql' | 'compare'>('clean');
  const [chartFrom, setChartFrom] = useState<Table | null>(null);
  const headers = original.headers;
 
@@ -148,9 +149,10 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
   </dl>
 
   <div className="dw-tabs" role="tablist" aria-label={t('Qué hacer con el archivo', 'What to do with the file')}>
-   {([['clean', t('Revisar y limpiar', 'Review & clean')], ['chart', t('Graficar', 'Chart')], ['sql', t('Preguntar con SQL', 'Ask with SQL')]] as const).map(([k, label]) => <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)}>{label}</button>)}
+   {([['clean', t('Revisar y limpiar', 'Review & clean')], ['chart', t('Graficar', 'Chart')], ['sql', t('Preguntar con SQL', 'Ask with SQL')], ['compare', t('Comparar', 'Compare')]] as const).map(([k, label]) => <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)}>{label}</button>)}
   </div>
   {tab === 'chart' && <CsvCharts key={`${version}:${chartFrom ? 'sql' : 'all'}`} lang={lang} table={chartFrom ?? whole} onBack={chartFrom ? () => setChartFrom(null) : undefined}/>}
+  {tab === 'compare' && <CsvCompare key={version} lang={lang} table={whole}/>}
   {tab === 'sql' && <CsvSql key={version} lang={lang} table={whole} onChart={r => { setChartFrom(r); setTab('chart'); }}/>}
   {tab === 'clean' && <>
 
