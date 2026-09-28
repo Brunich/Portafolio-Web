@@ -28,4 +28,4 @@
 **Falta**
 - U1: que revises en supabase.com si el proyecto está pausado (sospecha, no comprobada). En cuanto conteste, la página vuelve sola a la app en vivo.
 - V2 (`landmark-unique` dentro del iframe) es del repo de VibeMap; no lo toqué.
-- V2 resuelto del lado del portafolio (29-09): encabezado, contenido y pie con nombre propio; axe 0 avisos con el iframe incluido. VibeMap sola ya daba 0. Su repo se publica solo al subir a GitHub: no se toca sin tu permiso.
+- V2 resuelto del lado del portafolio (28-09): encabezado, contenido y pie con nombre propio; axe 0 avisos con el iframe incluido. VibeMap sola ya daba 0. Su repo se publica solo al subir a GitHub: no se toca sin tu permiso.

@@ -39,4 +39,4 @@
 **Falta**
 - Histórico semanal del OEE (necesita guardar turnos anteriores).
 - Probar con un Excel real de tu trabajo: eso lo valida en uso.
-- (29-09) OEE por día sacado de las fechas del reporte, con la meta del 85 % y el cambio por línea. Textos: «Incoherencias entre reportes», «Dato inválido».
+- (28-09) OEE por día sacado de las fechas del reporte, con la meta del 85 % y el cambio por línea. Textos: «Incoherencias entre reportes», «Dato inválido».
