@@ -2,6 +2,19 @@
 // export real de Excel o de un sistema de planta, puestos a propósito para que el analizador los encuentre.
 export type Sample = { id: string; file: string; title: [string, string]; context: [string, string]; csv: string };
 
+const clientes = `cliente,rfc,contacto,telefono,correo,cp,municipio,credito_dias
+Refaccionaria Del Norte,RDN150302AB4,Marta Ríos,8183456712,compras@delnorte.mx,64000,Monterrey,30
+Ferretera Cumbres,fcu-190711-k21,Jorge Leal,+52 81 2233 4455,jleal@ferrecumbres.mx,64610,Monterrey,15
+Abarrotes La Estrella,AES0812053T9,Lupita Garza,81 1122 3344,LUPITA@LAESTRELLA.MX ,66450,San Nicolás,0
+Taller Mecánico Treviño,TMT201399XX1,Raúl Treviño,8119876543,raul@tallertrevino.mx,66230,San Pedro,30
+Papelería Colón,PCO050505QW2,Elsa Colón,811234567,ventas@,64720,Monterrey,15
+Distribuidora Sierra Madre,DSM1102148N6,Iván Sierra,8187654321,isierra@dsmadre.mx,66269,san pedro,45
+Café Aurora,CAU160920HB7,Sofía Ramos,8110203040,sofia@cafeaurora.mx,66220,San Pedro,0
+Tortillería El Maizal,TMA090101JK3,Pedro Villarreal,(81) 8899-0011,pedro@elmaizal.mx,66470,San Nicolas,15
+Muebles Contreras CDMX,MCO140430LM5,Ana Contreras,55 5566 7788,ana@mueblescontreras.mx,6600,Cuauhtémoc,30
+Consultorio Dental Sonrisa,CDS180615PQ8,Dra. Leticia Mata,8155443322,citas@sonrisa.mx,64620,Monterrey,-15
+`;
+
 const planta = `folio,fecha,turno,linea,modelo,estacion,defecto,severidad,piezas_revisadas,piezas_rechazadas,inspector
 Q-1041,2026-03-02,Matutino,L1,M-21 Sedán,Carrocería,Rayón en puerta trasera,Menor,120,3,R. Garza
 Q-1042,2026-03-02,Matutino,L1,M-21 Sedán,Pintura,Burbuja en cofre,Mayor,118,6,R. Garza
@@ -48,4 +61,5 @@ F-20945,2026-02-12,Guadalupe Centro,Guadalupe,Baja presión,Baja,8,Atendido`;
 export const SAMPLES: Sample[] = [
  { id: 'planta', file: 'inspecciones_planta_marzo.csv', title: ['Planta de ensamble', 'Assembly plant'], context: ['Inspecciones de calidad por turno en una planta automotriz ficticia.', 'Quality inspections per shift at a fictional car plant.'], csv: planta },
  { id: 'agua', file: 'reportes_fugas_febrero.csv', title: ['Organismo de agua', 'Water utility'], context: ['Reportes ciudadanos de fugas en un organismo público ficticio del área metropolitana de Monterrey.', 'Citizen leak reports at a fictional public water utility in the Monterrey metro area.'], csv: agua },
+ { id: 'clientes', file: 'padron_clientes.csv', title: ['Padrón de clientes', 'Customer list'], context: ['Clientes de una distribuidora ficticia de Monterrey: RFC, teléfonos, correos y códigos postales.', 'Customers of a fictional Monterrey distributor: tax IDs, phones, emails and postal codes.'], csv: clientes },
 ];

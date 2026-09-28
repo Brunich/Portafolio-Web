@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Barcode, Camera, CameraSlash, ImageSquare, Plus, Minus, ListChecks, Printer, WhatsappLogo, DownloadSimple, ArrowCounterClockwise, MagnifyingGlass, Trash } from '@phosphor-icons/react';
+import { Barcode, Camera, CameraSlash, ImageSquare, Plus, Minus, ListChecks, Printer, WhatsappLogo, DownloadSimple, ArrowCounterClockwise, MagnifyingGlass, Trash, WarningCircle } from '@phosphor-icons/react';
 import { SAMPLE, codeKind, labelSvg, normalizeCode, printable, shopping } from './inventario-logic';
 import type { Move, Mode, Product } from './inventario-logic';
 import './inventario.css';
@@ -96,7 +96,7 @@ export default function Inventario({ lang }: { lang: 'es' | 'en' }) {
   <dl className="inv-kpis">
    <div><dt>{t('Productos', 'Products')}</dt><dd>{store.products.length}</dd></div>
    <div><dt>{t('Piezas en tienda', 'Units in store')}</dt><dd>{units}</dd></div>
-   <div className={low.length ? 'warn' : ''}><dt>{t('Bajo el mínimo', 'Below minimum')}</dt><dd>{low.length}</dd></div>
+   <div className={low.length ? 'warn' : ''}><dt>{low.length > 0 && <WarningCircle size={14} weight="fill" aria-hidden="true"/>}{t('Bajo el mínimo', 'Below minimum')}</dt><dd>{low.length}</dd></div>
    <div><dt>{t('Movimientos', 'Moves')}</dt><dd>{store.moves.length}</dd></div>
   </dl>
 

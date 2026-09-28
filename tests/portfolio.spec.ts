@@ -130,6 +130,11 @@ test('csv analyzer page: mind map, automatic fixes and second sample',async({pag
  await expect(page.locator('.dw-kpis div').first().locator('dd')).toHaveText('22');
  await page.getByRole('button',{name:'Organismo de agua'}).click();
  await expect(page.locator('.cf')).toContainText('Negativos en «dias_para_atender»');
+ // El padrón de clientes enseña las reglas de México: RFC, teléfono, correo y CP con formato de un clic.
+ await page.getByRole('button',{name:'Padrón de clientes'}).click();
+ await expect(page.locator('.cf')).toContainText('RFC inválido en «rfc»');
+ await page.getByRole('button',{name:/Arreglar lo automático/}).click();
+ await expect(page.locator('.dw-tablewrap')).toContainText('FCU190711K21');
 });
 
 test('customer club demo joins, stamps once per day and sends each message',async({page})=>{
