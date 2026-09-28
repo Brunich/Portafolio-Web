@@ -219,6 +219,9 @@ function ProjectPage({ lang, project, projects }: { lang: Lang; project: Project
      {project.metrics.length > 0 && <dl className="project-metrics case-metrics">{project.metrics.map(([value, label]) => <div key={value + label}><dt>{value}</dt><dd>{label}</dd></div>)}</dl>}
      <div className="tags">{project.tags.map(t => <span key={t}>{t}</span>)}</div>
      {project.link.startsWith('http') && <a className="button primary case-action" href={project.link} {...external(project.link)}>{project.action}<ArrowUpRight size={18}/></a>}
+     {NATIVE[project.id] && (NATIVE[project.id].href
+      ? <a className="native-note" href={NATIVE[project.id].href} {...external('https://github.com')}><strong>{es ? NATIVE[project.id].es : NATIVE[project.id].en}</strong><span>{es ? 'Descargar' : 'Download'}<ArrowUpRight size={14}/></span></a>
+      : <p className="native-note is-dev"><strong>{es ? NATIVE[project.id].es : NATIVE[project.id].en}</strong><span>{es ? 'En desarrollo' : 'In development'}</span></p>)}
      {REPO[project.id] && <a className="inline-link case-code" href={`https://github.com/Brunich/${REPO[project.id]}`} {...external('https://github.com')}><GithubLogo size={20}/>{es ? 'Código en GitHub' : 'Code on GitHub'}<ArrowUpRight size={16}/></a>}
     </div>
     <div className={`case-visual media-${project.id}`} aria-hidden="true">{project.id === 'club' ? <NfcTap lang={lang}/> : <Media lang={lang} project={project}/>}</div>
@@ -328,6 +331,13 @@ function PuntoDemo({ lang, link }: { lang: Lang; link: string }) {
 }
 
 // Cada proyecto tiene su propio repo, con pruebas y README.
+// La versión nativa de cada herramienta: la de escritorio ya se descarga; las de Android van en camino, con plan.
+const NATIVE: Record<string, { es: string; en: string; href?: string }> = {
+ spc: { es: 'También como app de escritorio para Windows', en: 'Also as a Windows desktop app', href: 'https://github.com/Brunich/graficas-de-control/releases/latest' },
+ club: { es: 'App Android nativa con lector NFC', en: 'Native Android app with NFC reader' },
+ inventario: { es: 'App Android nativa con escáner de cámara', en: 'Native Android app with camera scanner' },
+ turno: { es: 'App Android nativa con cámara y avisos', en: 'Native Android app with camera and alerts' },
+};
 const REPO: Record<string, string> = { club: 'nfc-negocios', csv: 'analizador-csv', planta: 'planta-oee', inventario: 'inventario-camara', spc: 'graficas-de-control', turno: 'entrega-de-turno', vibe: 'VibeMap', punto: 'Punto-U-app' };
 
 // Videos de motion design: hoy el reel del portafolio; el espacio está listo para los que sigan.
