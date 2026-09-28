@@ -238,3 +238,19 @@ test('a live demo whose server is down shows real screenshots and says why, inst
  await expect(page.locator('.live-shots img')).toHaveCount(1);
  await expect(page.locator('.case-browser iframe')).toHaveCount(0);
 });
+
+test('csv analyzer compares two snapshots of the same report and lists what changed', async ({ page }) => {
+ await page.goto('/proyectos/analizador-csv');
+ const input = page.locator('.dw-workbench input[type=file]').first();
+ await input.setInputFiles({ name: 'ayer.csv', mimeType: 'text/csv', buffer: Buffer.from('folio,estatus,piezas\nQ-1,Abierta,120\nQ-2,Abierta,98\nQ-3,Cerrada,80\nQ-4,Abierta,77') });
+ await page.getByRole('tab', { name: 'Comparar' }).click();
+ await page.locator('.cmp input[type=file]').setInputFiles({ name: 'hoy.csv', mimeType: 'text/csv', buffer: Buffer.from('folio,estatus,piezas\nQ-2,Cerrada,98\nQ-3,Cerrada,80\nQ-1,Cerrada,121\nQ-5,Abierta,60') });
+ await expect(page.getByLabel('Emparejar filas por')).toHaveValue('folio');
+ await expect(page.locator('.cmp-kpis .k-changed dd')).toHaveText('2');
+ await expect(page.locator('.cmp-list')).toContainText('Abierta→Cerrada');
+ await page.locator('.cmp-kpis .k-added button').click();
+ await expect(page.locator('.cmp-list')).toContainText('Q-5');
+ const dl = page.waitForEvent('download');
+ await page.getByRole('button', { name: /Descargar diferencias/ }).click();
+ expect((await dl).suggestedFilename()).toBe('diferencias.csv');
+});
