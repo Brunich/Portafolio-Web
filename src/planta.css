@@ -101,3 +101,4 @@ html[data-motion=paused] .pl *{animation:none!important}
 @keyframes plp-loop{0%{stroke-dashoffset:100}30%,85%{stroke-dashoffset:var(--o)}100%{stroke-dashoffset:100}}
 html[data-motion=paused] .plp *{animation-play-state:paused!important}
 .plp{--good:#9fd0bf;--mid:#d9c08a;--low:#e58fa0}
+html[data-motion=paused] .plp .pl-arc{animation:none!important;stroke-dashoffset:var(--o)}
