@@ -57,13 +57,12 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
  const [busy, setBusy] = useState('');
  const [book, setBook] = useState<{ file: File; sheets: string[]; sheet: string } | null>(null);
  const [query, setQuery] = useState('');
- const [allCols, setAllCols] = useState(false);
  const [version, setVersion] = useState(0);
  const [showAll, setShowAll] = useState(false);
  const [page, setPage] = useState(0);
  const upload = useRef<HTMLInputElement>(null);
  const tableTop = useRef<HTMLDivElement>(null), found = useRef<HTMLDivElement>(null);
- const [tab, setTab] = useState<'clean' | 'chart' | 'sql' | 'compare'>('clean');
+ const [tab, setTab] = useState<'clean' | 'cols' | 'chart' | 'sql' | 'compare'>('clean');
  const [chartFrom, setChartFrom] = useState<Table | null>(null);
  const headers = original.headers;
 
@@ -125,17 +124,13 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
   {dragging && <div className="dw-dropveil" aria-hidden="true">{t('Suelta tu CSV aquí', 'Drop your CSV here')}</div>}
 
   <header className="dw-top">
-   <div className="dw-file"><span className="dw-fileicon" aria-hidden="true">CSV</span><div><strong>{fileName}</strong><small>{sample ? `${t('Datos sintéticos', 'Synthetic data')} · ${sample.context[L]}` : t('Tu archivo · se procesa sólo en este navegador', 'Your file · processed only in this browser')}</small></div></div>
+   <div className="dw-file"><span className="dw-fileicon" aria-hidden="true">CSV</span><div><strong>{fileName}</strong><small>{sample ? <>{t('Ejemplo con datos inventados', 'Sample with made-up data')} · {sample.context[L]} · <a href={`mailto:${personal.email}?subject=${encodeURIComponent(t('CSV para revisar', 'CSV to review'))}`}>{t('¿tienes uno real? mándamelo', 'got a real one? send it')}</a></> : t('Tu archivo · se procesa sólo en este navegador', 'Your file · processed only in this browser')}</small></div></div>
    <div className="dw-sources">
     {SAMPLES.map(s => <button key={s.id} aria-pressed={source === s.id} onClick={() => { const d = parseCsv(s.csv); load(d, s.id, s.file); }}>{s.title[L]}</button>)}
     <input ref={upload} type="file" accept={TABLE_ACCEPT} hidden onChange={e => { const f = e.target.files?.[0]; if (f) void loadFile(f); e.target.value = ''; }}/>
     <button className="dw-primary" onClick={() => upload.current?.click()}>{t('Subir el tuyo', 'Upload yours')} <span aria-hidden="true">↑</span></button>
    </div>
   </header>
-  {sample && <div className="dw-yours">
-   <p><strong>{t('Esto es un ejemplo', 'This is a sample')}</strong> {t('con formato de reporte real; los datos son inventados.', 'shaped like a real report; the data is made up.')}</p>
-   <div><button className="dw-primary" onClick={() => upload.current?.click()}>{t('Sube el tuyo', 'Upload yours')} <span aria-hidden="true">↑</span></button><a href={`mailto:${personal.email}?subject=${encodeURIComponent(t('CSV para revisar', 'CSV to review'))}`}>{t('o mándamelo y lo reviso', 'or send it to me')}</a></div>
-  </div>}
   {busy && <p className="dw-note dw-busy" role="status"><i aria-hidden="true"/>{busy}</p>}
   {book && <div className="dw-sheet"><label>{t('Hoja de Excel', 'Excel sheet')}<select value={book.sheet} onChange={e => void loadFile(book.file, e.target.value)}>{book.sheets.map(n => <option key={n}>{n}</option>)}</select></label><small>{t(`Este libro tiene ${book.sheets.length} hojas; abrí «${book.sheet}».`, `This workbook has ${book.sheets.length} sheets; I opened “${book.sheet}”.`)}</small></div>}
   {note && <p className="dw-note" role="status">{note}</p>}
@@ -149,31 +144,33 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
   </dl>
 
   <div className="dw-tabs" role="tablist" aria-label={t('Qué hacer con el archivo', 'What to do with the file')}>
-   {([['clean', t('Revisar y limpiar', 'Review & clean')], ['chart', t('Graficar', 'Chart')], ['sql', t('Preguntar con SQL', 'Ask with SQL')], ['compare', t('Comparar', 'Compare')]] as const).map(([k, label]) => <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)}>{label}</button>)}
+   {([['clean', t('Revisar y limpiar', 'Review & clean')], ['cols', t('Columnas', 'Columns')], ['chart', t('Graficar', 'Chart')], ['sql', t('Preguntar con SQL', 'Ask with SQL')], ['compare', t('Comparar', 'Compare')]] as const).map(([k, label]) => <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)}>{label}</button>)}
   </div>
   {tab === 'chart' && <CsvCharts key={`${version}:${chartFrom ? 'sql' : 'all'}`} lang={lang} table={chartFrom ?? whole} onBack={chartFrom ? () => setChartFrom(null) : undefined}/>}
   {tab === 'compare' && <CsvCompare key={version} lang={lang} table={whole}/>}
   {tab === 'sql' && <CsvSql key={version} lang={lang} table={whole} onChart={r => { setChartFrom(r); setTab('chart'); }}/>}
-  {tab === 'clean' && <div className="dw-clean">
-
+  {tab === 'cols' && <div className="dw-colsview">
   <section className="dw-structure" aria-label={t('Cómo está organizado', 'How it is organized')}>
    <h3>{t('Cómo está organizado', 'How it is organized')}</h3>
    <CsvMindMap lang={lang} file={fileName} rows={rows.length} columns={profile} hover={hover} onHover={setHover} runKey={`${version}`}/>
   </section>
 
-  <section className={`dw-columns${allCols ? ' is-open' : ''}`} style={{ '--cols': Math.ceil(profile.length / Math.ceil(profile.length / 5)) } as React.CSSProperties} aria-label={t('Columnas', 'Columns')}>
+  <section className="dw-columns is-open" style={{ '--cols': Math.ceil(profile.length / Math.ceil(profile.length / 5)) } as React.CSSProperties} aria-label={t('Columnas', 'Columns')}>
    {profile.map((p, i) => <article key={p.name} className={`dw-col kind-${p.kind}${hover === i ? ' is-hot' : ''}`} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}>
     <header><strong>{p.name}</strong><span>{({ number: t('número', 'number'), date: t('fecha', 'date'), category: t('categoría', 'category'), text: t('texto', 'text') })[p.kind]}</span></header>
     <p>{p.kind === 'number' ? `${t('de', 'from')} ${p.min?.toLocaleString('es-MX')} ${t('a', 'to')} ${p.max?.toLocaleString('es-MX')} · ${t('mediana', 'median')} ${p.median?.toLocaleString('es-MX')}` : p.kind === 'date' ? `${p.from} → ${p.to}` : `${p.unique} ${t('valores distintos', 'distinct values')}`}{p.blanks ? ` · ${p.blanks} ${t(p.blanks === 1 ? 'vacío' : 'vacíos', 'blank')}` : ''}</p>
     <ColumnChart p={p} es={es}/>
    </article>)}
   </section>
-  {profile.length > 4 && <button className="dw-morecols" aria-expanded={allCols} onClick={() => setAllCols(!allCols)}>{allCols ? t('Ver menos columnas', 'Show fewer columns') : t(`Ver las ${profile.length} columnas`, `Show all ${profile.length} columns`)}</button>}
 
+  </div>}
+  {tab === 'clean' && <div className="dw-clean">
+  <div ref={found} className="dw-found-wrap"><Found lang={lang} issues={issues} rows={rows.length} done={done} focus={focusIssue} runKey={`${version}`}
+   onFix={apply} onFixAll={applyAll} onUndo={() => { setRows(original.rows); setDone([]); }}
+   onShow={id => { setFocusIssue(id); setPage(0); tableTop.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}/></div>
   <div className="dw-tabletools" ref={tableTop}>
    <label className="dw-search"><span className="dw-visually-hidden">{t('Buscar en la tabla', 'Search the table')}</span><input type="search" value={query} onChange={e => { setQuery(e.target.value); setPage(0); }} placeholder={t('Buscar en la tabla…', 'Search the table…')}/></label>
-   {focusIssue ? <button onClick={() => { setFocusIssue(null); setPage(0); }}>{t('Ver todas las filas', 'Show all rows')} ✕</button>
-    : issues.length > 0 && <button className="dw-jump" onClick={() => found.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>{t('Se encontraron incoherencias · revisar', 'Inconsistencies found · review')}</button>}
+   {focusIssue && <button onClick={() => { setFocusIssue(null); setPage(0); }}>{t('Ver todas las filas', 'Show all rows')} ✕</button>}
   </div>
   <div className="dw-tablewrap" tabIndex={0} role="region" aria-label={t('Datos', 'Data')}><table>
    <thead><tr><th scope="col" className="dw-rownum">#</th>{headers.map((h, i) => <th key={i} scope="col" className={hover === i ? 'dw-hot' : ''} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}>{h}</th>)}</tr></thead>
@@ -186,9 +183,6 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
    </span>
    <button className="dw-primary" onClick={download}>{t('Descargar CSV limpio', 'Download clean CSV')} <span aria-hidden="true">↓</span></button>
   </div>
-  <div ref={found} className="dw-found-wrap"><Found lang={lang} issues={issues} rows={rows.length} done={done} focus={focusIssue} runKey={`${version}`}
-   onFix={apply} onFixAll={applyAll} onUndo={() => { setRows(original.rows); setDone([]); }}
-   onShow={id => { setFocusIssue(id); setPage(0); tableTop.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}/></div>
   </div>}
  </div>;
 }

@@ -220,3 +220,12 @@ html[data-motion=paused] .cf *{animation:none!important}
 @media(max-width:700px){.cmp-files{grid-template-columns:1fr}.cmp-arrow{transform:rotate(90deg);justify-self:center}.cmp-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.cmp-list li{grid-template-columns:1fr;gap:4px}}
 /* Celular: primero «Qué encontré» (lo que está mal), luego columnas y tabla */
 @media(max-width:700px){.dw-clean{display:flex;flex-direction:column}.dw-found-wrap{order:-1;margin-bottom:8px}}
+/* Avisos cortos con icono en vez de oraciones: lo que se arregla solo y lo que hay que revisar. */
+.cf-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px!important}
+.cf-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px 4px 8px;border-radius:99px;font-size:13px;font-weight:600;border:1px solid transparent}
+.cf-chip.fix{color:#f2b8c4;background:#e89aab1a;border-color:#e89aab40}
+.cf-chip.rule{color:#ead39b;background:#e3c7801a;border-color:#e3c78040}
+.cf-chip.ok{color:#a9dcc0;background:#94d1ae1a;border-color:#94d1ae40}
+.dw-clean .dw-found-wrap{margin-bottom:28px}
+.dw-colsview{display:grid;gap:22px}
+.dw-file small a{color:inherit;text-decoration:underline;text-underline-offset:3px}
