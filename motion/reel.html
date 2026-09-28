@@ -180,28 +180,23 @@ function sIntro(g, u, t) {
 }
 
 // ——— Manifiesto ———
-const MANI = { size: 196, f: 'Ser', it: true, w: 400 };
-function periodPoint() { return { x: 150 + TW(X, 'de verdad', MANI) + TW(X, '.', MANI) * .45, y: 738 }; }
+const MANI = { size: 150, f: 'Ser', it: true, w: 400 }, MANI_L3 = 'de todos los días';
+function periodPoint() { return { x: 150 + TW(X, MANI_L3, MANI) + TW(X, '.', MANI) * .45, y: 735 }; }
 function sMani(g, u, t) {
  backdrop(g, t, P.rose, 420, 620);
  const out = seg(u, 2.95, 3.35);
- rise(g, 'Herramientas', 150, 385, seg(u, .3, 1.0), { size: 146, w: 700, sp: -5 }, out);
- rise(g, 'que se usan', 150, 540, seg(u, .45, 1.15), { size: 146, w: 700, sp: -5, c: P.soft }, out);
- rise(g, 'de verdad.', 150, 745, seg(u, .6, 1.35), { ...MANI, c: P.rose });
+ rise(g, 'Cosas útiles', 150, 390, seg(u, .3, 1.0), { size: 146, w: 700, sp: -5 }, out);
+ rise(g, 'para problemas', 150, 545, seg(u, .45, 1.15), { size: 146, w: 700, sp: -5, c: P.soft }, out);
+ rise(g, MANI_L3 + '.', 150, 740, seg(u, .6, 1.35), { ...MANI, c: P.rose });
  const ks = E.outCubic(seg(u, 1.25, 1.85));
  if (ks > 0) {
-  const w = TW(g, 'de verdad', MANI); g.save(); g.strokeStyle = P.rose; g.lineWidth = 5; g.lineCap = 'round'; g.globalAlpha = 1 - out; g.beginPath();
-  const N = 60; for (let i = 0; i <= N * ks; i++) { const px = 165 + w * i / N, py = 785 + Math.sin(i * .45) * 3.5 - i * .12; i ? g.lineTo(px, py) : g.moveTo(px, py); } g.stroke(); g.restore();
+  const w = TW(g, MANI_L3, MANI); g.save(); g.strokeStyle = P.rose; g.lineWidth = 4; g.lineCap = 'round'; g.globalAlpha = 1 - out; g.beginPath();
+  const N = 70; for (let i = 0; i <= N * ks; i++) { const px = 160 + w * i / N, py = 772 + Math.sin(i * .45) * 3 - i * .08; i ? g.lineTo(px, py) : g.moveTo(px, py); } g.stroke(); g.restore();
  }
- [['07', 'proyectos funcionando'], ['05', 'repos con pruebas y CI'], ['00', 'servidores: corre en tu navegador']].forEach(([n, l], i) => {
-  const k = E.outExpo(seg(u, 1.0 + i * .18, 1.8 + i * .18)), y = 420 + i * 150;
-  g.save(); g.globalAlpha = k * (1 - out); g.translate((1 - k) * 70, 0);
-  g.fillStyle = P.line; g.fillRect(1240, y - 78, 540 * k, 1.2);
-  const shown = Math.round(Number(n) * E.outCubic(seg(u, 1.0 + i * .18, 2.0 + i * .18)));
-  T(g, String(shown).padStart(2, '0'), 1240, y + 6, { size: 76, f: 'Mono', w: 700, c: i === 2 ? P.mint : P.text });
-  T(g, l, 1420, y - 8, { size: 22, f: 'Sans', w: 500, c: P.muted });
-  g.restore();
- });
+ const note = 'una muestra de lo que puedo construir', kn = seg(u, 1.5, 2.3);
+ T(g, '—', 150, 860, { size: 18, f: 'Mono', w: 500, c: P.rose, a: kn > 0 ? 1 - out : 0 });
+ T(g, note.slice(0, Math.round(kn * note.length)), 186, 860, { size: 18, f: 'Mono', w: 500, c: P.muted, a: 1 - out });
+ if (kn > 0 && out === 0) caret(g, 186 + TW(g, note.slice(0, Math.round(kn * note.length)), { size: 18, f: 'Mono', w: 500 }), 860, 18, t, kn < 1, P.rose);
 }
 
 // ——— 01 · NFC ———
@@ -629,8 +624,8 @@ const PROJ = [
 ];
 function sMore(g, u, t) {
  backdrop(g, t, P.lilac, 960, 700);
- rise(g, 'Más de lo que', 150, 290, seg(u, .15, .8), { size: 92, w: 700, sp: -3 });
- rise(g, 'cabe en un minuto.', 150, 392, seg(u, .3, .95), { size: 96, f: 'Ser', it: true, w: 400, c: P.lilac });
+ rise(g, 'Otras cosas', 150, 290, seg(u, .15, .8), { size: 92, w: 700, sp: -3 });
+ rise(g, 'que he explorado.', 150, 392, seg(u, .3, .95), { size: 96, f: 'Ser', it: true, w: 400, c: P.lilac });
  const base = lerp(1000, -1080, E.inOutSine(seg(u, .2, 4.2)));
  PROJ.forEach(([name, pitch, c, ic], i) => {
   const x = base + i * 360, cx = x + 165, d = (cx - 960) / 960, ke = E.outExpo(seg(u, .25 + i * .05, .95 + i * .05));
@@ -653,10 +648,9 @@ function sOutro(g, u, t) {
  orbits(g, 960, 470, t, seg(u, .2, 2.2), .92, 1);
  rise(g, 'Bruno Salas', 960, 520, seg(u, .3, 1.15), { size: 190, w: 700, sp: -8, al: 'center' }, 0, .05);
  rise(g, 'portafolio', 960, 640, seg(u, .6, 1.35), { size: 112, f: 'Ser', it: true, w: 400, c: P.lilac, al: 'center' }, 0, .05);
- rise(g, '¿Lo construimos juntos?', 960, 780, seg(u, 1.5, 2.2), { size: 58, f: 'Ser', it: true, w: 400, c: P.rose, al: 'center' }, 0, .03);
  const url = 'bruno-portfolio-azure.vercel.app   ·   github.com/Brunich', mo = { size: 21, f: 'Mono', w: 500, c: P.muted, al: 'left', sp: 1 }, uw = TW(g, url, mo);
- T(g, scramble(url, seg(u, 2.1, 3.0), 11, t), 960 - uw / 2, 870, mo);
- if (u > 3.0) caret(g, 960 + uw / 2 + 4, 870, 21, t, false);
+ T(g, scramble(url, seg(u, 1.6, 2.5), 11, t), 960 - uw / 2, 790, mo);
+ if (u > 2.5) caret(g, 960 + uw / 2 + 4, 790, 21, t, false);
 }
 
 // ——— Montaje ———

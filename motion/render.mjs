@@ -3,13 +3,12 @@
 //   node motion/render.mjs sheet 1 2.5 …   → hoja de contactos con esos instantes (motion/out/sheet.jpg)
 //   node motion/render.mjs 1.2 5.9 …       → sólo esos instantes, como PNG, para revisar
 import { chromium } from 'playwright';
-import { mkdirSync, writeFileSync, rmSync } from 'node:fs';
-import { spawnSync } from 'node:child_process';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { spawn } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join } from 'node:path';
-import { tmpdir } from 'node:os';
 
-const here = dirname(fileURLToPath(import.meta.url)), out = join(here, 'out'), frames = join(tmpdir(), 'bruno-reel-frames'); // fuera de OneDrive: son miles de PNG temporales
+const here = dirname(fileURLToPath(import.meta.url)), out = join(here, 'out');
 const FPS = 60, args = process.argv.slice(2), isSheet = args[0] === 'sheet', times = (isSheet ? args.slice(1) : args).map(Number);
 mkdirSync(out, { recursive: true });
 const browser = await chromium.launch({ channel: 'msedge' });
@@ -22,12 +21,17 @@ const grab = async (t, file, blur) => save(await page.evaluate(([t, blur]) => { 
 if (isSheet) save(await page.evaluate(ts => window.sheet(ts), times), join(out, 'sheet.jpg'));
 else if (times.length) for (const t of times) await grab(t, join(out, `t${t.toFixed(2)}.png`), false);
 else {
- const total = Math.round(FPS * await page.evaluate(() => window.DUR));
- rmSync(frames, { recursive: true, force: true }); mkdirSync(frames);
- for (let f = 0; f < total; f++) { await grab(f / FPS, join(frames, `f${String(f).padStart(5, '0')}.png`), true); if (f % 300 === 0) console.log(`${f}/${total}`); }
- await browser.close(); // libera memoria: con el navegador abierto, x264 se quedó sin ella
- const r = spawnSync('ffmpeg', ['-v', 'error', '-y', '-framerate', String(FPS), '-i', join(frames, 'f%05d.png'), '-c:v', 'libx264', '-preset', 'slow', '-crf', '16', '-threads', '4', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', join(out, 'bruno-salas-reel.mp4')], { stdio: 'inherit' });
- if (r.status !== 0) process.exit(r.status ?? 1);
- console.log('listo:', join(out, 'bruno-salas-reel.mp4'));
+ // Los cuadros van directo a ffmpeg por una tubería: 3000 PNG en disco son ~9 GB y llenaron el disco una vez.
+ const total = Math.round(FPS * await page.evaluate(() => window.DUR)), file = join(out, 'bruno-salas-reel.mp4');
+ const ff = spawn('ffmpeg', ['-v', 'error', '-y', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'png', '-i', '-', '-c:v', 'libx264', '-preset', 'slow', '-crf', '16', '-threads', '4', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', file], { stdio: ['pipe', 'inherit', 'inherit'] });
+ const done = new Promise(ok => ff.on('close', ok));
+ for (let f = 0; f < total; f++) {
+  const data = await page.evaluate(t => { window.frame(t); return document.getElementById('c').toDataURL('image/png'); }, f / FPS);
+  if (!ff.stdin.write(Buffer.from(data.split(',')[1], 'base64'))) await new Promise(ok => ff.stdin.once('drain', ok));
+  if (f % 300 === 0) console.log(`${f}/${total}`);
+ }
+ ff.stdin.end(); const code = await done;
+ if (code !== 0) { console.error('ffmpeg falló:', code); process.exit(1); }
+ console.log('listo:', file);
 }
 if (browser.isConnected()) await browser.close();
