@@ -13,7 +13,7 @@ test('portfolio has working bilingual navigation, project pages and CV', async (
   await expect(page.locator('html')).toHaveAttribute('lang','en');
   await expect(page.getByRole('link', {name:'View projects',exact:true})).toBeVisible();
   await page.getByRole('button', { name:'Cambiar a español' }).click();
-  await page.locator('.project-punto').getByRole('link',{name:'Ver proyecto',exact:true}).click();
+  await page.locator('.other-card.project-punto').click(); // Punto U va en «Otros proyectos»
   await expect(page).toHaveURL(/\/proyectos\/punto-u$/);
   await expect(page.getByRole('heading',{level:1})).toHaveText('Punto U');
   await expect(page.getByRole('heading',{name:'Cómo funciona'})).toBeVisible();
@@ -181,7 +181,7 @@ test('on desktop each wheel step moves one zone, and the index jumps to a projec
  await page.waitForTimeout(400);
  await page.mouse.wheel(0,120);
  await expect(page.locator('.zone-dots .on')).toContainText('NFC para negocios');
- await page.locator('.zone-dots button',{hasText:'Proyectos'}).click();
- await page.locator('.project-index button',{hasText:'Punto U'}).click();
- await expect(page.locator('.zone-dots .on')).toContainText('Punto U');
+ await page.locator('.zone-dots').getByRole('button',{name:'Proyectos',exact:true}).click();
+ await page.locator('.project-index button',{hasText:'Entrega de turno'}).click();
+ await expect(page.locator('.zone-dots .on')).toContainText('Entrega de turno');
 });

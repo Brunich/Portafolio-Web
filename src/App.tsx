@@ -32,6 +32,8 @@ import { StampPage, NfcSetup, Qr, bizLink, bizFrom } from './Stamp';
 import './brand.css';
 
 const PROJECT_ORDER = ['club', 'csv', 'planta', 'spc', 'inventario', 'turno', 'vibe', 'punto'];
+// En la portada van al frente los que resuelven un problema de negocio; el hackathon y la app de estudiantes, abajo.
+const OTHER = ['vibe', 'punto'];
 type Project = ReturnType<typeof professional>['projects'][number];
 const external = (url: string) => url.startsWith('http') ? { target: '_blank', rel: 'noreferrer' } : {};
 
@@ -150,12 +152,17 @@ function HeroArt() {
 
 function Home({ lang, paused, projects }: { lang: Lang; paused: boolean; projects: Project[] }) {
  const c = copy[lang], p = professional(lang), es = lang === 'es';
+ const featured = projects.filter(x => !OTHER.includes(x.id)), others = projects.filter(x => OTHER.includes(x.id));
  const cv = es ? '/cv/Bruno-Salas-ES.pdf' : '/cv/Bruno-Salas-EN.pdf';
  return <main id="main">
   <section id="home" className="hero wrap" data-zone={es ? 'Inicio' : 'Home'}><HeroArt/><div className="hero-copy"><h1>{p.title}<em>{p.accent}</em></h1><p>{p.intro}</p><div className="hero-actions"><a className="button primary" href="#projects">{c.view}<ArrowDown size={19}/></a><a className="button secondary" href={cv} download>{es ? 'Descargar CV' : 'Download CV'}<DownloadSimple size={19}/></a></div><p className="hero-facts">{es ? 'Monterrey, N. L. · UANL 2023–2028 · Español, inglés y portugués' : 'Monterrey, Mexico · UANL 2023–2028 · Spanish, English & Portuguese'}</p></div><div className="hero-workbench"><HeroShowcase lang={lang} paused={paused}/></div></section>
-  <section id="projects" className="wrap section-space"><div className="projects-intro" data-zone={es ? 'Proyectos' : 'Projects'}><div className="section-heading" data-num="01"><div><span className="kicker">01 · {es ? 'Proyectos' : 'Projects'}</span><h2>{p.projectsTitle}</h2><p>{p.projectsIntro}</p></div><a className="inline-link" href={personal.github} {...external(personal.github)}>GitHub<GithubLogo size={21}/></a></div>
-   <ol className="project-index">{projects.map((x, i) => <li key={x.id} className={`project-${x.id}`}><button onClick={() => void glideTo(document.getElementById(`p-${x.id}`))}><span className="pi-num">{String(i + 1).padStart(2, '0')}</span><span className="pi-main"><strong>{x.title}</strong><em>{x.pitch}</em></span><span className="pi-kind">{x.kind}</span><ArrowDown size={18}/></button></li>)}</ol></div>
-   <div className="rows">{projects.map((project, i) => <ProjectRow key={project.id} lang={lang} project={project} flip={i % 2 === 1} n={i + 1} of={projects.length}/>)}</div>
+  <section id="projects" className="wrap section-space"><div className="projects-intro" data-zone={es ? 'Proyectos' : 'Projects'}><div className="section-heading" data-num="01"><div><span className="kicker">01 · {es ? 'Proyectos' : 'Projects'}</span><h2>{p.projectsTitle}</h2><p>{p.projectsIntro}</p></div><a className="inline-link more-link" href={personal.github} {...external(personal.github)}><GithubLogo size={21}/>{es ? 'Tengo más proyectos, pequeños y grandes' : 'I have more projects, small and large'}<ArrowUpRight size={18}/></a></div>
+   <ol className="project-index">{featured.map((x, i) => <li key={x.id} className={`project-${x.id}`}><button onClick={() => void glideTo(document.getElementById(`p-${x.id}`))}><span className="pi-num">{String(i + 1).padStart(2, '0')}</span><span className="pi-main"><strong>{x.title}</strong><em>{x.pitch}</em></span><span className="pi-kind">{x.kind}</span><ArrowDown size={18}/></button></li>)}</ol></div>
+   <div className="rows">{featured.map((project, i) => <ProjectRow key={project.id} lang={lang} project={project} flip={i % 2 === 1} n={i + 1} of={featured.length}/>)}</div>
+   <div className="others" data-zone={es ? 'Otros proyectos' : 'Other projects'}>
+    <div className="others-head"><span className="kicker">{es ? 'Otros proyectos' : 'Other projects'}</span><p>{es ? 'Un hackathon y una app para estudiantes: menos de negocio, igual de hechos a mano.' : 'A hackathon and a student app: less business, just as hand-made.'}</p></div>
+    <div className="others-grid">{others.map(x => <a key={x.id} className={`other-card project-${x.id}`} data-c href={`/proyectos/${x.slug}`} data-title={x.title}><span className={`other-media media-${x.id}`}><Media lang={lang} project={x}/></span><span className="other-copy"><em>{x.kind}</em><strong>{x.title}</strong><span>{x.pitch}</span></span><ArrowUpRight size={20}/></a>)}</div>
+   </div>
   </section>
   <section id="about" className="about-section section-space"><div className="wrap">
    <div className="about-grid" data-zone={es ? 'Perfil' : 'Profile'}>
@@ -252,7 +259,7 @@ function NfcPage({ lang }: { lang: Lang }) {
  const es = lang === 'es';
  const [tool, setTool] = useState<'card' | 'menu'>(() => location.hash === '#menu' ? 'menu' : 'card');
  useEffect(() => { scrollTo(0, 0); }, []);
- return <main id="main" data-c className="case project-club">
+ return <main id="main" data-c className="case project-club" aria-label={es ? 'Tu tarjeta NFC' : 'Your NFC card'}>
   <div className="wrap">
    <a className="case-back" href="/proyectos/club-nfc" data-title={es ? 'NFC para negocios' : 'NFC for businesses'}><ArrowLeft size={18}/>{es ? 'NFC para negocios' : 'NFC for businesses'}</a>
    <header className="nfc-head"><h1>{es ? 'Tu tarjeta de sellos, en un chip.' : 'Your stamp card, on a chip.'}</h1><p className="pitch">{es ? 'Tres pasos y queda lista en el mostrador.' : 'Three steps and it’s ready at the counter.'}</p></header>
