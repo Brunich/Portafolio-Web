@@ -33,3 +33,27 @@ test('EAN-8, UPC-A y códigos internos quedan en una sola forma por producto', a
  assert.equal(codeKind('ABC-123'), 'Code 128');
  assert.equal(printable('96385074') && printable('4006381333931') && !printable('ABC-123'), true);
 });
+
+test('catálogo del proveedor: agrega los nuevos, actualiza los que ya están y respeta lo contado', async () => {
+ const { importCatalog, SAMPLE } = await import('../src/inventario-logic.ts');
+ const agua = SAMPLE[0];
+ const r = importCatalog(SAMPLE, ['Código de barras', 'Descripción', 'Precio', 'Mínimo'], [
+  [agua.code, 'Agua natural 1 L', '$15.50', '30'],
+  ['7501000000119', 'Galletas surtidas', '27', ''],
+  ['', 'Sin código', '10', '1'],
+ ]);
+ assert.deepEqual([r.added, r.updated, r.skipped], [1, 1, 1]);
+ const a = r.products.find(p => p.code === agua.code)!;
+ assert.deepEqual([a.price, a.min, a.stock], [15.5, 30, agua.stock]);
+ assert.equal(r.products.find(p => p.name === 'Galletas surtidas')!.stock, 0);
+ assert.deepEqual(importCatalog(SAMPLE, ['precio'], [['1']]).missing, ['código', 'producto']);
+});
+
+test('valor en tienda y vendido hoy, a precio de venta', async () => {
+ const { stockValue, soldToday } = await import('../src/inventario-logic.ts');
+ const ps = [{ code: 'A', name: 'a', stock: 3, min: 1, price: 10 }, { code: 'B', name: 'b', stock: 2, min: 1 }];
+ assert.equal(stockValue(ps), 30);
+ const now = new Date(2026, 8, 28, 15).getTime(), ayer = now - 24 * 3600e3;
+ const moves = [{ at: now - 1000, code: 'A', name: 'a', delta: -2, mode: 'out' as const }, { at: ayer, code: 'A', name: 'a', delta: -5, mode: 'out' as const }, { at: now, code: 'A', name: 'a', delta: 4, mode: 'in' as const }];
+ assert.equal(soldToday(ps, moves, now), 20);
+});
