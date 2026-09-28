@@ -284,3 +284,4 @@ html,body{overflow-x:clip}
 .motion-next p{font-size:14px;color:var(--muted)}
 .motion-tag{align-self:flex-start;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--lilac);border:1px solid #a894f055;border-radius:99px;padding:4px 10px}
 @media(max-width:860px){.motion-grid{grid-template-columns:1fr}}
+.dw-note{margin:12px 0 0;padding:10px 14px;border-radius:12px;background:#9fd0bf14;border:1px solid #9fd0bf40;color:#cfe9df;font-size:14px}

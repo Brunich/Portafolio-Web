@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 import { exportCsv, parseCsv, profileColumns } from './csv';
+import { readTable, TABLE_ACCEPT } from './read-file';
 import type { ColumnProfile, CsvData } from './csv';
 import { detectIssues } from './quality';
 import type { Issue } from './quality';
@@ -13,7 +14,7 @@ import type { Table } from './CsvCharts';
 import CsvSql from './CsvSql';
 import './data-workbench.css';
 
-const LIMIT = 2 * 1024 * 1024;
+const LIMIT = 20 * 1024 * 1024;
 
 function ColumnChart({ p }: { p: ColumnProfile }) {
  if (p.kind === 'number' && p.numbers && p.min !== undefined && p.max !== undefined) {
@@ -45,6 +46,7 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
  const [focusIssue, setFocusIssue] = useState<string | null>(null);
  const [dragging, setDragging] = useState(false);
  const [error, setError] = useState('');
+ const [note, setNote] = useState('');
  const [query, setQuery] = useState('');
  const [version, setVersion] = useState(0);
  const [showAll, setShowAll] = useState(false);
@@ -68,23 +70,28 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
  const focusRows = focusIssue ? new Set(issues.find(i => i.id === focusIssue)?.cells.map(([r]) => r)) : null;
  const visible = (focusRows ? matches.filter(([, i]) => focusRows.has(i)) : matches).slice(0, showAll ? 500 : 10);
 
- const load = (data: CsvData, id: string, name: string) => { setOriginal(data); setRows(data.rows); setSource(id); setFileName(name); setDone([]); setFocusIssue(null); setQuery(''); setChartFrom(null); setError(''); setShowAll(false); setVersion(v => v + 1); };
+ const load = (data: CsvData, id: string, name: string) => { setOriginal(data); setRows(data.rows); setSource(id); setFileName(name); setDone([]); setFocusIssue(null); setQuery(''); setChartFrom(null); setError(''); setNote(''); setShowAll(false); setVersion(v => v + 1); };
  const apply = (issue: Issue) => { if (!issue.fix) return; setRows(r => issue.fix!(r)); setDone(d => [...d, doneOf(issue)]); setFocusIssue(null); };
  const applyAll = () => { let r = rows; const fixed: Done[] = []; for (let pass = 0; pass < 4; pass++) { const next = detectIssues(headers, r).filter(i => i.fix); if (!next.length) break; next.forEach(i => { r = i.fix!(r); fixed.push(doneOf(i)); }); } setRows(r); setDone(d => [...d, ...fixed]); setFocusIssue(null); };
  function describeError(err: unknown) {
   const [kind, row, expected, actual] = (err instanceof Error ? err.message : 'READ').split(':');
   if (kind === 'ROW_WIDTH') return t(`La fila ${row} tiene ${actual} columnas y el encabezado ${expected}. Revisa separadores y comillas.`, `Row ${row} has ${actual} columns and the header ${expected}. Check delimiters and quotes.`);
   if (kind === 'EMPTY') return t('El archivo está vacío.', 'The file is empty.');
-  if (kind === 'SIZE') return t('El archivo supera 2 MB.', 'The file exceeds 2 MB.');
-  if (kind === 'TYPE') return t('Elige un archivo .csv.', 'Choose a .csv file.');
+  if (kind === 'SIZE') return t('El archivo supera 20 MB.', 'The file exceeds 20 MB.');
+  if (kind === 'TYPE') return t('Elige un CSV, TSV o Excel (.xlsx, .xls).', 'Choose a CSV, TSV or Excel file (.xlsx, .xls).');
   if (kind === 'UNCLOSED_QUOTE' || kind === 'INVALID_QUOTE') return t(`Comillas inválidas en la fila ${row}.`, `Invalid quotes in row ${row}.`);
-  return t('No se pudo leer. Guarda el CSV en UTF-8.', 'Could not read it. Save the CSV as UTF-8.');
+  return t('No se pudo leer el archivo. Si es de Excel, prueba guardarlo como .xlsx.', 'Could not read the file. If it comes from Excel, try saving it as .xlsx.');
  }
  async function loadFile(file: File) {
   try {
-   if (!/\.csv$/i.test(file.name)) throw new Error('TYPE');
    if (file.size > LIMIT) throw new Error('SIZE');
-   load(parseCsv(new TextDecoder('utf-8', { fatal: true }).decode(await file.arrayBuffer())), 'file', file.name);
+   const data = await readTable(file);
+   load(data, 'file', file.name);
+   const f = data.fixes;
+   const n = (k: number, one: string, many: string) => k ? `${k} ${k === 1 ? one : many}` : '';
+   if (f && (f.short || f.long || f.blank)) setNote(t(
+    `Lo abrí ajustando: ${[n(f.blank, 'línea vacía saltada', 'líneas vacías saltadas'), n(f.short, 'fila corta completada', 'filas cortas completadas'), n(f.long, 'fila con datos de más (nueva columna)', 'filas con datos de más (nueva columna)')].filter(Boolean).join(', ')}. No se perdió ningún dato.`,
+    `Opened with adjustments: ${[n(f.blank, 'blank line skipped', 'blank lines skipped'), n(f.short, 'short row padded', 'short rows padded'), n(f.long, 'row with extra data (new column)', 'rows with extra data (new column)')].filter(Boolean).join(', ')}. No data was lost.`));
   } catch (err) { setError(describeError(err)); }
  }
  function download() {
@@ -102,7 +109,7 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
    <div className="dw-file"><span className="dw-fileicon" aria-hidden="true">CSV</span><div><strong>{fileName}</strong><small>{sample ? `${t('Datos sintéticos', 'Synthetic data')} · ${sample.context[L]}` : t('Tu archivo · se procesa sólo en este navegador', 'Your file · processed only in this browser')}</small></div></div>
    <div className="dw-sources">
     {SAMPLES.map(s => <button key={s.id} aria-pressed={source === s.id} onClick={() => { const d = parseCsv(s.csv); load(d, s.id, s.file); }}>{s.title[L]}</button>)}
-    <input ref={upload} type="file" accept=".csv,text/csv" hidden onChange={e => { const f = e.target.files?.[0]; if (f) void loadFile(f); e.target.value = ''; }}/>
+    <input ref={upload} type="file" accept={TABLE_ACCEPT} hidden onChange={e => { const f = e.target.files?.[0]; if (f) void loadFile(f); e.target.value = ''; }}/>
     <button className="dw-primary" onClick={() => upload.current?.click()}>{t('Subir el tuyo', 'Upload yours')} <span aria-hidden="true">↑</span></button>
    </div>
   </header>
@@ -110,6 +117,7 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
    <p><strong>{t('Esto es un ejemplo', 'This is a sample')}</strong> {t('con formato de reporte real; los datos son inventados.', 'shaped like a real report; the data is made up.')}</p>
    <div><button className="dw-primary" onClick={() => upload.current?.click()}>{t('Sube el tuyo', 'Upload yours')} <span aria-hidden="true">↑</span></button><a href={`mailto:${personal.email}?subject=${encodeURIComponent(t('CSV para revisar', 'CSV to review'))}`}>{t('o mándamelo y lo reviso', 'or send it to me')}</a></div>
   </div>}
+  {note && <p className="dw-note" role="status">{note}</p>}
   {error && <p className="dw-error" role="alert">{error} {t('Se conserva el análisis anterior.', 'The previous analysis is kept.')}</p>}
 
   <dl className="dw-kpis">
