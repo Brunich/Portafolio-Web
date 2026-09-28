@@ -27,3 +27,13 @@
 2. **T2 · Volumen (T5).** Filtros y «ver más»; prueba con 60 incidencias.
 3. **T3 · Entrega formal.** PDF del turno con fotos.
 4. **T4 · Compartido (T6).** Sincronizar entre celulares; necesita servidor y es decisión tuya.
+
+## Estado al 28-09-2026
+**Hecho y validado técnicamente**
+- T1: en celular, pestañas por columna y un botón en cada tarjeta para moverla; prueba con pantalla táctil a 390 px: de Abiertas a Cerradas sólo con toques.
+- T2: filtros por línea y severidad y «Ver N más»; prueba con 60 incidencias.
+- T3: hoja de entrega para imprimir o guardar en PDF, en una página, con las cerradas y su foto.
+
+**Falta**
+- T4: compartir entre celulares (necesita servidor: decisión tuya).
+- Probar el arrastre y la cámara en tu celular (validación en uso).

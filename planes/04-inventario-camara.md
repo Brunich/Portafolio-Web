@@ -25,3 +25,13 @@
 2. **T2 · Más códigos (I4).** EAN-8, UPC-A, Code128; pruebas con imágenes generadas.
 3. **T3 · Uso diario (I6).** Buscar, editar, borrar; historial por producto.
 4. **T4 · Prueba en tu celular (I5).** Escanear 5 productos reales de tu casa; eso lo valida en uso.
+
+## Estado al 28-09-2026
+**Hecho y validado técnicamente**
+- T1: el texto ya no manda a «etiquetas de abajo»: abre las etiquetas y baja a ellas; columna de la cámara fija al bajar.
+- T2: EAN-8 (etiqueta generada y leída desde foto en la prueba), UPC-A = mismo producto que su EAN-13, códigos internos con letras (Code 128).
+- T3: buscar por nombre o código, historial por producto, nombre editable, borrar con deshacer.
+- La impresión de etiquetas ya no deja páginas en blanco.
+
+**Falta**
+- T4: escanear 5 productos reales con tu celular (validación en uso de la cámara).
