@@ -259,7 +259,26 @@ function NfcPage({ lang }: { lang: Lang }) {
    </ol>
   </div>
   <section className="case-demo"><div className="wrap"><div className="dw-tabs nfc-tabs" role="tablist">{([['card', es ? 'Tarjeta de sellos' : 'Stamp card'], ['menu', es ? 'Menú' : 'Menu']] as const).map(([k, label]) => <button key={k} role="tab" aria-selected={tool === k} onClick={() => { setTool(k); history.replaceState(null, '', k === 'menu' ? '#menu' : location.pathname); }}>{label}</button>)}</div><Suspense fallback={null}>{tool === 'card' ? <NfcSetup lang={lang}/> : <MenuBuilder lang={lang}/>}</Suspense></div></section>
+  <NfcGuide lang={lang}/>
  </main>;
+}
+
+// Guía de compra y grabado: qué chip pedir, cómo grabarlo y cómo dejarlo seguro.
+function NfcGuide({ lang }: { lang: Lang }) {
+ const es = lang === 'es';
+ const cards: [string, string, string[]][] = es ? [
+  ['Qué comprar', 'Stickers NTAG215 redondos de 25 mm, en paquete de 10.', ['Tarjeta de sellos: basta un NTAG213; con enlace de reseñas, NTAG215.', 'Menú: NTAG216 sin descripciones; el QR sí aguanta el menú completo.', 'Sobre metal (caja, refri, terminal) pide la versión «anti-metal»: un sticker normal no se lee ahí.', 'Evita MIFARE Classic 1K: el iPhone no lo abre como enlace.']],
+  ['Cómo grabarlo', 'Dos minutos, sin instalar nada en Android.', ['Android: abre esta página en Chrome y toca «Grabar en el chip».', 'iPhone: app gratuita NFC Tools → Escribir → Añadir registro → URL → pega el enlace.', 'Acerca el chip a la parte de atrás del celular, cerca de la cámara.']],
+  ['Antes de pegarlo', 'Que lo lea un celular que no sea el tuyo.', ['En Android, «¿Quedó bien grabado?» lee el chip y lo compara con tu enlace.', 'Cuando funcione, bloquéalo en NFC Tools (Otros → Bloquear etiqueta) para que nadie lo reescriba. Es para siempre: hazlo al final.', 'Pega también el QR al lado, para los celulares sin NFC.']],
+ ] : [
+  ['What to buy', 'Round 25 mm NTAG215 stickers, in packs of 10.', ['Stamp card: an NTAG213 is enough; with a review link, NTAG215.', 'Menu: NTAG216 without descriptions; the QR holds the full menu.', 'On metal (register, fridge, card terminal) get the “anti-metal” kind: a regular sticker will not read there.', 'Avoid MIFARE Classic 1K: iPhones will not open it as a link.']],
+  ['How to write it', 'Two minutes, nothing to install on Android.', ['Android: open this page in Chrome and tap “Write to the chip”.', 'iPhone: free NFC Tools app → Write → Add record → URL → paste the link.', 'Hold the chip to the back of the phone, near the camera.']],
+  ['Before sticking it', 'Have a phone other than yours read it.', ['On Android, “Was it written right?” reads the chip and compares it with your link.', 'Once it works, lock it in NFC Tools (Other → Lock tag) so nobody rewrites it. It is permanent: do it last.', 'Stick the QR next to it too, for phones without NFC.']],
+ ];
+ return <section className="wrap nfc-guide" data-zone={es ? 'Guía' : 'Guide'} aria-labelledby="nfc-guide-title">
+  <h2 id="nfc-guide-title">{es ? 'Guía rápida del chip' : 'Chip quick guide'}</h2>
+  <div className="nfc-guide-grid">{cards.map(([title, lead, items], i) => <article key={title}><span>{String(i + 1).padStart(2, '0')}</span><h3>{title}</h3><p>{lead}</p><ul>{items.map(x => <li key={x}>{x}</li>)}</ul></article>)}</div>
+ </section>;
 }
 
 // Cada proyecto tiene su propio repo, con pruebas y README.

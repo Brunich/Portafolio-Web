@@ -3,7 +3,7 @@
 .hs-card{position:absolute;inset:5% 7%;display:block;overflow:hidden;border-radius:22px;border:1px solid #ffffff1c;background:radial-gradient(ellipse 80% 70% at 50% 25%,#2e2447,#150f22 72%);box-shadow:0 40px 80px -20px #04051299,inset 0 1px 0 #ffffff14;transition:transform .9s cubic-bezier(.2,.8,.2,1),opacity .9s,filter .9s}
 .hs-card>img{width:100%;height:100%;object-fit:cover;object-position:top}
 .hs-phone{display:flex;align-items:center;justify-content:center;padding:22px}
-.hs-phone img{width:auto;max-width:100%;height:100%;object-fit:contain;border:5px solid #090a18;border-radius:26px;box-shadow:0 20px 50px #0a0b1e80,0 0 0 1px #463a66}
+.hs-phone img{width:auto;max-width:100%;height:100%;object-fit:contain;border:5px solid #0f0c15;border-radius:26px;box-shadow:0 20px 50px #130f1980,0 0 0 1px #463a66}
 .hs-pos0{z-index:3;transform:none}
 .hs-pos1{z-index:2;transform:translate(10%,-5%) scale(.9) rotate(4deg);opacity:.7;filter:saturate(.6) brightness(.65);pointer-events:none}
 .hs-pos2{z-index:1;transform:translate(-10%,-7%) scale(.84) rotate(-5deg);opacity:.45;filter:saturate(.5) brightness(.55);pointer-events:none}
@@ -18,7 +18,7 @@
 .hs-rect .cc-row{font-size:11.5px}
 
 /* Celular sobre el chip NFC (ciclo de 5,6 s, igual que la rotación) */
-.hs-nfc{background:radial-gradient(ellipse 70% 60% at 50% 78%,#3a2f7a,#150f22 70%)}
+.hs-nfc{background:radial-gradient(ellipse 70% 60% at 50% 78%,#4e3e6b,#150f22 70%)}
 .nt{position:absolute;inset:0}
 .nt-tag{position:absolute;left:50%;bottom:11%;width:34%;aspect-ratio:1.55;transform:translateX(-50%) perspective(500px) rotateX(52deg);display:grid;place-items:center;gap:2px;border-radius:14px;background:linear-gradient(150deg,#f4f1ff,#cfc6ff);color:#2a1f5c;box-shadow:0 18px 30px #0008}
 .nt-tag .hs-icon{width:34%;height:auto}
