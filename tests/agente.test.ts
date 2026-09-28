@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import { answer, toSql, isSafeSql, recommend } from '../src/agente-logic.ts';
 
 test('contesta con la fuente: precio, existencia, horario y pedido', () => {
- const p = answer('¿Cuánto cuestan las balatas del Tsuru?');
+ const p = answer('¿Cuánto cuesta el rodamiento 6205?');
  assert.equal(p.intent, 'precio');
- assert.match(p.text, /\$489/);
- assert.equal(p.source, 'catálogo · BAL-2211');
- assert.match(answer('precio de balatas aveo').text, /agotado/);
+ assert.match(p.text, /\$185/);
+ assert.equal(p.source, 'catálogo · ROD-6205');
+ assert.match(answer('precio del rodamiento 6206').text, /agotado/);
  assert.equal(answer('¿A qué hora abren el sábado?').intent, 'horario');
  const o = answer('mi pedido p-1043');
  assert.equal(o.intent, 'pedido');

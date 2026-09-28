@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { CheckCircle, Lightning, WarningCircle } from '@phosphor-icons/react';
 import type { Issue } from './quality';
 
-// «Qué encontré» como gráfica: un medidor con las filas limpias y una barra por problema.
+// Revisión como gráfica: un medidor con las filas limpias y una barra por problema.
 // Lo que se arregla con un clic se encoge y se pinta de menta; lo que requiere criterio se queda.
 export type Done = { key: number; title: [string, string]; text: [string, string]; n: number };
 let seq = 0;
@@ -23,9 +23,9 @@ export default function Found({ lang, issues, rows, done, focus, runKey, onFix, 
  const max = Math.max(1, ...issues.map(rowsOf), ...done.map(d => d.n));
  const tone = !real.length ? 'ok' : real.every(i => !i.fix) ? 'rule' : 'fix';
 
- return <section className="cf" aria-label={t('Qué encontré', 'What I found')} key={runKey}>
+ return <section className="cf" aria-label={t('Revisión', 'Review')} key={runKey}>
   <header className="cf-head">
-   <div><h3>{t('Qué encontré', 'What I found')}</h3>
+   <div><h3>{t('Revisión', 'Review')}</h3>
     <p className="cf-chips">{!real.length ? <span className="cf-chip ok"><CheckCircle size={16} weight="fill" aria-hidden="true"/>{t('Listo para usar', 'Ready to use')}</span> : <>
      {fixable.length > 0 && <span className="cf-chip fix"><Lightning size={16} weight="fill" aria-hidden="true"/>{t(`${fixable.length} con arreglo automático`, `${fixable.length} auto-fixable`)}</span>}
      {real.length - fixable.filter(i => i.severity !== 'info').length > 0 && <span className="cf-chip rule"><WarningCircle size={16} weight="fill" aria-hidden="true"/>{t(`${real.length - fixable.filter(i => i.severity !== 'info').length} por revisar`, `${real.length - fixable.filter(i => i.severity !== 'info').length} to review`)}</span>}</>}</p></div>
