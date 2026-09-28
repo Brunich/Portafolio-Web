@@ -115,7 +115,7 @@ export default function Spc({ lang }: { lang: 'es' | 'en' }) {
   {!c && <p className="spc-err">{t('Hacen falta al menos 5 mediciones numéricas en la columna elegida.', 'At least 5 numeric measurements are needed in the chosen column.')}</p>}
   {c && v && <>
    <section className={`spc-verdict ${v.control ? 'ok' : 'bad'}`}>
-    <div className="spc-state">{v.control ? <CheckCircle size={30} weight="fill"/> : <WarningOctagon size={30} weight="fill"/>}<div><strong>{v.text}</strong><small>{c.mode === 'I-MR' ? t('Gráfica de individuales y rango móvil (I-MR)', 'Individuals and moving range chart (I-MR)') : t(`Gráfica X̄-R con subgrupos de ${c.n}`, `X̄-R chart, subgroups of ${c.n}`)}{c.base < c.points.length ? t(` · límites con los primeros ${c.base}`, ` · limits from the first ${c.base}`) : ''}</small></div></div>
+    <div className="spc-state">{v.control ? <CheckCircle size={30} weight="fill"/> : <WarningOctagon size={30} weight="fill"/>}<div><strong>{v.title}</strong>{v.detail && <span className="spc-detail">{v.detail[0].toUpperCase() + v.detail.slice(1)}</span>}<small>{c.mode === 'I-MR' ? t('Gráfica de individuales y rango móvil (I-MR)', 'Individuals and moving range chart (I-MR)') : t(`Gráfica X̄-R con subgrupos de ${c.n}`, `X̄-R chart, subgroups of ${c.n}`)}{c.base < c.points.length ? t(` · límites con los primeros ${c.base}`, ` · limits from the first ${c.base}`) : ''}</small></div></div>
     <dl className="spc-kpis">
      <div><dt>{t('Promedio', 'Mean')}</dt><dd>{fmt(c.mean)}</dd></div>
      <div><dt>σ</dt><dd>{fmt(c.sigma, 4)}</dd></div>

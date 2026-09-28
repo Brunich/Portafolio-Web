@@ -102,7 +102,10 @@ export function verdict(c: Chart, cap: Capability | null, es: boolean) {
  // Control y capacidad son cosas distintas: un proceso puede avisar que cambió y todavía cumplir la tolerancia.
  const still = !control && capable !== 'no', and = still ? (es ? 'aunque todavía' : 'though it still') : (es ? 'y' : 'and');
  const b = capable === null ? '' : capable === 'yes' ? (es ? `${and} cumple la tolerancia con margen.` : `${and} meets the tolerance with room.`) : capable === 'tight' ? (es ? `${and} cumple la tolerancia, pero justo.` : `${and} meets the tolerance, barely.`) : (es ? 'y no alcanza la tolerancia: saldrán piezas malas.' : 'and cannot hold the tolerance: bad parts will come out.');
- return { control, capable, signals, text: b ? `${a} ${b}` : a };
+ const title = control ? (es ? 'Bajo control' : 'In control') : (es ? 'Fuera de control' : 'Out of control');
+ const parts = [control ? '' : (es ? `${signals} ${signals === 1 ? 'señal' : 'señales'}` : `${signals} signal${signals === 1 ? '' : 's'}`),
+  capable === null ? '' : capable === 'yes' ? (es ? 'cumple la tolerancia con margen' : 'meets the tolerance with room') : capable === 'tight' ? (es ? 'cumple la tolerancia, pero justo' : 'meets the tolerance, barely') : (es ? 'no alcanza la tolerancia' : 'cannot hold the tolerance')].filter(Boolean);
+ return { control, capable, signals, text: b ? `${a} ${b}` : a, title, detail: parts.join(' · ') };
 }
 
 // Ejemplo: diámetro de un buje, 25 muestras de 5 piezas cada hora; a partir de la 18 la herramienta se desgasta.

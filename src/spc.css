@@ -80,3 +80,5 @@ html[data-motion=paused] .spc-chart circle{animation:none;opacity:1}
 html[data-motion=paused] .spcp .ln{animation:none;stroke-dashoffset:0}
 .spc-swipe{display:none;margin:0;font-size:12.5px;color:var(--muted,#b7aec4)}
 @media(max-width:700px){.spc-swipe{display:block}}
+.spc-state .spc-detail{display:block;margin-top:2px;font-size:15px;color:var(--text,#eee)}
+.inv-kpis dt svg,.inv dt svg{vertical-align:-2px;margin-right:4px}
