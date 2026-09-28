@@ -71,7 +71,14 @@
 @keyframes inv-in{from{transform:translateY(8px)}}
 html[data-motion=paused] .inv *{animation:none!important}
 @media(max-width:900px){.inv-main{grid-template-columns:1fr}.inv-kpis{grid-template-columns:repeat(2,1fr)}.inv-products li{grid-template-columns:1fr 100px}.inv-bar{display:none}}
-@media print{body *{visibility:hidden}.inv-sheet,.inv-sheet *{visibility:visible}.inv-sheet{position:absolute;inset:0;grid-template-columns:repeat(3,1fr)}.inv-sheet figure{border:1px dashed #999;break-inside:avoid}}
+/* Imprimir etiquetas: sólo la hoja, sin páginas en blanco, y sólo cuando la hoja está abierta */
+@media print{
+ body:has(.inv-sheet){background:#fff!important}
+ body:has(.inv-sheet) *:not(:has(.inv-sheet)):not(.inv-sheet):not(.inv-sheet *){display:none!important}
+ body:has(.inv-sheet) :has(.inv-sheet):not(html):not(body){display:block!important;position:static!important;margin:0!important;padding:0!important;min-height:0!important;background:none!important;border:0!important;box-shadow:none!important;animation:none!important;transform:none!important;opacity:1!important;clip-path:none!important;visibility:visible!important}
+ .inv-sheet{display:grid!important;grid-template-columns:repeat(3,1fr);gap:4mm;visibility:visible!important}
+ .inv-sheet figure{margin:0;border:1px dashed #999;break-inside:avoid;visibility:visible!important}
+}
 
 /* Vista previa: un celular escanea y el número sube */
 .ivp{height:100%;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:clamp(16px,4%,40px);padding:clamp(20px,5%,44px);background:radial-gradient(ellipse 80% 70% at 30% 30%,#2a2440,#120e1d 72%)}
