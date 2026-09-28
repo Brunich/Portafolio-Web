@@ -5,6 +5,8 @@ import AxeBuilder from '@axe-core/playwright';
 test.beforeEach(async ({ page }) => { await page.addInitScript(() => sessionStorage.setItem('bruno-intro', '1')); });
 
 test('portfolio has working bilingual navigation, project pages and CV', async ({ page, request }) => {
+ // El servidor de Punto U se simula arriba: esta prueba revisa la página, no el estado de Supabase.
+ await page.route('**/*supabase.co/**', r => r.fulfill({ status: 200, body: '' }));
   await page.goto('/');
   await expect(page.getByRole('heading', {level:1})).toContainText('Desarrollo web');
   await page.getByRole('button', { name:'Switch to English' }).click();
