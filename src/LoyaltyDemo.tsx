@@ -3,18 +3,10 @@ import './loyalty-demo.css';
 
 // Club de clientes por NFC: el mesero apoya el celular del cliente en un chip,
 // se suma un sello en su tarjeta del Wallet y el sistema le escribe por WhatsApp
-// en el momento justo. Aquí todo se simula en el navegador: no se envía nada.
+// en el momento justo. Aquí se simula en el navegador; la tarjeta real está en Stamp.tsx.
 const GOAL = 8;
 const DAY = 24 * 60 * 60 * 1000;
 const START = new Date(2026, 9, 6, 14, 10).getTime(); // martes 6 de octubre, 14:10
-
-const BUILD: { title: [string, string]; text: [string, string]; tech: string }[] = [
- { title: ['El chip', 'The chip'], text: ['Abre una URL sin instalar nada. Cada lectura trae un código nuevo: copiar el enlace no suma sellos.', 'Opens a URL with nothing installed. Every read carries a new code: copying the link adds no stamps.'], tech: 'NFC NTAG 424 DNA · SUN / AES-CMAC' },
- { title: ['La primera visita', 'The first visit'], text: ['Pide sólo nombre, WhatsApp y cumpleaños, con consentimiento.', 'Asks only for name, WhatsApp and birthday, with consent.'], tech: 'React · API en Node · Postgres' },
- { title: ['La tarjeta', 'The pass'], text: ['Pase firmado para Apple y Google Wallet. Cada sello lo actualiza solo.', 'Signed pass for Apple and Google Wallet. Each stamp updates it automatically.'], tech: 'PassKit (.pkpass) · Google Wallet API' },
- { title: ['Las reglas', 'The rules'], text: ['Un sello al día, premios por local o cadena, y cada visita registrada.', 'One stamp a day, rewards per venue or chain, and every visit logged.'], tech: 'Postgres · restricciones únicas · RLS' },
- { title: ['Los mensajes', 'The messages'], text: ['Reseña a las 2 h, «te extrañamos» a los 30 días y promo antes del cumpleaños.', 'Review at 2 h, “we miss you” at 30 days and a promo before the birthday.'], tech: 'WhatsApp Cloud API · cron / colas' },
-];
 
 type Msg ={ id: number; at: number; text: [string, string]; action?: 'review' | 'reserve'; done?: boolean };
 type Log = { id: number; at: number; text: [string, string]; kind: 'visit' | 'msg' | 'rule' | 'win' };
@@ -210,17 +202,6 @@ export default function LoyaltyDemo({ lang }: { lang: 'es' | 'en' }) {
     </ol>
    </div>
   </div>
-  <div className="ld-build">
-   <h3>{t('Cómo lo construiría de verdad', 'How I would build it for real')}</h3>
-   <ol>
-    {BUILD.map((b, i) => <li key={b.title[0]} style={{ ['--i' as string]: i }}>
-     <span className="ld-step">{String(i + 1).padStart(2, '0')}</span>
-     <strong>{b.title[L]}</strong>
-     <p>{b.text[L]}</p>
-     <code>{b.tech}</code>
-    </li>)}
-   </ol>
-  </div>
-  <p className="ld-note">{t('Simulación: el restaurante es ficticio y no se envía ningún WhatsApp. Inspirado en un producto real; esta versión es mía.', 'Simulation: the restaurant is fictional and no WhatsApp is sent. Inspired by a real product; this version is mine.')}</p>
+  <p className="ld-note">{t('El Cerro es un restaurante de ejemplo y en esta demo no se envía ningún WhatsApp.', 'El Cerro is a sample restaurant and this demo sends no WhatsApp messages.')}</p>
  </div>;
 }

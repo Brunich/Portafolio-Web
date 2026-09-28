@@ -30,7 +30,7 @@
 html[data-motion=paused] .pano-stage img.on{animation:none;transform:none}
 @media(max-width:640px){.pano-thumbs{grid-template-columns:repeat(5,minmax(96px,1fr));overflow-x:auto}.pano-title strong{font-size:17px}.pano-title{padding:30px 14px 12px}.original-pairs{justify-content:flex-start}}
 
-.gamedev-kicker{display:inline-block;margin-bottom:12px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#ffc896}
+.gamedev-kicker{display:inline-block;margin-bottom:12px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#cfc4ff}
 .gamedev-tags span{border-color:#6a5a7d;color:#e6dcf2}
 .gamedev-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 34px}
 .gamedev-metrics div{background:#272a33;border:1px solid #474a57;border-radius:10px;padding:16px 18px}

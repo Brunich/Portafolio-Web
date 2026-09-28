@@ -5,11 +5,12 @@ import { detectIssues } from './quality';
 import type { Issue } from './quality';
 import { SAMPLES } from './samples';
 import CsvMindMap from './CsvMindMap';
+import Found, { doneOf } from './CsvFound';
+import type { Done } from './CsvFound';
 import { personal } from './personal';
 import './data-workbench.css';
 
 const LIMIT = 2 * 1024 * 1024;
-const SEV: Record<Issue['severity'], [string, string]> = { high: ['Revisar', 'Review'], medium: ['Corregible', 'Fixable'], low: ['Menor', 'Minor'], info: ['Aviso', 'Note'] };
 
 function ColumnChart({ p }: { p: ColumnProfile }) {
  if (p.kind === 'number' && p.numbers && p.min !== undefined && p.max !== undefined) {
@@ -36,7 +37,7 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
  const [rows, setRows] = useState<string[][]>(() => parseCsv(SAMPLES[0].csv).rows);
  const [source, setSource] = useState<string>(SAMPLES[0].id);
  const [fileName, setFileName] = useState(SAMPLES[0].file);
- const [history, setHistory] = useState<string[]>([]);
+ const [done, setDone] = useState<Done[]>([]);
  const [hover, setHover] = useState<number | null>(null);
  const [focusIssue, setFocusIssue] = useState<string | null>(null);
  const [dragging, setDragging] = useState(false);
@@ -45,6 +46,7 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
  const [version, setVersion] = useState(0);
  const [showAll, setShowAll] = useState(false);
  const upload = useRef<HTMLInputElement>(null);
+ const tableTop = useRef<HTMLDivElement>(null), found = useRef<HTMLDivElement>(null);
  const headers = original.headers;
 
  const issues = useMemo(() => detectIssues(headers, rows), [headers, rows]);
@@ -55,15 +57,14 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
   return m;
  }, [issues, focusIssue]);
  const filled = rows.length * headers.length ? Math.round(rows.reduce((n, r) => n + r.filter(v => v.trim()).length, 0) / (rows.length * headers.length) * 1000) / 10 : 0;
- const fixable = issues.filter(i => i.fix);
  const sample = SAMPLES.find(s => s.id === source);
  const matches = rows.map((r, i) => [r, i] as const).filter(([r]) => !query || r.some(v => v.toLocaleLowerCase('es').includes(query.toLocaleLowerCase('es'))));
  const focusRows = focusIssue ? new Set(issues.find(i => i.id === focusIssue)?.cells.map(([r]) => r)) : null;
  const visible = (focusRows ? matches.filter(([, i]) => focusRows.has(i)) : matches).slice(0, showAll ? 500 : 10);
 
- const load = (data: CsvData, id: string, name: string) => { setOriginal(data); setRows(data.rows); setSource(id); setFileName(name); setHistory([]); setFocusIssue(null); setQuery(''); setError(''); setShowAll(false); setVersion(v => v + 1); };
- const apply = (issue: Issue) => { if (!issue.fix) return; setRows(r => issue.fix!(r)); setHistory(h => [...h, issue.fixDone![L]]); setFocusIssue(null); };
- const applyAll = () => { let r = rows; const done: string[] = []; for (let pass = 0; pass < 4; pass++) { const next = detectIssues(headers, r).filter(i => i.fix); if (!next.length) break; next.forEach(i => { r = i.fix!(r); done.push(i.fixDone![L]); }); } setRows(r); setHistory(h => [...h, ...done]); setFocusIssue(null); };
+ const load = (data: CsvData, id: string, name: string) => { setOriginal(data); setRows(data.rows); setSource(id); setFileName(name); setDone([]); setFocusIssue(null); setQuery(''); setError(''); setShowAll(false); setVersion(v => v + 1); };
+ const apply = (issue: Issue) => { if (!issue.fix) return; setRows(r => issue.fix!(r)); setDone(d => [...d, doneOf(issue)]); setFocusIssue(null); };
+ const applyAll = () => { let r = rows; const fixed: Done[] = []; for (let pass = 0; pass < 4; pass++) { const next = detectIssues(headers, r).filter(i => i.fix); if (!next.length) break; next.forEach(i => { r = i.fix!(r); fixed.push(doneOf(i)); }); } setRows(r); setDone(d => [...d, ...fixed]); setFocusIssue(null); };
  function describeError(err: unknown) {
   const [kind, row, expected, actual] = (err instanceof Error ? err.message : 'READ').split(':');
   if (kind === 'ROW_WIDTH') return t(`La fila ${row} tiene ${actual} columnas y el encabezado ${expected}. Revisa separadores y comillas.`, `Row ${row} has ${actual} columns and the header ${expected}. Check delimiters and quotes.`);
@@ -112,25 +113,10 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
    <div className={issues.some(i => i.severity !== 'info') ? 'dw-kpi-warn' : 'dw-kpi-ok'}><dt>{t('Problemas', 'Issues')}</dt><dd>{issues.filter(i => i.severity !== 'info').length}</dd></div>
   </dl>
 
-  <div className="dw-main">
-   <section className="dw-issues" aria-label={t('Qué encontré', 'What I found')}>
-    <div className="dw-issues-head"><h4>{t('Qué encontré', 'What I found')}</h4>{fixable.length > 0 && <button className="dw-primary" onClick={applyAll}>{t(`Arreglar lo automático (${fixable.length})`, `Fix the automatic ones (${fixable.length})`)}</button>}</div>
-    {!issues.length && <p className="dw-clean">{t('Sin problemas detectados. El archivo está listo para analizar.', 'No issues found. The file is ready to analyze.')}</p>}
-    <ul>{issues.map(issue => <li key={issue.id} className={`dw-issue sev-${issue.severity}${focusIssue === issue.id ? ' is-focus' : ''}`}>
-     <button className="dw-issue-main" aria-pressed={focusIssue === issue.id} onClick={() => setFocusIssue(focusIssue === issue.id ? null : issue.id)}>
-      <span className="dw-sev">{SEV[issue.severity][L]}</span><strong>{issue.title[L]}</strong>
-      <span className="dw-issue-detail">{issue.detail[L]}</span>
-      {issue.example && <code>{issue.example}</code>}
-     </button>
-     {issue.fix && <button className="dw-fix" onClick={() => apply(issue)}>{issue.fixLabel![L]}</button>}
-    </li>)}</ul>
-    {history.length > 0 && <div className="dw-history"><h5>{t('Cambios aplicados', 'Applied changes')}</h5><ul>{history.map((h, i) => <li key={i}>✓ {h}</li>)}</ul><button onClick={() => { setRows(original.rows); setHistory([]); }}>{t('Volver al original', 'Back to original')}</button></div>}
-   </section>
-   <section className="dw-structure" aria-label={t('Cómo está organizado', 'How it is organized')}>
-    <h4>{t('Cómo está organizado', 'How it is organized')}</h4>
-    <CsvMindMap lang={lang} file={fileName} rows={rows.length} columns={profile} hover={hover} onHover={setHover} runKey={`${version}`}/>
-   </section>
-  </div>
+  <section className="dw-structure" aria-label={t('Cómo está organizado', 'How it is organized')}>
+   <h4>{t('Cómo está organizado', 'How it is organized')}</h4>
+   <CsvMindMap lang={lang} file={fileName} rows={rows.length} columns={profile} hover={hover} onHover={setHover} runKey={`${version}`}/>
+  </section>
 
   <section className="dw-columns" aria-label={t('Columnas', 'Columns')}>
    {profile.map((p, i) => <article key={p.name} className={`dw-col kind-${p.kind}${hover === i ? ' is-hot' : ''}`} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}>
@@ -140,9 +126,10 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
    </article>)}
   </section>
 
-  <div className="dw-tabletools">
+  <div className="dw-tabletools" ref={tableTop}>
    <label className="dw-search"><span className="dw-visually-hidden">{t('Buscar en la tabla', 'Search the table')}</span><input type="search" value={query} onChange={e => setQuery(e.target.value)} placeholder={t('Buscar en la tabla…', 'Search the table…')}/></label>
-   {focusIssue && <button onClick={() => setFocusIssue(null)}>{t('Ver todas las filas', 'Show all rows')} ✕</button>}
+   {focusIssue ? <button onClick={() => setFocusIssue(null)}>{t('Ver todas las filas', 'Show all rows')} ✕</button>
+    : issues.length > 0 && <button className="dw-jump" onClick={() => found.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>{t('Las celdas marcadas tienen algo raro · ver qué', 'Marked cells have something off · see what')} ↓</button>}
   </div>
   <div className="dw-tablewrap" tabIndex={0} role="region" aria-label={t('Datos', 'Data')}><table>
    <thead><tr><th scope="col" className="dw-rownum">#</th>{headers.map((h, i) => <th key={i} scope="col" className={hover === i ? 'dw-hot' : ''} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}>{h}</th>)}</tr></thead>
@@ -152,6 +139,8 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
    <span>{t(`${visible.length} de ${rows.length} filas`, `${visible.length} of ${rows.length} rows`)}{!showAll && matches.length > 10 && <button className="dw-link" onClick={() => setShowAll(true)}>{t('ver todas', 'show all')}</button>}</span>
    <button className="dw-primary" onClick={download}>{t('Descargar CSV limpio', 'Download clean CSV')} <span aria-hidden="true">↓</span></button>
   </div>
-  <p className="dw-note">{t('Lo que requiere criterio se marca, no se inventa.', 'What needs judgment is flagged, never made up.')}</p>
+  <div ref={found}><Found lang={lang} issues={issues} rows={rows.length} done={done} focus={focusIssue} runKey={`${version}`}
+   onFix={apply} onFixAll={applyAll} onUndo={() => { setRows(original.rows); setDone([]); }}
+   onShow={id => { setFocusIssue(id); tableTop.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}/></div>
  </div>;
 }
