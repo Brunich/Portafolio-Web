@@ -67,3 +67,5 @@ html[data-motion=paused] .st-msg,html[data-motion=paused] .st-links{animation:no
 .st-qr svg{width:100%;height:auto}
 .st-print p{font-size:13px;line-height:1.5;color:var(--muted,#aeb0c9)}
 @media(max-width:860px){.st-setup{grid-template-columns:1fr}.st-out{position:static}.st-two{grid-template-columns:1fr}}
+.st-pin{display:block;margin:14px auto 0;width:140px;min-height:48px;text-align:center;letter-spacing:.4em;font:800 20px 'DM Sans Variable',sans-serif;border-radius:14px;border:1px solid #ffffff33;background:#0c0914;color:#fff}
+.st-err{color:#ffb2c3!important;font-size:14px!important}

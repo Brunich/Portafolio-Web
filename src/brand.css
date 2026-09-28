@@ -266,3 +266,10 @@ html[data-motion=paused] .zone-in *,html[data-motion=paused] .zone-in{animation:
 html[data-motion=paused] .case-visual{animation:none}
 .case-visual .nt-phone{width:21%}.case-visual .nt-tag{width:26%}.case-visual .nt-wave{width:22%}
 html,body{overflow-x:clip}
+.project-planta{--c:#8fb7d6}.project-inventario{--c:#c9a8e8}
+/* Pestañas fuera del analizador (página /nfc) */
+.nfc-tabs{display:flex;gap:4px;margin:0 0 28px;padding:4px;border-radius:14px;background:#0f0b18;border:1px solid #ffffff14;width:max-content;max-width:100%}
+.nfc-tabs button{min-height:44px;border:0;background:transparent;border-radius:10px;padding:8px 18px;color:var(--muted);font:600 14px 'DM Sans Variable',sans-serif;cursor:pointer}
+.nfc-tabs button[aria-selected=true]{background:linear-gradient(120deg,#a894f0,#c9a8e8);color:#150f22}
+.club-real+.club-real{margin-top:16px}
+.club-menu{background:linear-gradient(120deg,#a894f022,#1b1629 55%);border-color:#a894f033}

@@ -4,7 +4,13 @@ import './stamp.css';
 
 // Tarjeta de sellos real: un chip NFC (o un QR) abre /sello con los datos del negocio en el enlace.
 // El sello se guarda en el celular del cliente: uno al día, y al llenar la tarjeta se canjea el premio.
-export type Biz = { name: string; goal: number; prize: string; color: string; review: string; wa: string };
+export type Biz = { name: string; goal: number; prize: string; color: string; review: string; wa: string; pin?: string };
+
+// PIN de canje: en el enlace sólo va una huella del PIN (SHA-256 con el nombre del negocio), no el PIN.
+export async function pinHash(name: string, pin: string) {
+ const bytes = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${slug(name)}:${pin}`)));
+ return [...bytes.slice(0, 5)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
 type Card = { stamps: number; last: string; rewards: number; visits: number };
 type Lang = 'es' | 'en';
 
@@ -17,12 +23,13 @@ export function bizFrom(search: string): Biz {
  const q = new URLSearchParams(search);
  const goal = Math.min(12, Math.max(3, Number(q.get('m')) || 8));
  const c = (q.get('c') ?? '').replace(/[^0-9a-f]/gi, '');
- return { name: q.get('n')?.trim() || 'El Cerro', goal, prize: q.get('p')?.trim() || 'Postre de la casa', color: c.length === 6 ? c : COLORS[0], review: q.get('r') ?? '', wa: (q.get('w') ?? '').replace(/\D/g, '') };
+ return { name: q.get('n')?.trim() || 'El Cerro', goal, prize: q.get('p')?.trim() || 'Postre de la casa', color: c.length === 6 ? c : COLORS[0], review: q.get('r') ?? '', pin: (q.get('k') ?? '').replace(/[^0-9a-f]/g, '') || undefined, wa: (q.get('w') ?? '').replace(/\D/g, '') };
 }
 export function bizLink(b: Biz, origin = location.origin) {
  const q = new URLSearchParams({ n: b.name, m: String(b.goal), p: b.prize, c: b.color });
  if (b.review) q.set('r', b.review);
  if (b.wa) q.set('w', b.wa);
+ if (b.pin) q.set('k', b.pin);
  return `${origin}/sello?${q}`;
 }
 export function Qr({ text, label }: { text: string; label: string }) {
@@ -64,11 +71,16 @@ export function StampPage({ lang }: { lang: Lang }) {
  const [card, setCard] = useState(first.card);
  const [status, setStatus] = useState(first.status);
  const [confirm, setConfirm] = useState(false);
+ const [pin, setPin] = useState('');
+ const [pinErr, setPinErr] = useState(false);
  const demo = new URLSearchParams(location.search).has('demo');
  useEffect(() => { document.title = `${biz.name} · ${es ? 'tus sellos' : 'your stamps'}`; }, [biz.name, es]);
  const left = biz.goal - card.stamps;
 
- function redeem() { const c = { ...card, stamps: 0, rewards: card.rewards + 1 }; write(key, c); setCard(c); setStatus('today'); setConfirm(false); }
+ async function redeem() {
+  if (biz.pin && await pinHash(biz.name, pin) !== biz.pin) { setPinErr(true); return; }
+  const c = { ...card, stamps: 0, rewards: card.rewards + 1 }; write(key, c); setCard(c); setStatus('today'); setConfirm(false); setPin(''); setPinErr(false);
+ }
  function another() { // sólo en la demo del portafolio: simula la visita de otro día
   if (card.stamps >= biz.goal) return;
   const c = { ...card, stamps: card.stamps + 1, visits: card.visits + 1, last: today() }; write(key, c); setCard(c); setStatus(c.stamps >= biz.goal ? 'full' : 'new');
@@ -81,7 +93,7 @@ export function StampPage({ lang }: { lang: Lang }) {
    {status === 'new' && <><h1>{es ? '¡Sello de hoy listo!' : 'Today’s stamp is in!'}</h1><p>{es ? `Te ${left === 1 ? 'falta 1' : `faltan ${left}`} para: ${biz.prize}.` : `${left} more for: ${biz.prize}.`}</p></>}
    {status === 'today' && <><h1>{card.stamps ? (es ? 'Ya tienes el sello de hoy.' : 'You already have today’s stamp.') : (es ? 'Tarjeta canjeada.' : 'Card redeemed.')}</h1><p>{es ? 'Uno por día: vuelve pronto por el siguiente.' : 'One a day: come back soon for the next one.'}</p></>}
    {status === 'full' && !confirm && <><h1>{es ? '¡Tarjeta completa!' : 'Card complete!'}</h1><p>{es ? `Tu premio: ${biz.prize}. Enséñale esta pantalla a quien te atiende.` : `Your reward: ${biz.prize}. Show this screen to the staff.`}</p><button className="st-btn" onClick={() => setConfirm(true)}>{es ? 'Canjear premio' : 'Redeem reward'}</button></>}
-   {status === 'full' && confirm && <><h1>{es ? '¿Ya te lo dieron?' : 'Did you get it?'}</h1><p>{es ? 'Que lo confirme alguien del negocio: la tarjeta vuelve a empezar.' : 'Let the staff confirm it: the card starts over.'}</p><div className="st-row"><button className="st-btn" onClick={redeem}>{es ? 'Sí, canjeado' : 'Yes, redeemed'}</button><button className="st-btn ghost" onClick={() => setConfirm(false)}>{es ? 'Todavía no' : 'Not yet'}</button></div></>}
+   {status === 'full' && confirm && <><h1>{es ? '¿Ya te lo dieron?' : 'Did you get it?'}</h1><p>{biz.pin ? (es ? 'Quien te atiende escribe el PIN del negocio para canjearlo.' : 'The staff types the business PIN to redeem it.') : (es ? 'Que lo confirme alguien del negocio: la tarjeta vuelve a empezar.' : 'Let the staff confirm it: the card starts over.')}</p>{biz.pin && <input className="st-pin" value={pin} inputMode="numeric" maxLength={6} autoComplete="off" aria-label="PIN" placeholder="PIN" onChange={e => { setPin(e.target.value.replace(/\D/g, '')); setPinErr(false); }}/>}{pinErr && <p className="st-err">{es ? 'PIN incorrecto.' : 'Wrong PIN.'}</p>}<div className="st-row"><button className="st-btn" onClick={() => void redeem()}>{es ? 'Sí, canjeado' : 'Yes, redeemed'}</button><button className="st-btn ghost" onClick={() => setConfirm(false)}>{es ? 'Todavía no' : 'Not yet'}</button></div></>}
   </section>
   {(biz.review || biz.wa) && <nav className="st-links">
    {biz.review && <a className="st-btn ghost" href={biz.review} target="_blank" rel="noreferrer">{es ? '¿Te gustó? Deja una reseña' : 'Liked it? Leave a review'}</a>}
@@ -97,6 +109,8 @@ export function NfcSetup({ lang }: { lang: Lang }) {
  const [biz, setBiz] = useState<Biz>({ name: 'El Cerro', goal: 8, prize: es ? 'Postre de la casa' : 'House dessert', color: COLORS[0], review: '', wa: '' });
  const [copied, setCopied] = useState(false);
  const [nfc, setNfc] = useState<'idle' | 'wait' | 'ok' | 'error'>('idle');
+ const [pin, setPin] = useState('');
+ useEffect(() => { let alive = true; if (/^\d{4,6}$/.test(pin)) void pinHash(biz.name, pin).then(h => { if (alive) setBiz(b => b.pin === h ? b : { ...b, pin: h }); }); else setBiz(b => b.pin ? { ...b, pin: undefined } : b); return () => { alive = false; }; }, [pin, biz.name]);
  const link = bizLink(biz);
  const canWrite = typeof window !== 'undefined' && 'NDEFReader' in window;
  const set = (p: Partial<Biz>) => { setBiz(b => ({ ...b, ...p })); setCopied(false); setNfc('idle'); };
@@ -120,6 +134,7 @@ export function NfcSetup({ lang }: { lang: Lang }) {
    </div>
    <fieldset><legend>{es ? 'Color' : 'Color'}</legend>{COLORS.map(c => <button type="button" key={c} aria-label={`#${c}`} aria-pressed={biz.color === c} style={{ background: `#${c}` }} onClick={() => set({ color: c })}/>)}</fieldset>
    <label>{es ? 'Enlace para reseñas (opcional)' : 'Review link (optional)'}<input value={biz.review} placeholder="https://g.page/r/…/review" onChange={e => set({ review: e.target.value.trim() })}/></label>
+   <label>{es ? 'PIN para canjear el premio (opcional, 4 a 6 números)' : 'PIN to redeem the reward (optional, 4–6 digits)'}<input value={pin} inputMode="numeric" maxLength={6} autoComplete="off" placeholder="2468" onChange={e => { setPin(e.target.value.replace(/\D/g, '')); setCopied(false); setNfc('idle'); }}/></label>
    <label>{es ? 'WhatsApp del negocio (opcional)' : 'Business WhatsApp (optional)'}<input value={biz.wa} inputMode="tel" placeholder="52 81 1234 5678" onChange={e => set({ wa: e.target.value })}/></label>
   </form>
   <div className="st-out">
