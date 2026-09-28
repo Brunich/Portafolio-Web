@@ -106,7 +106,7 @@ test('stamp card with PIN: a wrong PIN does not redeem, the right one does', asy
 
 test('on a phone every project header is one column, the title fits and the floating button waits until you scroll up', async ({ page }) => {
  await page.setViewportSize({ width: 390, height: 844 });
- for (const slug of ['club-nfc', 'analizador-csv', 'planta', 'graficas-de-control', 'inventario', 'entrega-de-turno', 'vibemap', 'punto-u']) {
+ for (const slug of ['club-nfc', 'analizador-csv', 'planta', 'graficas-de-control', 'inventario', 'entrega-de-turno', 'asistente-ia-local', 'vibemap', 'punto-u']) {
   await page.goto(`/proyectos/${slug}`);
   const head = await page.locator('.case-head').evaluate(e => ({ cols: getComputedStyle(e).gridTemplateColumns.split(' ').length, h1: e.querySelector('h1')!.getBoundingClientRect().right, doc: document.documentElement.scrollWidth }));
   expect(head.cols, slug).toBe(1);
@@ -269,4 +269,23 @@ test('control charts: the sample flags the tool wear, and a plain column of read
  await expect(page.locator('.spc-okmsg')).toBeVisible();
  await page.getByLabel(/Tolerancia máxima/).fill('70.2');
  await expect(page.locator('.spc-kpis')).toContainText('Fuera de tolerancia');
+});
+
+test('local AI assistant (in development): answers with a source, escalates the unknown, and the database is read-only', async ({ page }) => {
+ await page.goto('/proyectos/asistente-ia-local');
+ await expect(page.locator('.ag-dev')).toContainText('En desarrollo');
+ await page.getByLabel('Mensaje').fill('¿Cuánto cuestan las balatas del Tsuru?');
+ await page.getByRole('button', { name: 'Enviar' }).click();
+ await expect(page.locator('.ag-msg.bot').last()).toContainText('$489');
+ await expect(page.locator('.ag-msg.bot').last()).toContainText('BAL-2211');
+ await page.getByLabel('Mensaje').fill('¿Me pueden hacer factura con otro RFC?');
+ await page.getByRole('button', { name: 'Enviar' }).click();
+ await expect(page.locator('.ag-msg.bot').last()).toContainText('Pasado a una persona');
+ await page.getByRole('tab', { name: 'Consultar la base' }).click();
+ await expect(page.locator('.ag-table tbody tr')).toHaveCount(2);
+ await page.locator('.ag-tries button', { hasText: 'Borra' }).click();
+ await expect(page.locator('.ag-block')).toContainText('sólo lee');
+ await page.getByRole('tab', { name: 'Dónde instalarlo' }).click();
+ await page.getByLabel('Prefiere no pagar mensualidad').check();
+ await expect(page.locator('.ag-options li.pick')).toContainText('PC del negocio');
 });

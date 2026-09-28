@@ -354,3 +354,6 @@ html,body{overflow-x:clip}
 .other-copy strong{font:720 24px/1.1 var(--display);letter-spacing:-.02em}
 .other-copy span{color:var(--muted);font:italic 400 17px var(--serif)}
 @media(max-width:760px){.others-grid{grid-template-columns:1fr}.other-media{height:180px}}
+.project-agente{--c:#b3c7e6}
+/* Proyecto en desarrollo: la etiqueta de estado se distingue de «Funcional» */
+.project-agente .project-kind em{background:#d9c08a1f;color:#e6d3a3;border:1px dashed #d9c08a88}
