@@ -19,3 +19,12 @@
 **Tandas.**
 - T1: tú entras a supabase.com y revisas si el proyecto está pausado (reactivarlo es un clic en su panel). Es tu cuenta, así que no lo toco.
 - T2: si no se puede reactivar, quitarlo de la vitrina y mostrar capturas en vez de la app en vivo.
+
+## Estado al 28-09-2026
+**Hecho y validado técnicamente**
+- Punto U: la página prueba su servidor; si no responde, enseña capturas de la app con un aviso y cambia el texto. Hoy cae en ese caso: `wugsixqhygqvamgywymn.supabase.co` sigue sin existir en el DNS (observado hoy).
+- VibeMap: el mismo respaldo si su despliegue cae (hoy responde 200). Pruebas simulan los dos estados.
+
+**Falta**
+- U1: que revises en supabase.com si el proyecto está pausado (sospecha, no comprobada). En cuanto conteste, la página vuelve sola a la app en vivo.
+- V2 (`landmark-unique` dentro del iframe) es del repo de VibeMap; no lo toqué.
