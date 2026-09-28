@@ -328,3 +328,11 @@ html,body{overflow-x:clip}
 .live-shots figcaption{font-size:13px;color:var(--muted)}
 @media(max-width:640px){.live-shots.n2 img{max-height:380px}.live-shots{gap:10px}}
 :root .dw-workbench .dw-pager .dw-link{display:inline-flex;align-items:center;min-height:44px;padding-inline:8px}
+.project-spc{--c:#e2b3a0}
+/* Con 8 proyectos el índice debe caber en una pantalla (si no, la rueda se queda dentro de la zona) */
+.project-index button{padding-block:clamp(8px,1.35vh,16px)}
+.paged .projects-intro{gap:clamp(18px,3vh,36px)}
+/* Guía lateral: la etiqueta oculta no ocupa lugar ni tapa lo que hay debajo */
+.zone-dots button{position:relative;width:44px}
+.zone-dots span{position:absolute;right:48px;top:50%;margin-top:-13px;pointer-events:none}
+.zone-dots button:hover span,.zone-dots button:focus-visible span{pointer-events:auto}

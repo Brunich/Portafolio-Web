@@ -173,7 +173,7 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
   <div className="dw-tabletools" ref={tableTop}>
    <label className="dw-search"><span className="dw-visually-hidden">{t('Buscar en la tabla', 'Search the table')}</span><input type="search" value={query} onChange={e => { setQuery(e.target.value); setPage(0); }} placeholder={t('Buscar en la tabla…', 'Search the table…')}/></label>
    {focusIssue ? <button onClick={() => { setFocusIssue(null); setPage(0); }}>{t('Ver todas las filas', 'Show all rows')} ✕</button>
-    : issues.length > 0 && <button className="dw-jump" onClick={() => found.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>{t('Las celdas marcadas tienen algo raro · ver qué', 'Marked cells have something off · see what')}</button>}
+    : issues.length > 0 && <button className="dw-jump" onClick={() => found.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>{t('Se encontraron incoherencias · revisar', 'Inconsistencies found · review')}</button>}
   </div>
   <div className="dw-tablewrap" tabIndex={0} role="region" aria-label={t('Datos', 'Data')}><table>
    <thead><tr><th scope="col" className="dw-rownum">#</th>{headers.map((h, i) => <th key={i} scope="col" className={hover === i ? 'dw-hot' : ''} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}>{h}</th>)}</tr></thead>
