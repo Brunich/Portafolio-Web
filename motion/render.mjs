@@ -29,4 +29,5 @@ else {
  const r = spawnSync('ffmpeg', ['-v', 'error', '-y', '-framerate', String(FPS), '-i', join(frames, 'f%05d.png'), '-c:v', 'libx264', '-preset', 'slow', '-crf', '16', '-threads', '4', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', join(out, 'bruno-salas-reel.mp4')], { stdio: 'inherit' });
  if (r.status !== 0) process.exit(r.status ?? 1);
  console.log('listo:', join(out, 'bruno-salas-reel.mp4'));
-} else await browser.close();
+}
+if (browser.isConnected()) await browser.close();
