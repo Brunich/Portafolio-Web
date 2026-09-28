@@ -4,21 +4,21 @@
 
 export const fold = (s: string) => s.toLocaleLowerCase('es').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[¿?¡!.,;:]/g, ' ').replace(/\s+/g, ' ').trim();
 
-// ---------- Atención al cliente: una refaccionaria de ejemplo ----------
+// ---------- Atención al cliente: un proveedor industrial de ejemplo ----------
 export type Product = { sku: string; name: string; price: number; stock: number; tags: string[] };
 export type Order = { folio: string; status: string; eta: string };
 export const SHOP = {
- name: 'Refaccionaria Del Norte',
+ name: 'Suministros Industriales Norte',
  hours: 'lunes a viernes de 8:00 a 19:00 y sábados de 9:00 a 14:00',
  address: 'Av. Ruiz Cortines 1450, Monterrey',
  phone: '81 5550 0199',
  products: [
-  { sku: 'BAL-2211', name: 'Balatas delanteras Tsuru', price: 489, stock: 12, tags: ['balatas', 'frenos', 'tsuru', 'nissan'] },
-  { sku: 'BAL-3109', name: 'Balatas delanteras Aveo', price: 545, stock: 0, tags: ['balatas', 'frenos', 'aveo', 'chevrolet'] },
-  { sku: 'ACE-5W30', name: 'Aceite sintético 5W-30 (4 L)', price: 720, stock: 30, tags: ['aceite', '5w30', 'sintetico'] },
-  { sku: 'FIL-A120', name: 'Filtro de aire Versa', price: 210, stock: 7, tags: ['filtro', 'aire', 'versa', 'nissan'] },
-  { sku: 'BAT-4210', name: 'Batería 42 meses', price: 2350, stock: 4, tags: ['bateria', 'acumulador'] },
-  { sku: 'BUJ-IR4', name: 'Bujías de iridio (juego de 4)', price: 980, stock: 9, tags: ['bujias', 'iridio', 'afinacion'] },
+  { sku: 'ROD-6205', name: 'Rodamiento 6205-2RS', price: 185, stock: 40, tags: ['rodamiento', 'balero', '6205'] },
+  { sku: 'ROD-6206', name: 'Rodamiento 6206-2RS', price: 210, stock: 0, tags: ['rodamiento', 'balero', '6206'] },
+  { sku: 'ACE-H68', name: 'Aceite hidráulico ISO 68 (19 L)', price: 1890, stock: 14, tags: ['aceite', 'hidraulico', 'iso68'] },
+  { sku: 'GUA-N100', name: 'Guantes de nitrilo (caja de 100)', price: 260, stock: 55, tags: ['guantes', 'nitrilo', 'epp'] },
+  { sku: 'LEN-C01', name: 'Lentes de seguridad claros', price: 95, stock: 120, tags: ['lentes', 'seguridad', 'epp'] },
+  { sku: 'BAN-A48', name: 'Banda en V A-48', price: 145, stock: 9, tags: ['banda', 'correa', 'a48'] },
  ] as Product[],
  orders: [
   { folio: 'P-1042', status: 'en camino', eta: 'hoy antes de las 18:00' },

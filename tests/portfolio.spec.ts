@@ -53,13 +53,17 @@ test('landing stays a summary: heavy demos live on their own pages', async ({pag
  // Siete proyectos, cada uno en su pantalla: el límite cuida que no vuelvan los apartados largos.
  expect(await page.evaluate(()=>document.documentElement.scrollHeight)).toBeLessThan(14000);
  await page.locator('.hs-tabs button').nth(1).click();
- await page.locator('.hs-pos0').click();
- await expect(page).toHaveURL(/\/proyectos\/analizador-csv$/);
+ await page.locator('.hs-pos0 .ha-nav').getByRole('button',{name:'Completo'}).click();
+ await expect(page.locator('.hs-pos0 .ha-csv-full')).toBeVisible();
+ await page.locator('.hs-pos0 .ha-nav').getByRole('link',{name:'Abrir'}).click();
+ await expect(page).toHaveURL(/\/proyectos\/analizador-csv#demo$/);
+ await expect(page.locator('#demo')).toBeInViewport();
 });
 
 test('shift handover: an incident cannot be closed without evidence, and the handover lists what is open', async ({page,request})=>{
  await page.goto('/proyectos/entrega-de-turno');
  const board=page.locator('.sh');
+ await board.getByRole('button',{name:'Nueva incidencia'}).click();
  await board.getByLabel('Lote').fill('4480');
  await board.getByLabel('Defecto').fill('Soldadura incompleta');
  await board.getByRole('button',{name:'Registrar'}).click();
