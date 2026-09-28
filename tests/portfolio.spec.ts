@@ -44,7 +44,12 @@ test('landing stays a summary: heavy demos live on their own pages', async ({pag
  await expect(page.locator('.dw-workbench')).toHaveCount(0);
  await expect(page.locator('.ld-stage')).toHaveCount(0);
  await expect(page.locator('.sh')).toHaveCount(0);
- await expect(page.locator('body')).not.toContainText(/en desarrollo|in development/i);
+ // Sólo el asistente local lleva «en desarrollo» (lo pidió Bruno); ningún otro proyecto debe parecer a medias.
+ const withDev = await page.evaluate(()=>[...document.querySelectorAll('body *')]
+  .filter(el=>el.children.length===0 && /en desarrollo|in development/i.test(el.textContent ?? ''))
+  .map(el=>el.closest('.project-agente') ? 'project-agente' : (el.parentElement?.className ?? el.tagName)));
+ expect(withDev.length).toBeGreaterThan(0);
+ for (const c of withDev) expect(c).toContain('project-agente');
  // Siete proyectos, cada uno en su pantalla: el límite cuida que no vuelvan los apartados largos.
  expect(await page.evaluate(()=>document.documentElement.scrollHeight)).toBeLessThan(14000);
  await page.locator('.hs-tabs button').nth(1).click();
