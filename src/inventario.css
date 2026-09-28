@@ -4,7 +4,7 @@
 .inv button:hover,.inv-photo:hover{border-color:#ffffff66}
 .inv button:disabled{opacity:.5;cursor:default}
 .inv input{min-height:40px;border:1px solid #ffffff24;border-radius:10px;background:#0f0b18;color:var(--text);padding:8px 12px;font:500 14px 'DM Sans Variable',sans-serif}
-.inv-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0}
+.inv-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:0}
 .inv-kpis div{padding:4px 0 4px 14px;border-left:2px solid #ffffff24}
 .inv-kpis dt{font-size:12.5px;color:var(--muted)}
 .inv-kpis dd{margin:4px 0 0;font:800 clamp(24px,2.6vw,34px)/1 var(--display);letter-spacing:-.03em}
@@ -115,3 +115,5 @@ html[data-motion=paused] .ivp *{animation-play-state:paused!important}
 .inv .inv-hint .pl-link{border:0;background:none;padding:0 2px;min-height:0;font:inherit;font-weight:600;cursor:pointer}
 .inv-detail .inv-empty{font-size:13px}
 .inv-detail .inv-log li{grid-template-columns:36px minmax(0,1fr) auto;padding:4px 0;background:none;border:0;animation:none}
+.inv-import{display:flex;align-items:center;gap:6px;margin:10px 0 0;font-size:14px;color:#a9dcc0}
+.inv-kpis dt svg{vertical-align:-2px;margin-right:4px}

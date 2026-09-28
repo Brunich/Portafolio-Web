@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { flushSync } from 'react-dom';
-import { ArrowUpRight, ArrowDown, ArrowLeft, ArrowRight, DownloadSimple, GithubLogo, EnvelopeSimple, LinkedinLogo, WhatsappLogo, Pause, Play, AndroidLogo } from '@phosphor-icons/react';
+import { ArrowUpRight, ArrowDown, ArrowLeft, ArrowRight, DownloadSimple, GithubLogo, EnvelopeSimple, LinkedinLogo, WhatsappLogo, Pause, Play, AndroidLogo, UserCircle } from '@phosphor-icons/react';
 import { copy, certificates } from './content';
 import type { Lang } from './content';
 import { professional } from './professional-content';
@@ -166,6 +166,7 @@ function Home({ lang, paused, projects }: { lang: Lang; paused: boolean; project
    <div className="others is-dev" data-zone={es ? 'En desarrollo' : 'In development'}>
     <div className="others-head"><span className="kicker">{es ? 'En desarrollo' : 'In development'}</span><p>{es ? 'Lo que estoy construyendo ahora.' : 'What I am building now.'}</p></div>
     <div className="others-grid">{dev.map(x => <a key={x.id} className={`other-card project-${x.id}`} data-c href={`/proyectos/${x.slug}`} data-title={x.title}><span className={`other-media media-${x.id}`}><Media lang={lang} project={x}/></span><span className="other-copy"><em>{x.status}</em><strong>{x.title}</strong><span>{x.pitch}</span></span><ArrowUpRight size={20}/></a>)}
+     <div className="other-card other-plain project-portal"><span className="other-media other-icon" aria-hidden="true"><UserCircle size={72} weight="duotone"/><small>{es ? 'Cuentas · peticiones · documentos' : 'Accounts · requests · documents'}</small></span><span className="other-copy"><em>{es ? 'En desarrollo' : 'In development'}</em><strong>{es ? 'Portal de empleados' : 'Employee portal'}</strong><span>{es ? 'Cada empleado con su cuenta y su foto: peticiones, documentos y avisos, con bloqueo por intentos, segundo paso y aviso de privacidad.' : 'Each employee with an account and photo: requests, documents and notices, with login lockout, two-step sign-in and a privacy notice.'}</span></span></div>
      <div className="other-card other-plain project-android"><span className="other-media other-icon" aria-hidden="true"><AndroidLogo size={72} weight="duotone"/><small>NFC · CameraX · Compose</small></span><span className="other-copy"><em>{es ? 'En desarrollo' : 'In development'}</em><strong>{es ? 'Apps Android nativas' : 'Native Android apps'}</strong><span>{es ? 'NFC para negocios, Inventario y Entrega de turno, con el lector NFC, la cámara y los avisos del teléfono.' : 'NFC for businesses, Inventory and Shift handover, using the phone’s NFC reader, camera and alerts.'}</span></span></div></div>
    </div>
    <div className="others" data-zone={es ? 'Otros códigos' : 'Other code'}>
