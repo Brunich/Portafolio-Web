@@ -135,3 +135,20 @@ test('an Excel workbook with several sheets opens the one with data and lets you
  await expect(page.locator('.dw-kpis dd').nth(0)).toHaveText('3');
  await expect(page.locator('.dw-sheet')).toContainText('abrí «Calidad»');
 });
+
+test('plant: a report with odd column names gets mapped by hand, and exceptions can be ticked off', async ({ page }) => {
+ await page.goto('/proyectos/planta');
+ const csv = 'Fecha de producción,Turno,Línea,No. de orden,Meta,Piezas OK,Tiempo disponible,Ciclo\n2026-03-09,Matutino,L1,4411,400,392,450,60\n2026-03-09,Matutino,L2,4412,330,318,450,72';
+ await page.locator('.pl-file').first().locator('input[type=file]').setInputFiles({ name: 'mi_reporte.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
+ const box = page.locator('.pl-file').first();
+ await expect(box.locator('.pl-miss')).toContainText('Dime cuál es cuál');
+ await box.locator('.pl-miss label', { hasText: 'lote' }).locator('select').selectOption({ label: 'No. de orden' });
+ await box.locator('.pl-miss label', { hasText: 'producidas' }).locator('select').selectOption({ label: 'Piezas OK' });
+ await expect(box.locator('.pl-mapped')).toContainText('asignadas a mano');
+ await expect(page.locator('.pl-total')).toBeVisible();
+ await expect(page.locator('.pl-shifts tbody tr')).toHaveCount(1);
+ const first = page.locator('.pl-ex li').first();
+ await first.getByLabel('Revisada').check();
+ await expect(first).toHaveClass(/is-done/);
+ await expect(page.locator('.pl-progress')).toContainText('1 de');
+});
