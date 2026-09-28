@@ -131,7 +131,7 @@ test('customer club demo joins, stamps once per day and sends each message',asyn
  await club.getByRole('button',{name:/\+2 horas/}).click();
  await expect(club.locator('.ld-chat')).toContainText('una reseña nos ayuda');
  await club.getByRole('button',{name:'Dejar reseña en Google'}).click();
- await expect(club.locator('.ld-kpis div').nth(3).locator('dd')).toHaveText('1');
+ await expect(club.locator('.ld-kpis div').nth(3).locator('dd')).toHaveText('19'); // 18 del mes + la de Mariana
  await club.getByRole('button',{name:/Su cumpleaños/}).click();
  await expect(club.locator('.ld-chat')).toContainText('cumpleaños');
  await club.getByRole('button',{name:/Enviar campaña/}).click();
@@ -142,12 +142,14 @@ test('customer club demo joins, stamps once per day and sends each message',asyn
 test('stamp card from the NFC chip: one stamp a day, and the reward resets it',async({page})=>{
  await page.goto('/sello?n=Cafe%20Prueba&m=5&p=Un%20cafe&c=5fcfa9');
  await expect(page.locator('.st-count')).toHaveText('1/5');
- await expect(page.getByRole('heading',{level:1})).toHaveText('¡Sello de hoy listo!');
+ await expect(page.getByRole('heading',{level:1})).toHaveText('¡Bienvenido a Cafe Prueba!');
  await page.reload();
  await expect(page.locator('.st-count')).toHaveText('1/5');
  await expect(page.getByRole('heading',{level:1})).toHaveText('Ya tienes el sello de hoy.');
  await page.goto('/sello?n=Cafe%20Prueba&m=5&p=Un%20cafe&c=5fcfa9&demo');
- for (let i=0;i<4;i++) await page.getByRole('button',{name:/Demo/}).click();
+ await page.getByRole('button',{name:/Demo/}).click();
+ await expect(page.getByRole('heading',{level:1})).toHaveText('¡Sello de hoy listo!');
+ for (let i=0;i<3;i++) await page.getByRole('button',{name:/Demo/}).click();
  await expect(page.locator('.st-count')).toHaveText('5/5');
  await page.getByRole('button',{name:'Canjear premio'}).click();
  await page.getByRole('button',{name:'Sí, canjeado'}).click();

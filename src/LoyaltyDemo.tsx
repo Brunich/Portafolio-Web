@@ -11,6 +11,13 @@ const START = new Date(2026, 9, 6, 14, 10).getTime(); // martes 6 de octubre, 14
 type Msg ={ id: number; at: number; text: [string, string]; action?: 'review' | 'reserve'; done?: boolean };
 type Log = { id: number; at: number; text: [string, string]; kind: 'visit' | 'msg' | 'rule' | 'win' };
 type Screen = 'lock' | 'join' | 'wallet' | 'chat';
+// El panel no arranca en cero: así se ve un martes cualquiera del mes, con otros clientes del club.
+const MONTH = { members: 37, visits: 212, sent: 64, reviews: 18 };
+const EARLIER: Log[] = [
+ { id: -1, at: START - 26 * 60 * 1000, text: ['Luis dejó su reseña en Google ★★★★★', 'Luis left a Google review ★★★★★'], kind: 'msg' },
+ { id: -2, at: START - 58 * 60 * 1000, text: ['Visita de Ana · sello 8 de 8 · premio desbloqueado', 'Ana’s visit · stamp 8 of 8 · reward unlocked'], kind: 'win' },
+ { id: -3, at: START - 83 * 60 * 1000, text: ['Visita de Jorge · sello 3 de 8', 'Jorge’s visit · stamp 3 of 8'], kind: 'visit' },
+];
 
 export default function LoyaltyDemo({ lang }: { lang: 'es' | 'en' }) {
  const es = lang === 'es', L = es ? 0 : 1;
@@ -24,7 +31,7 @@ export default function LoyaltyDemo({ lang }: { lang: 'es' | 'en' }) {
  const [lastVisit, setLastVisit] = useState<number | null>(null);
  const [pendingReview, setPendingReview] = useState(false);
  const [msgs, setMsgs] = useState<Msg[]>([]);
- const [log, setLog] = useState<Log[]>([]);
+ const [log, setLog] = useState<Log[]>(EARLIER);
  const [stats, setStats] = useState({ visits: 0, sent: 0, reviews: 0, reservations: 0 });
  const [tapping, setTapping] = useState(false);
  const [fresh, setFresh] = useState(-1);
@@ -187,15 +194,15 @@ export default function LoyaltyDemo({ lang }: { lang: 'es' | 'en' }) {
 
    {/* Panel del dueño */}
    <div className="ld-panel">
-    <div className="ld-panel-head"><strong>{t('Panel de El Cerro', 'El Cerro dashboard')}</strong><span>{when(now)}</span></div>
+    <div className="ld-panel-head"><strong>{t('Panel de El Cerro · este mes', 'El Cerro dashboard · this month')}</strong><span>{when(now)}</span></div>
     <dl className="ld-kpis">
-     <div><dt>{t('En el club', 'Members')}</dt><dd>{member ? 1 : 0}</dd></div>
-     <div><dt>{t('Visitas', 'Visits')}</dt><dd>{stats.visits}</dd></div>
-     <div><dt>{t('Mensajes', 'Messages')}</dt><dd>{stats.sent}</dd></div>
-     <div><dt>{t('Reseñas', 'Reviews')}</dt><dd>{stats.reviews}</dd></div>
+     <div><dt>{t('En el club', 'Members')}</dt><dd>{MONTH.members + (member ? 1 : 0)}</dd></div>
+     <div><dt>{t('Visitas', 'Visits')}</dt><dd>{MONTH.visits + stats.visits}</dd></div>
+     <div><dt>{t('Mensajes', 'Messages')}</dt><dd>{MONTH.sent + stats.sent}</dd></div>
+     <div><dt>{t('Reseñas', 'Reviews')}</dt><dd>{MONTH.reviews + stats.reviews}</dd></div>
     </dl>
     {member && <div className="ld-contact"><span className="ld-avatar" aria-hidden="true">{member.name.charAt(0).toUpperCase()}</span><div><strong>{member.name}</strong><small>{member.phone} · {t('cumple', 'bday')} {member.birthday.slice(5).split('-').reverse().join('/')}</small></div><span className="ld-stampmini">{stamps}/{GOAL}</span></div>}
-    <p className="ld-label">{t('Lo que pasó', 'Activity')}</p>
+    <p className="ld-label">{t('Lo que pasó hoy', 'Today')}</p>
     <ol className="ld-log" aria-live="polite">
      {log.length === 0 && <li className="ld-empty">{t('Aún no hay visitas.', 'No visits yet.')}</li>}
      {log.map(l => <li key={l.id} className={`ld-${l.kind}`}><time>{when(l.at)}</time>{l.text[L]}</li>)}

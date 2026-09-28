@@ -306,3 +306,15 @@ html,body{overflow-x:clip}
 .pano-thumbs img{height:auto}
 /* Portada en celular: cada fila es imagen, título, una frase y el botón; la descripción y las cifras viven en la página del proyecto */
 @media(max-width:760px){.row .project-info>p:not(.pitch),.row .project-metrics{display:none}.row{gap:18px}.row .project-links{margin-top:18px}.row .project-media{aspect-ratio:4/3}}
+/* Guía del chip en /nfc */
+.nfc-guide{padding-block:clamp(40px,6vw,72px)}
+.nfc-guide h2{font-size:clamp(28px,3.4vw,44px);line-height:1.05;margin-bottom:24px}
+.nfc-guide-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.nfc-guide article{padding:24px;border-radius:22px;background:var(--surface);border:1px solid #ffffff14}
+.nfc-guide article>span{font:700 12px var(--display);letter-spacing:.08em;color:var(--rose)}
+.nfc-guide h3{margin:10px 0 6px;font-size:22px}
+.nfc-guide article>p{color:var(--text);font-size:15px}
+.nfc-guide ul{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:10px}
+.nfc-guide li{position:relative;padding-left:18px;font-size:14.5px;line-height:1.5;color:var(--muted)}
+.nfc-guide li::before{content:'';position:absolute;left:0;top:.62em;width:7px;height:7px;border-radius:50%;background:color-mix(in srgb,var(--rose) 70%,transparent)}
+@media(max-width:860px){.nfc-guide-grid{grid-template-columns:1fr}}
