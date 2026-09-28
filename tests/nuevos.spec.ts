@@ -118,3 +118,20 @@ test('on a phone every project header is one column, the title fits and the floa
  await page.mouse.wheel(0, -400);
  await expect(page.locator('.zone-nav')).not.toHaveClass(/is-hidden/);
 });
+
+test('an Excel workbook with several sheets opens the one with data and lets you switch', async ({ page }) => {
+ await page.goto('/proyectos/analizador-csv');
+ const XLSX = await import('xlsx');
+ const wb = XLSX.utils.book_new();
+ XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Reporte semanal']]), 'Portada');
+ XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Fecha', 'Línea', 'Piezas'], ['2 mar 2026', 'L1', 120], ['2026-03-03', 'L2', 98]]), 'Producción');
+ XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Folio', 'Defecto'], ['Q-1', 'Rayón'], ['Q-2', 'Golpe'], ['Q-3', 'Rayón']]), 'Calidad');
+ await page.locator('.dw-workbench input[type=file]').setInputFiles({ name: 'semana.xlsx', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', buffer: XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }) });
+ const sheet = page.getByLabel('Hoja de Excel');
+ await expect(sheet).toHaveValue('Producción');
+ await expect(page.locator('.dw-kpis dd').nth(0)).toHaveText('2');
+ await expect(page.locator('.dw-workbench')).toContainText('Fechas en 2 formatos');
+ await sheet.selectOption('Calidad');
+ await expect(page.locator('.dw-kpis dd').nth(0)).toHaveText('3');
+ await expect(page.locator('.dw-sheet')).toContainText('abrí «Calidad»');
+});
