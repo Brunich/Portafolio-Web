@@ -17,3 +17,19 @@ test('la lista de compras lleva cada producto bajo mínimo al doble del mínimo'
  const pan = list.find(p => p.name.startsWith('Pan'))!;
  assert.equal(pan.order, pan.min * 2 - pan.stock);
 });
+
+test('EAN-8, UPC-A y códigos internos quedan en una sola forma por producto', async () => {
+ const { isEan8, makeEan8, normalizeCode, codeKind, ean8Bits, printable } = await import('../src/inventario-logic.ts');
+ assert.equal(isEan8('96385074'), true); // ejemplo clásico de EAN-8
+ assert.equal(isEan8('96385075'), false);
+ assert.equal(makeEan8('9638507'), '96385074');
+ assert.equal(ean8Bits('96385074').length, 67);
+ // El mismo producto leído como UPC-A (12) o como EAN-13 (13) es un solo código.
+ assert.equal(normalizeCode('036000291452'), '0036000291452');
+ assert.equal(normalizeCode('0036000291452'), '0036000291452');
+ assert.equal(codeKind('0036000291452'), 'UPC-A');
+ assert.equal(normalizeCode(' 750 1000 00001-7 '), '7501000000017');
+ assert.equal(normalizeCode('abc-123 x'), 'ABC-123 X');
+ assert.equal(codeKind('ABC-123'), 'Code 128');
+ assert.equal(printable('96385074') && printable('4006381333931') && !printable('ABC-123'), true);
+});

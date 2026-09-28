@@ -152,3 +152,37 @@ test('plant: a report with odd column names gets mapped by hand, and exceptions 
  await expect(first).toHaveClass(/is-done/);
  await expect(page.locator('.pl-progress')).toContainText('1 de');
 });
+
+test('inventory: EAN-8 labels are read from a photo, internal codes keep letters, and search, delete and undo work', async ({ page }) => {
+ await page.goto('/proyectos/inventario');
+ const add = async (code: string, name: string) => {
+  await page.getByLabel('Código de barras').fill(code);
+  await page.getByRole('button', { name: 'Aplicar' }).click();
+  await page.getByPlaceholder('Nombre del producto').fill(name);
+  await page.getByRole('button', { name: 'Guardar' }).click();
+ };
+ await add('96385074', 'Chicle de menta');
+ await add('abc-123', 'Tornillo interno');
+ await expect(page.locator('.inv-products')).toContainText('ABC-123');
+ // La etiqueta EAN-8 que genera la página se fotografía y se lee: entra una pieza más.
+ await page.getByRole('button', { name: /Etiquetas con código/ }).click();
+ const fig = page.locator('.inv-sheet figure', { hasText: '96385074' });
+ const png = await fig.evaluate(async el => {
+  const s = el.innerHTML, img = new Image(); img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(s))); await img.decode();
+  const c = document.createElement('canvas'); c.width = img.width * 3; c.height = img.height * 3;
+  const x = c.getContext('2d')!; x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(img, 0, 0, c.width, c.height);
+  return c.toDataURL('image/png').split(',')[1];
+ });
+ await page.locator('.inv-photo input').setInputFiles({ name: 'chicle.png', mimeType: 'image/png', buffer: Buffer.from(png, 'base64') });
+ const chicle = page.locator('.inv-products > li', { hasText: 'Chicle de menta' });
+ await expect(chicle.locator('.inv-stock b')).toHaveText('2');
+ // Buscar, abrir, borrar y deshacer.
+ await page.getByLabel('Buscar producto').fill('tornillo');
+ await expect(page.locator('.inv-products > li')).toHaveCount(1);
+ await page.locator('.inv-name', { hasText: 'Tornillo interno' }).click();
+ await expect(page.locator('.inv-kind')).toHaveText('Code 128');
+ await page.getByRole('button', { name: 'Borrar producto' }).click();
+ await expect(page.locator('.inv-products > li')).toHaveCount(0);
+ await page.getByRole('button', { name: 'Deshacer' }).click();
+ await expect(page.locator('.inv-products > li')).toHaveCount(1);
+});
