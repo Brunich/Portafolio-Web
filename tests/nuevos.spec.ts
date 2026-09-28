@@ -226,3 +226,15 @@ test('shift handover with 60 incidents: filters by line and severity, and long c
  await expect(open.locator('h3 span')).toHaveText('4'); // abiertas de L2 y críticas en los datos de arriba
  await expect(open.locator('.sh-card')).toHaveCount(4);
 });
+
+test('a live demo whose server is down shows real screenshots and says why, instead of an empty app', async ({ page }) => {
+ await page.route('**/*supabase.co/**', r => r.abort());
+ await page.route('https://vibemap-brunich.vercel.app/**', r => r.abort());
+ await page.goto('/proyectos/punto-u');
+ await expect(page.locator('.live-note')).toContainText('no está respondiendo');
+ await expect(page.locator('.live-shots img')).toHaveCount(2);
+ await expect(page.locator('.demo-punto-copy h2')).toHaveText('Así se ve la app.');
+ await page.goto('/proyectos/vibemap');
+ await expect(page.locator('.live-shots img')).toHaveCount(1);
+ await expect(page.locator('.case-browser iframe')).toHaveCount(0);
+});
