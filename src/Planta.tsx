@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import { FileXls, FileCsv, CheckCircle, WarningCircle, DownloadSimple, WhatsappLogo, Copy } from '@phosphor-icons/react';
 import { parseCsv } from './csv';
 import { readTable, TABLE_ACCEPT } from './read-file';
-import { consolidate, mapColumns, summaryText, NEEDS, SAMPLE_PROD, SAMPLE_QUAL, SAMPLE_STOPS } from './planta-logic';
+import { byDay, consolidate, mapColumns, summaryText, NEEDS, SAMPLE_PROD, SAMPLE_QUAL, SAMPLE_STOPS } from './planta-logic';
 import type { ColumnMap, Field, FileKind, Grid, LineOee } from './planta-logic';
 import { exportCsv } from './csv';
 import './planta.css';
@@ -56,6 +56,7 @@ export default function Planta({ lang }: { lang: 'es' | 'en' }) {
  const maps = useMemo(() => (['prod', 'qual', 'stops'] as FileKind[]).map(k => slots[k] ? mapColumns(k, slots[k]!.grid.headers, over[k]) : null), [slots, over]);
  const ready = slots.prod && slots.qual && !maps[0]?.missing.length && !maps[1]?.missing.length;
  const res = useMemo(() => ready ? consolidate(slots.prod!.grid, slots.qual!.grid, slots.stops && !maps[2]?.missing.length ? slots.stops.grid : null, limit / 100, over) : null, [slots, limit, ready, maps, over]);
+ const days = useMemo(() => res ? byDay(res) : [], [res]);
  const matched = res ? res.lots.filter(l => l.rev !== undefined).length : 0;
  const rules = res ? [...new Set(res.exceptions.map(e => e.rule))] : [];
  const shown = res ? res.exceptions.filter(e => !filter || e.rule === filter) : [];
@@ -124,6 +125,21 @@ export default function Planta({ lang }: { lang: 'es' | 'en' }) {
 
    <h3 className="pl-h">{t('OEE por línea', 'OEE by line')}<span>{t('Disponibilidad × rendimiento × calidad. La marca del anillo es el 85 %.', 'Availability × performance × quality. The ring mark is 85%.')}</span></h3>
    <div className="pl-lines">{res.lines.map((l, i) => <LineCard key={l.linea} l={l} es={es} i={i}/>)}</div>
+
+   {days.length > 1 && <section className="pl-days" aria-label={t('OEE por día', 'OEE by day')}>
+    <h3 className="pl-h">{t('OEE por día', 'OEE by day')}<span>{t('Sale de las fechas del reporte: sube una semana y ves la tendencia. La raya punteada es el 85 %.', 'Built from the report dates: upload a week to see the trend. The dashed line is 85%.')}</span></h3>
+    <div className="pl-days-chart" role="list">
+     {days.map((d, i) => { const tone = d.oee >= .85 ? 'good' : d.oee >= .65 ? 'mid' : 'low', prev = days[i - 1];
+      return <div key={d.fecha} className={`pl-day tone-${tone}`} role="listitem" title={d.lines.map(l => `${l.linea} ${pct(l.oee)}`).join(' · ')} style={{ ['--i' as string]: i }}>
+       <b>{pct(d.oee)}{prev && <em className={d.oee >= prev.oee ? 'up' : 'down'}>{d.oee >= prev.oee ? '▲' : '▼'} {Math.abs((d.oee - prev.oee) * 100).toFixed(1)}</em>}</b>
+       <span className="pl-day-bar"><i style={{ height: `${d.oee * 100}%` }}/></span>
+       <small>{new Date(`${d.fecha}T12:00:00`).toLocaleDateString(es ? 'es-MX' : 'en-US', { weekday: 'short', day: 'numeric', month: 'short' })}</small>
+      </div>; })}
+    </div>
+    <table className="pl-daytable"><thead><tr><th scope="col">{t('Línea', 'Line')}</th>{days.map(d => <th key={d.fecha} scope="col">{new Date(`${d.fecha}T12:00:00`).toLocaleDateString(es ? 'es-MX' : 'en-US', { day: 'numeric', month: 'short' })}</th>)}<th scope="col">{t('Cambio', 'Change')}</th></tr></thead>
+     <tbody>{res.lines.map(l => { const vals = days.map(d => d.lines.find(x => x.linea === l.linea)?.oee), first = vals.find(v => v !== undefined), last = [...vals].reverse().find(v => v !== undefined), delta = first !== undefined && last !== undefined ? last - first : 0;
+      return <tr key={l.linea}><th scope="row">{l.linea}</th>{vals.map((v, i) => <td key={i}>{v === undefined ? '—' : pct(v)}</td>)}<td className={delta > 0.0005 ? 'up' : delta < -0.0005 ? 'down' : ''}>{delta > 0.0005 ? '▲' : delta < -0.0005 ? '▼' : '='} {Math.abs(delta * 100).toFixed(1)}</td></tr>; })}</tbody></table>
+   </section>}
 
    <div className="pl-split">
     <section className="pl-ex">
