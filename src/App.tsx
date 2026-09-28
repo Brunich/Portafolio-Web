@@ -12,10 +12,12 @@ const LoyaltyDemo = lazy(() => import('./LoyaltyDemo'));
 const ShiftHandover = lazy(() => import('./ShiftHandover'));
 const Planta = lazy(() => import('./Planta'));
 const Inventario = lazy(() => import('./Inventario'));
+const Spc = lazy(() => import('./Spc'));
 const MenuPage = lazy(() => import('./Menu').then(m => ({ default: m.MenuPage })));
 const MenuBuilder = lazy(() => import('./Menu').then(m => ({ default: m.MenuBuilder })));
 import PlantaPreview from './PlantaPreview';
 import InventarioPreview from './InventarioPreview';
+import SpcPreview from './SpcPreview';
 import ClubPreview from './ClubPreview';
 import CsvChart from './CsvChart';
 import TurnoPreview from './TurnoPreview';
@@ -29,7 +31,7 @@ import { usePaging, glide, glideTo, zoneList } from './paging';
 import { StampPage, NfcSetup, Qr, bizLink, bizFrom } from './Stamp';
 import './brand.css';
 
-const PROJECT_ORDER = ['club', 'csv', 'planta', 'inventario', 'turno', 'vibe', 'punto'];
+const PROJECT_ORDER = ['club', 'csv', 'planta', 'spc', 'inventario', 'turno', 'vibe', 'punto'];
 type Project = ReturnType<typeof professional>['projects'][number];
 const external = (url: string) => url.startsWith('http') ? { target: '_blank', rel: 'noreferrer' } : {};
 
@@ -178,6 +180,7 @@ function Media({ lang, project }: { lang: Lang; project: Project }) {
   case 'turno': return <TurnoPreview lang={lang}/>;
   case 'planta': return <PlantaPreview lang={lang}/>;
   case 'inventario': return <InventarioPreview lang={lang}/>;
+  case 'spc': return <SpcPreview lang={lang}/>;
   case 'vibemap': return <img className="vibe-shot" src="/media/vibemap-mapa.webp" alt={lang === 'es' ? 'Mapa mental de VibeMap sobre el código de este portafolio' : 'VibeMap mind map of this portfolio’s code'} width="1210" height="350" loading="lazy"/>;
   default: return <div className="phones"><img src="/media/punto-u-mapa.webp" width="780" height="2000" alt={es ? 'Punto U: mapa del campus con misiones' : 'Punto U: campus map with missions'} loading="lazy"/><img src="/media/punto-u.webp" width="600" height="1300" alt={es ? 'Punto U: crear perfil' : 'Punto U: create profile'} loading="lazy"/></div>;
  }
@@ -217,6 +220,7 @@ function ProjectPage({ lang, project, projects }: { lang: Lang; project: Project
    {project.id === 'club' && <><div className="case-demo-head"><h2>{es ? 'Así se ve en el restaurante.' : 'This is how it looks at the restaurant.'}</h2><p>{es ? 'Apoya el celular en el chip y adelanta el tiempo: así junta sellos el cliente y así le da seguimiento el negocio.' : 'Tap the phone on the chip and fast-forward: this is how the customer collects stamps and how the business follows up.'}</p></div><LoyaltyDemo lang={lang}/><ClubReal lang={lang}/></>}
    {project.id === 'turno' && <ShiftHandover lang={lang}/>}
    {project.id === 'planta' && <><div className="case-demo-head"><h2>{es ? 'Súbele tus reportes del turno.' : 'Upload your shift reports.'}</h2><p>{es ? 'Ya vienen tres de ejemplo. Cambia cualquiera por tu Excel o CSV: todo se procesa en tu navegador.' : 'Three samples are loaded. Swap any for your Excel or CSV: everything runs in your browser.'}</p></div><Planta lang={lang}/></>}
+   {project.id === 'spc' && <><div className="case-demo-head"><h2>{es ? 'Súbele las mediciones de una pieza.' : 'Upload a part’s measurements.'}</h2><p>{es ? 'Ya viene un ejemplo: el diámetro de un buje, cinco piezas cada media hora, con la herramienta desgastándose al final. Cambia la tolerancia o sube tu Excel.' : 'A sample is loaded: a bushing diameter, five parts every half hour, with the tool wearing out at the end. Change the tolerance or upload your Excel.'}</p></div><Spc lang={lang}/></>}
    {project.id === 'inventario' && <><div className="case-demo-head"><h2>{es ? 'Ábrelo en tu celular y escanea algo.' : 'Open it on your phone and scan something.'}</h2><p>{es ? 'Funciona con la cámara, con una foto del código o escribiéndolo. Se guarda en tu navegador.' : 'Works with the camera, a photo of the code or by typing it. Saved in your browser.'}</p></div><Inventario lang={lang}/></>}
    {project.id === 'csv' && <><div className="case-demo-head"><h2>{es ? 'Tus datos, en un mapa.' : 'Your data, as a map.'}</h2><p>{es ? 'Sube o arrastra tu CSV. Se analiza en tu navegador y nada sale de tu equipo.' : 'Upload or drag your CSV. It is analyzed in your browser and nothing leaves your device.'}</p></div><DataWorkbench lang={lang}/></>}
    {project.id === 'vibe' && <div className="demo-vibe"><div className="case-demo-head"><h2>{es ? 'Pruébalo aquí mismo.' : 'Try it right here.'}</h2><p>{es ? 'Toca «Un RPG en Godot» o suelta la carpeta de tu proyecto. Todo corre en tu navegador.' : 'Tap “Un RPG en Godot” or drop your own project folder. Everything runs in your browser.'}</p></div><LiveOrShots probe={project.link} lang={lang} shots={[['/media/vibemap-mapa.webp', 1210, 350, es ? 'Mapa mental de VibeMap' : 'VibeMap mind map']]}><div className="case-browser"><span className="case-browser-bar"><i/><i/><i/><b>vibemap-brunich.vercel.app</b></span><iframe src={project.link} title={es ? 'VibeMap en vivo' : 'VibeMap live'} loading="lazy"/></div></LiveOrShots><p className="demo-vibe-links"><a className="inline-link" href={project.link} {...external(project.link)}>{es ? 'Abrir en otra pestaña' : 'Open in a new tab'}<ArrowUpRight size={18}/></a><a className="inline-link" href="https://github.com/Brunich/VibeMap" {...external('https://github.com/Brunich/VibeMap')}>{es ? 'Ver el código' : 'View the code'}<ArrowUpRight size={18}/></a></p></div>}

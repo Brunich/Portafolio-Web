@@ -106,7 +106,7 @@ test('stamp card with PIN: a wrong PIN does not redeem, the right one does', asy
 
 test('on a phone every project header is one column, the title fits and the floating button waits until you scroll up', async ({ page }) => {
  await page.setViewportSize({ width: 390, height: 844 });
- for (const slug of ['club-nfc', 'analizador-csv', 'planta', 'inventario', 'entrega-de-turno', 'vibemap', 'punto-u']) {
+ for (const slug of ['club-nfc', 'analizador-csv', 'planta', 'graficas-de-control', 'inventario', 'entrega-de-turno', 'vibemap', 'punto-u']) {
   await page.goto(`/proyectos/${slug}`);
   const head = await page.locator('.case-head').evaluate(e => ({ cols: getComputedStyle(e).gridTemplateColumns.split(' ').length, h1: e.querySelector('h1')!.getBoundingClientRect().right, doc: document.documentElement.scrollWidth }));
   expect(head.cols, slug).toBe(1);
@@ -253,4 +253,20 @@ test('csv analyzer compares two snapshots of the same report and lists what chan
  const dl = page.waitForEvent('download');
  await page.getByRole('button', { name: /Descargar diferencias/ }).click();
  expect((await dl).suggestedFilename()).toBe('diferencias.csv');
+});
+
+test('control charts: the sample flags the tool wear, and a plain column of readings becomes an individuals chart', async ({ page }) => {
+ await page.goto('/proyectos/graficas-de-control');
+ await expect(page.locator('.spc-verdict')).toHaveClass(/bad/);
+ await expect(page.locator('.spc-verdict')).toContainText('Fuera de control');
+ await expect(page.locator('.spc-signals')).toContainText('Regla 1');
+ await expect(page.locator('.spc-kpis')).toContainText('Cpk');
+ // Una sola columna de lecturas, sin subgrupos ni tolerancia: individuales y rango móvil.
+ const readings = ['temperatura_C', ...[70.1, 70.4, 69.8, 70.0, 70.3, 69.9, 70.2, 70.1, 69.7, 70.0, 70.2, 69.9]].join('\n');
+ await page.locator('.spc input[type=file]').setInputFiles({ name: 'horno.csv', mimeType: 'text/csv', buffer: Buffer.from(readings) });
+ await expect(page.locator('.spc-state small')).toContainText('I-MR');
+ await expect(page.locator('.spc-verdict')).toHaveClass(/ok/);
+ await expect(page.locator('.spc-okmsg')).toBeVisible();
+ await page.getByLabel(/Tolerancia máxima/).fill('70.2');
+ await expect(page.locator('.spc-kpis')).toContainText('Fuera de tolerancia');
 });
