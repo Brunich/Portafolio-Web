@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { CheckCircle, Lightning, WarningCircle } from '@phosphor-icons/react';
 import type { Issue } from './quality';
 
 // «Qué encontré» como gráfica: un medidor con las filas limpias y una barra por problema.
@@ -25,9 +26,9 @@ export default function Found({ lang, issues, rows, done, focus, runKey, onFix, 
  return <section className="cf" aria-label={t('Qué encontré', 'What I found')} key={runKey}>
   <header className="cf-head">
    <div><h3>{t('Qué encontré', 'What I found')}</h3>
-    <p>{!real.length ? t('Nada que corregir: el archivo está listo.', 'Nothing to fix: the file is ready.')
-     : fixable.length ? t(`${fixable.length} se arreglan con un clic; el resto necesita que alguien decida.`, `${fixable.length} can be fixed in one click; the rest needs someone to decide.`)
-     : t('Lo que queda necesita que alguien decida: se marca, no se inventa.', 'What remains needs someone to decide: it is flagged, never made up.')}</p></div>
+    <p className="cf-chips">{!real.length ? <span className="cf-chip ok"><CheckCircle size={16} weight="fill" aria-hidden="true"/>{t('Listo para usar', 'Ready to use')}</span> : <>
+     {fixable.length > 0 && <span className="cf-chip fix"><Lightning size={16} weight="fill" aria-hidden="true"/>{t(`${fixable.length} con arreglo automático`, `${fixable.length} auto-fixable`)}</span>}
+     {real.length - fixable.filter(i => i.severity !== 'info').length > 0 && <span className="cf-chip rule"><WarningCircle size={16} weight="fill" aria-hidden="true"/>{t(`${real.length - fixable.filter(i => i.severity !== 'info').length} por revisar`, `${real.length - fixable.filter(i => i.severity !== 'info').length} to review`)}</span>}</>}</p></div>
    <div className="cf-actions">
     {done.length > 0 && <button onClick={onUndo}>{t('Volver al original', 'Back to original')}</button>}
     {fixable.length > 0 && <button className="dw-primary" onClick={onFixAll}>{t(`Arreglar lo automático (${fixable.length})`, `Fix the automatic ones (${fixable.length})`)}</button>}
@@ -48,7 +49,7 @@ export default function Found({ lang, issues, rows, done, focus, runKey, onFix, 
       <span className="cf-n" title={t('filas', 'rows')}>{rowsOf(i).toLocaleString(es ? 'es-MX' : 'en-US')}</span>
       <span className="cf-act">{i.fix && <button className="cf-fix" onClick={() => onFix(i)}>{i.fixLabel![L]}</button>}</span>
       {isOpen && <div className="cf-detail"><p>{i.detail[L]}</p>{i.example && <code>{i.example}</code>}
-       <button className="dw-link" onClick={() => onShow(i.id)}>{t('Ver estas filas en la tabla', 'Show these rows in the table')} ↑</button></div>}
+       <button className="dw-link" onClick={() => onShow(i.id)}>{t('Ver en la tabla', 'Show in table')} ↓</button></div>}
      </li>;
     })}
     {done.map(d => <li key={`d${d.key}`} className="cf-row k-fix is-done" style={{ ['--w' as string]: `${d.n / max * 100}%` }}>
@@ -59,6 +60,6 @@ export default function Found({ lang, issues, rows, done, focus, runKey, onFix, 
     </li>)}
    </ol>
   </div>
-  <p className="cf-legend"><span><i className="fix"/>{t('se corrige con un clic', 'one-click fix')}</span><span><i className="rule"/>{t('requiere criterio', 'needs judgment')}</span><span><i className="info"/>{t('aviso', 'note')}</span><span>{t('El número es cuántas filas toca.', 'The number is how many rows it touches.')}</span></p>
+  <p className="cf-legend"><span><i className="fix"/>{t('se corrige con un clic', 'one-click fix')}</span><span><i className="rule"/>{t('requiere criterio', 'needs judgment')}</span><span><i className="info"/>{t('aviso', 'note')}</span><span>{t('# = filas', '# = rows')}</span></p>
  </section>;
 }

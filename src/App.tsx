@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { flushSync } from 'react-dom';
-import { ArrowUpRight, ArrowDown, ArrowLeft, ArrowRight, DownloadSimple, GithubLogo, EnvelopeSimple, LinkedinLogo, WhatsappLogo, Pause, Play } from '@phosphor-icons/react';
+import { ArrowUpRight, ArrowDown, ArrowLeft, ArrowRight, DownloadSimple, GithubLogo, EnvelopeSimple, LinkedinLogo, WhatsappLogo, Pause, Play, AndroidLogo } from '@phosphor-icons/react';
 import { copy, certificates } from './content';
 import type { Lang } from './content';
 import { professional } from './professional-content';
@@ -36,6 +36,8 @@ import './brand.css';
 const PROJECT_ORDER = ['club', 'csv', 'planta', 'spc', 'inventario', 'turno', 'agente', 'vibe', 'punto'];
 // En la portada van al frente los que resuelven un problema de negocio; el hackathon y la app de estudiantes, abajo.
 const OTHER = ['vibe', 'punto'];
+// Lo que todavía no está listo va en su propio apartado, para que la lista principal sea sólo lo que ya funciona.
+const DEV = ['agente'];
 type Project = ReturnType<typeof professional>['projects'][number];
 const external = (url: string) => url.startsWith('http') ? { target: '_blank', rel: 'noreferrer' } : {};
 
@@ -154,16 +156,22 @@ function HeroArt() {
 
 function Home({ lang, paused, projects }: { lang: Lang; paused: boolean; projects: Project[] }) {
  const c = copy[lang], p = professional(lang), es = lang === 'es';
- const featured = projects.filter(x => !OTHER.includes(x.id)), others = projects.filter(x => OTHER.includes(x.id));
+ const featured = projects.filter(x => !OTHER.includes(x.id) && !DEV.includes(x.id)), others = projects.filter(x => OTHER.includes(x.id)), dev = projects.filter(x => DEV.includes(x.id));
  const cv = es ? '/cv/Bruno-Salas-ES.pdf' : '/cv/Bruno-Salas-EN.pdf';
  return <main id="main">
   <section id="home" className="hero wrap" data-zone={es ? 'Inicio' : 'Home'}><HeroArt/><div className="hero-copy"><h1>{p.title}<em>{p.accent}</em></h1><p>{p.intro}</p><div className="hero-actions"><a className="button primary" href="#projects">{c.view}<ArrowDown size={19}/></a><a className="button secondary" href={cv} download>{es ? 'Descargar CV' : 'Download CV'}<DownloadSimple size={19}/></a></div><p className="hero-facts">{es ? 'Monterrey, N. L. · UANL 2023–2028 · Español, inglés y portugués' : 'Monterrey, Mexico · UANL 2023–2028 · Spanish, English & Portuguese'}</p></div><div className="hero-workbench"><HeroShowcase lang={lang} paused={paused}/></div></section>
   <section id="projects" className="wrap section-space"><div className="projects-intro" data-zone={es ? 'Proyectos' : 'Projects'}><div className="section-heading" data-num="01"><div><span className="kicker">01 · {es ? 'Proyectos' : 'Projects'}</span><h2>{p.projectsTitle}</h2><p>{p.projectsIntro}</p></div><a className="inline-link more-link" href={personal.github} {...external(personal.github)}><GithubLogo size={21}/>{es ? 'Tengo más proyectos, pequeños y grandes' : 'I have more projects, small and large'}<ArrowUpRight size={18}/></a></div>
    <ol className="project-index">{featured.map((x, i) => <li key={x.id} className={`project-${x.id}`}><button onClick={() => void glideTo(document.getElementById(`p-${x.id}`))}><span className="pi-num">{String(i + 1).padStart(2, '0')}</span><span className="pi-main"><strong>{x.title}</strong><em>{x.pitch}</em></span><span className="pi-kind">{x.kind}</span><ArrowDown size={18}/></button></li>)}</ol></div>
    <div className="rows">{featured.map((project, i) => <ProjectRow key={project.id} lang={lang} project={project} flip={i % 2 === 1} n={i + 1} of={featured.length}/>)}</div>
-   <div className="others" data-zone={es ? 'Otros proyectos' : 'Other projects'}>
-    <div className="others-head"><span className="kicker">{es ? 'Otros proyectos' : 'Other projects'}</span><p>{es ? 'Un hackathon y una app para estudiantes: menos de negocio, igual de hechos a mano.' : 'A hackathon and a student app: less business, just as hand-made.'}</p></div>
-    <div className="others-grid">{others.map(x => <a key={x.id} className={`other-card project-${x.id}`} data-c href={`/proyectos/${x.slug}`} data-title={x.title}><span className={`other-media media-${x.id}`}><Media lang={lang} project={x}/></span><span className="other-copy"><em>{x.kind}</em><strong>{x.title}</strong><span>{x.pitch}</span></span><ArrowUpRight size={20}/></a>)}</div>
+   <div className="others is-dev" data-zone={es ? 'En desarrollo' : 'In development'}>
+    <div className="others-head"><span className="kicker">{es ? 'En desarrollo' : 'In development'}</span><p>{es ? 'Lo que estoy construyendo ahora.' : 'What I am building now.'}</p></div>
+    <div className="others-grid">{dev.map(x => <a key={x.id} className={`other-card project-${x.id}`} data-c href={`/proyectos/${x.slug}`} data-title={x.title}><span className={`other-media media-${x.id}`}><Media lang={lang} project={x}/></span><span className="other-copy"><em>{x.status}</em><strong>{x.title}</strong><span>{x.pitch}</span></span><ArrowUpRight size={20}/></a>)}
+     <div className="other-card other-plain project-android"><span className="other-media other-icon" aria-hidden="true"><AndroidLogo size={72} weight="duotone"/><small>NFC · CameraX · Compose</small></span><span className="other-copy"><em>{es ? 'En desarrollo' : 'In development'}</em><strong>{es ? 'Apps Android nativas' : 'Native Android apps'}</strong><span>{es ? 'NFC para negocios, Inventario y Entrega de turno, con el lector NFC, la cámara y los avisos del teléfono.' : 'NFC for businesses, Inventory and Shift handover, using the phone’s NFC reader, camera and alerts.'}</span></span></div></div>
+   </div>
+   <div className="others" data-zone={es ? 'Otros códigos' : 'Other code'}>
+    <div className="others-head"><span className="kicker">{es ? 'Otros códigos' : 'Other code'}</span><p>{es ? 'Un hackathon, una app para estudiantes y más en mi GitHub.' : 'A hackathon, a student app and more on my GitHub.'}</p></div>
+    <div className="others-grid">{others.map(x => <a key={x.id} className={`other-card project-${x.id}`} data-c href={`/proyectos/${x.slug}`} data-title={x.title}><span className={`other-media media-${x.id}`}><Media lang={lang} project={x}/></span><span className="other-copy"><em>{x.kind}</em><strong>{x.title}</strong><span>{x.pitch}</span></span><ArrowUpRight size={20}/></a>)}
+     <a className="other-card other-plain other-github" href={personal.github} {...external(personal.github)}><span className="other-copy"><em>GitHub · Brunich</em><strong>{es ? 'Tengo más proyectos, pequeños y grandes' : 'I have more projects, small and large'}</strong><span>{es ? 'Juegos, herramientas y pruebas: todo el código.' : 'Games, tools and experiments: all the code.'}</span></span><GithubLogo size={26}/></a></div>
    </div>
   </section>
   <section id="about" className="about-section section-space"><div className="wrap">
@@ -236,9 +244,10 @@ function ProjectPage({ lang, project, projects }: { lang: Lang; project: Project
    {project.id === 'agente' && <><div className="case-demo-head"><h2>{es ? 'Así va a trabajar.' : 'This is how it will work.'}</h2><p>{es ? 'Escríbele como cliente, pregúntale a la base de una planta o calcula dónde instalarlo. Todo corre en tu navegador.' : 'Write to it as a customer, ask a plant’s database, or work out where to run it. Everything runs in your browser.'}</p></div><Agente lang={lang}/></>}
    {project.id === 'spc' && <><div className="case-demo-head"><h2>{es ? 'Súbele las mediciones de una pieza.' : 'Upload a part’s measurements.'}</h2><p>{es ? 'Ya viene un ejemplo: el diámetro de un buje, cinco piezas cada media hora, con la herramienta desgastándose al final. Cambia la tolerancia o sube tu Excel.' : 'A sample is loaded: a bushing diameter, five parts every half hour, with the tool wearing out at the end. Change the tolerance or upload your Excel.'}</p></div><Spc lang={lang}/></>}
    {project.id === 'inventario' && <><div className="case-demo-head"><h2>{es ? 'Ábrelo en tu celular y escanea algo.' : 'Open it on your phone and scan something.'}</h2><p>{es ? 'Funciona con la cámara, con una foto del código o escribiéndolo. Se guarda en tu navegador.' : 'Works with the camera, a photo of the code or by typing it. Saved in your browser.'}</p></div><Inventario lang={lang}/></>}
-   {project.id === 'csv' && <><div className="case-demo-head"><h2>{es ? 'Tus datos, en un mapa.' : 'Your data, as a map.'}</h2><p>{es ? 'Sube o arrastra tu CSV. Se analiza en tu navegador y nada sale de tu equipo.' : 'Upload or drag your CSV. It is analyzed in your browser and nothing leaves your device.'}</p></div><DataWorkbench lang={lang}/></>}
+   {project.id === 'csv' && <><div className="case-demo-head"><h2>{es ? 'Pruébalo con tu reporte.' : 'Try it with your report.'}</h2><p>{es ? 'CSV o Excel. Todo pasa en tu navegador.' : 'CSV or Excel. It all runs in your browser.'}</p></div><DataWorkbench lang={lang}/></>}
    {project.id === 'vibe' && <div className="demo-vibe"><div className="case-demo-head"><h2>{es ? 'Pruébalo aquí mismo.' : 'Try it right here.'}</h2><p>{es ? 'Toca «Un RPG en Godot» o suelta la carpeta de tu proyecto. Todo corre en tu navegador.' : 'Tap “Un RPG en Godot” or drop your own project folder. Everything runs in your browser.'}</p></div><LiveOrShots probe={project.link} lang={lang} shots={[['/media/vibemap-mapa.webp', 1210, 350, es ? 'Mapa mental de VibeMap' : 'VibeMap mind map']]}><div className="case-browser"><span className="case-browser-bar"><i/><i/><i/><b>vibemap-brunich.vercel.app</b></span><iframe src={project.link} title={es ? 'VibeMap en vivo' : 'VibeMap live'} loading="lazy"/></div></LiveOrShots><p className="demo-vibe-links"><a className="inline-link" href={project.link} {...external(project.link)}>{es ? 'Abrir en otra pestaña' : 'Open in a new tab'}<ArrowUpRight size={18}/></a><a className="inline-link" href="https://github.com/Brunich/VibeMap" {...external('https://github.com/Brunich/VibeMap')}>{es ? 'Ver el código' : 'View the code'}<ArrowUpRight size={18}/></a></p></div>}
   </Suspense></div></section>
+  {!OTHER.includes(project.id) && <aside className={`case-cta wrap project-${project.id}`} aria-label={es ? 'Contacto' : 'Contact'}><div><strong>{es ? '¿Te sirve para tu negocio?' : 'Useful for your business?'}</strong><span>{es ? 'Lo adapto a tus datos y te lo dejo funcionando.' : 'I adapt it to your data and leave it running.'}</span></div><a className="button primary" href={`mailto:${personal.email}?subject=${encodeURIComponent(project.title)}`}>{es ? 'Escríbeme' : 'Write to me'}<ArrowUpRight size={18}/></a></aside>}
   <nav data-c data-zone={es ? 'Siguiente' : 'Next'} className={`case-next wrap project-${next.id}`} aria-label={es ? 'Siguiente proyecto' : 'Next project'}><a href={`/proyectos/${next.slug}`} data-title={next.title}><span>{es ? 'Siguiente proyecto' : 'Next project'}</span><strong>{next.title}</strong><ArrowRight size={26}/></a></nav>
  </main>;
 }
