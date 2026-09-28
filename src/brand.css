@@ -1,7 +1,7 @@
 /* Identidad: noche índigo con lila, cian y menta; títulos en Bricolage Grotesque y subtítulos
    en Instrument Serif itálica. Va al final para mandar sobre los estilos anteriores. */
 :root{--bg:#120e1d;--surface:#1b1629;--surface-2:#231c35;--line:#302743;--text:#f4f0f7;--muted:#b7aec4;
- --lilac:#a894f0;--cyan:#b3aed8;--rose:#dd9fbd;--gold:#d9c08a;--mint:#9fd0bf;--violet:#b9a7ff;--amber:var(--gold);--coral:#ff6b8b;
+ --lilac:#a894f0;--cyan:#b3aed8;--rose:#dd9fbd;--gold:#d9c08a;--mint:#9fd0bf;--violet:#b9a7ff;--amber:var(--gold);--coral:#e58fa0;
  --accent:var(--lilac);--on-accent:#120c30;
  --display:'Bricolage Grotesque Variable','Manrope Variable',sans-serif;--serif:'Instrument Serif',Georgia,serif;
  background:var(--bg);color:var(--text)}
@@ -163,7 +163,7 @@ html[data-motion=paused] .hero h1 em{animation:none}
 
 /* Vista previa del NFC en la lista: su propio color y el chip abajo, sin tapar la tarjeta */
 .row .ld-preview{background:radial-gradient(circle at 82% 12%,#dd9fbd38,transparent 50%),radial-gradient(circle at 8% 92%,#a894f033,transparent 55%),linear-gradient(160deg,#241a38,#140f20)}
-.row .ld-preview .ld-pass{background:linear-gradient(150deg,#4a2266,#a2437a 60%,#e86aa6);box-shadow:0 24px 50px #0008}
+.row .ld-preview .ld-pass{background:linear-gradient(150deg,#3b2352,#6d3a68 60%,#9b5d88);box-shadow:0 24px 50px #0008}
 .row .ld-preview-chip{top:auto;right:clamp(18px,6%,48px);bottom:clamp(18px,6%,40px);width:62px;height:62px;border:0;border-radius:16px;background:#f4f1ff;color:#2a1f5c}
 .row .ld-preview-chip i{border-color:#dd9fbd}
 /* El analizador en rectángulo: letras completas */
@@ -304,3 +304,5 @@ html,body{overflow-x:clip}
 /* «Cómo funciona»: una columna por paso (3, 4 o 5) para que ninguno quede huérfano abajo */
 @media(min-width:861px){.how ol{grid-template-columns:repeat(var(--n,3),minmax(0,1fr));gap:clamp(20px,3vw,40px)}}
 .pano-thumbs img{height:auto}
+/* Portada en celular: cada fila es imagen, título, una frase y el botón; la descripción y las cifras viven en la página del proyecto */
+@media(max-width:760px){.row .project-info>p:not(.pitch),.row .project-metrics{display:none}.row{gap:18px}.row .project-links{margin-top:18px}.row .project-media{aspect-ratio:4/3}}

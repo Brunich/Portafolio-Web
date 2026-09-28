@@ -12,7 +12,7 @@
 /* El analizador como rectángulo: sin estirarse, centrado en la tarjeta */
 .hs-chart{display:grid;place-items:center;padding:6%}
 .hs-rect{width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;border:1px solid #ffffff14;box-shadow:0 20px 40px #0006}
-.hs-rect .cc{min-height:0;height:100%;padding:6% 7%;background:radial-gradient(ellipse 70% 90% at 15% 40%,#173a3a,#111330 70%)}
+.hs-rect .cc{min-height:0;height:100%;padding:6% 7%;background:radial-gradient(ellipse 70% 90% at 15% 40%,#2a2045,#150f22 70%)}
 .hs-rect .cc-gauge{max-width:150px}
 .hs-rect .cc-bars{gap:6px}
 .hs-rect .cc-row{font-size:11.5px}
@@ -53,3 +53,7 @@ html[data-motion=paused] .nt *{animation-play-state:paused!important}
 @keyframes hs-progress{from{transform:scaleX(0)}}
 @media(max-width:640px){.hs-stage{aspect-ratio:1.05}.hs-card{inset:4% 5%}.hs-tabs small{display:none}.hs-tabs button{flex-direction:column;align-items:flex-start;gap:6px}.nt-phone{width:36%}.nt-tag{width:44%}}
 @media(prefers-reduced-motion:reduce){.hs-card{transition:none}.hs-progress{display:none}.nt *{animation:none!important}.nt-phone{transform:translate(-50%,8%)}.nt-stamps b.new{transform:none}.nt-screen strong,.nt-screen em{opacity:1}}
+/* Planta en la vitrina: los anillos de OEE al centro */
+.hs-plant{display:grid;place-items:center;height:100%;padding:8% 6%}
+.hs-plant .plp{width:100%}
+.t-planta{--t:#8fb7d6}

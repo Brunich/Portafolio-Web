@@ -1,21 +1,22 @@
 import { useEffect, useState } from 'react';
 import CsvChart from './CsvChart';
+import PlantaPreview from './PlantaPreview';
 import './hero-showcase.css';
 
-// Portada: tres proyectos reales apilados que rotan solos. La tarjeta del frente lleva a su página.
+// Portada: tres proyectos que se pueden probar, apilados que rotan solos. La tarjeta del frente lleva a su página.
 const SLIDES = [
  { slug: 'club-nfc', title: 'NFC para negocios', note: ['Un sello con acercar el celular', 'A stamp with one tap'], kind: 'nfc' },
  { slug: 'analizador-csv', title: 'Analizador CSV', note: ['Limpia reportes en el navegador', 'Cleans reports in the browser'], kind: 'chart' },
- { slug: 'punto-u', title: 'Punto U', note: ['Red de favores entre estudiantes', 'A favor network for students'], kind: 'phone', img: '/media/punto-u.webp' },
+ { slug: 'planta', title: 'Planta y OEE', note: ['Tres reportes, un OEE', 'Three reports, one OEE'], kind: 'planta' },
 ] as const;
 
-// Íconos de línea para cada proyecto: el símbolo NFC clásico, una gráfica y un pin en el mapa.
+// Íconos de línea para cada proyecto: el símbolo NFC clásico, una gráfica y un medidor.
 export function ProjectIcon({ kind }: { kind: string }) {
  const p = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
  return <svg className="hs-icon" viewBox="0 0 24 24" aria-hidden="true">
   {kind === 'nfc' && <><rect x="3" y="3" width="18" height="18" rx="5" {...p}/><path d="M8.5 16.5V7.5l7 9V7.5" {...p}/><path d="M6 9.5a4 4 0 0 0 0 5M18 9.5a4 4 0 0 1 0 5" {...p} opacity=".55"/></>}
   {kind === 'chart' && <><rect x="3" y="3" width="18" height="18" rx="5" {...p}/><path d="M7.5 16v-3M12 16V8M16.5 16v-5.5" {...p}/><path d="M7 7.5h2" {...p} opacity=".55"/></>}
-  {kind === 'phone' && <><path d="M12 21s-6.5-5.4-6.5-10.5a6.5 6.5 0 0 1 13 0C18.5 15.6 12 21 12 21z" {...p}/><circle cx="12" cy="10.5" r="2.4" {...p}/></>}
+  {kind === 'planta' && <><path d="M4.5 16.5a7.5 7.5 0 0 1 15 0" {...p}/><path d="M12 16.5l3.5-4.5" {...p}/><path d="M4 20h16" {...p} opacity=".55"/></>}
  </svg>;
 }
 
@@ -53,7 +54,7 @@ export default function HeroShowcase({ lang, paused }: { lang: 'es' | 'en'; paus
     const pos = (i - front + SLIDES.length) % SLIDES.length;
     return <a key={s.slug} href={`/proyectos/${s.slug}`} data-title={s.title} className={`hs-card hs-${s.kind} hs-pos${pos}`} tabIndex={pos === 0 ? 0 : -1} aria-hidden={pos !== 0}
      aria-label={`${s.title} — ${s.note[L]}. ${es ? 'Ver proyecto' : 'View project'}`}>
-     {s.kind === 'nfc' ? (pos === 0 && <NfcTap key={front} lang={lang}/>) : s.kind === 'chart' ? <div className="hs-rect"><CsvChart lang={lang}/></div> : <img src={s.img} width="600" height="1300" alt="" loading={i ? 'lazy' : undefined}/>}
+     {s.kind === 'nfc' ? (pos === 0 && <NfcTap key={front} lang={lang}/>) : s.kind === 'chart' ? <div className="hs-rect"><CsvChart lang={lang}/></div> : <div className="hs-plant"><PlantaPreview lang={lang}/></div>}
     </a>;
    })}
   </div>
