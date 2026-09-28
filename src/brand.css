@@ -1,7 +1,7 @@
 /* Identidad: noche índigo con lila, cian y menta; títulos en Bricolage Grotesque y subtítulos
    en Instrument Serif itálica. Va al final para mandar sobre los estilos anteriores. */
 :root{--bg:#120e1d;--surface:#1b1629;--surface-2:#231c35;--line:#302743;--text:#f4f0f7;--muted:#b7aec4;
- --lilac:#a894f0;--cyan:#b3aed8;--rose:#dd9fbd;--gold:#d9c08a;--mint:#9fd0bf;--violet:#b9a7ff;--amber:var(--gold);--coral:#ff6b8b;
+ --lilac:#a894f0;--cyan:#b3aed8;--rose:#dd9fbd;--gold:#d9c08a;--mint:#9fd0bf;--violet:#b9a7ff;--amber:var(--gold);--coral:#e58fa0;
  --accent:var(--lilac);--on-accent:#120c30;
  --display:'Bricolage Grotesque Variable','Manrope Variable',sans-serif;--serif:'Instrument Serif',Georgia,serif;
  background:var(--bg);color:var(--text)}
@@ -105,6 +105,18 @@ h1,h2,h3{font-family:var(--display);font-weight:720;letter-spacing:-.035em}
 .zone-arrow{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:linear-gradient(120deg,var(--lilac),#c9a8e8);color:#120c30;transition:transform .4s cubic-bezier(.16,1,.3,1);animation:zone-bob 2.4s ease-in-out infinite}
 .zone-nav.is-top .zone-arrow{transform:rotate(180deg);animation:none}
 @keyframes zone-bob{50%{transform:translateY(3px)}}
+/* Fuera de la portada: sólo el círculo (la etiqueta sale al pasar el ratón) y se esconde mientras bajas */
+.zone-nav{transition:transform .35s cubic-bezier(.16,1,.3,1),opacity .25s,border-color .25s,gap .3s,padding .3s}
+.zone-nav.is-hidden:not(:focus-visible){transform:translateY(calc(100% + 30px));opacity:0;pointer-events:none}
+html:not(.paged) .zone-nav{gap:0;padding:6px}
+html:not(.paged) .zone-label{max-width:0;transition:max-width .35s cubic-bezier(.16,1,.3,1)}
+@media(hover:hover){html:not(.paged) .zone-nav:hover,html:not(.paged) .zone-nav:focus-visible{gap:10px;padding-left:16px}html:not(.paged) .zone-nav:hover .zone-label,html:not(.paged) .zone-nav:focus-visible .zone-label{max-width:170px}}
+/* Objetivos táctiles de al menos 44 px */
+.topbar .brand{display:inline-flex;align-items:center;min-height:44px}
+.case-code{min-height:44px;align-items:center}
+:root .dw-link,:root .pl-link{display:inline-flex;align-items:center;min-height:44px;padding-inline:8px}
+:root .dw-yours a{display:inline-flex;align-items:center;min-height:44px}
+:root .st-foot a{display:inline-flex;align-items:center;min-height:44px}
 html[data-motion=paused] .zone-arrow,html[data-motion=paused] .orbit,html[data-motion=paused] .spark{animation:none}
 
 /* Intro de la primera visita */
@@ -151,7 +163,7 @@ html[data-motion=paused] .hero h1 em{animation:none}
 
 /* Vista previa del NFC en la lista: su propio color y el chip abajo, sin tapar la tarjeta */
 .row .ld-preview{background:radial-gradient(circle at 82% 12%,#dd9fbd38,transparent 50%),radial-gradient(circle at 8% 92%,#a894f033,transparent 55%),linear-gradient(160deg,#241a38,#140f20)}
-.row .ld-preview .ld-pass{background:linear-gradient(150deg,#4a2266,#a2437a 60%,#e86aa6);box-shadow:0 24px 50px #0008}
+.row .ld-preview .ld-pass{background:linear-gradient(150deg,#3b2352,#6d3a68 60%,#9b5d88);box-shadow:0 24px 50px #0008}
 .row .ld-preview-chip{top:auto;right:clamp(18px,6%,48px);bottom:clamp(18px,6%,40px);width:62px;height:62px;border:0;border-radius:16px;background:#f4f1ff;color:#2a1f5c}
 .row .ld-preview-chip i{border-color:#dd9fbd}
 /* El analizador en rectángulo: letras completas */
@@ -178,10 +190,10 @@ html[data-motion=paused] .row .ld-preview-chip{animation:none}
 .hero{overflow-x:clip}
 @media(max-width:980px){.portrait{max-width:280px}}
 /* El analizador también en la paleta nueva */
-.dw-workbench{--dw-bg:#1b1629;--dw-surface:#231c35;--dw-line:#30274a;border-color:#ffffff17;border-radius:24px}
+:root .dw-workbench{--dw-bg:#1b1629;--dw-surface:#231c35;--dw-line:#30274a;border-color:#ffffff17;border-radius:24px}
 .dw-workbench button{border-color:#ffffff2e;background:#231c35}
 .dw-workbench td{border-bottom-color:#2a2240}.dw-workbench th{background:#261f3b}
-.dw-search input{background:#0f0b18;border-color:#30274a}
+:root .dw-search input{background:#0f0b18;border-color:#30274a}
 .dw-col,.dw-yours{background:#1e182e}
 .cf-row:hover,.cf-row.is-open,.cf-row.is-focus{background:#261f3b}
 
@@ -263,6 +275,8 @@ html[data-motion=paused] .zone-in *,html[data-motion=paused] .zone-in{animation:
 .case-visual .vibe-shot{height:auto;position:absolute;inset:0;margin:auto;padding:6%;object-fit:contain}
 .case-visual.media-vibe{display:grid;place-items:center}
 @media(max-width:980px){.case-visual{order:-1;aspect-ratio:16/10}}
+/* En celular el encabezado va en una columna: la regla de dos columnas de arriba ganaba a la de pages.css */
+@media(max-width:860px){.case-head{grid-template-columns:minmax(0,1fr);gap:26px;padding-top:12px}.case-head h1{font-size:clamp(38px,11vw,60px);overflow-wrap:anywhere;hyphens:auto}.case-visual{aspect-ratio:4/3;max-height:62vh}.case-metrics{gap:14px;flex-wrap:wrap}.case-metrics div{flex:1 1 40%!important}}
 html[data-motion=paused] .case-visual{animation:none}
 .case-visual .nt-phone{width:21%}.case-visual .nt-tag{width:26%}.case-visual .nt-wave{width:22%}
 html,body{overflow-x:clip}
@@ -285,3 +299,58 @@ html,body{overflow-x:clip}
 .motion-tag{align-self:flex-start;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--lilac);border:1px solid #a894f055;border-radius:99px;padding:4px 10px}
 @media(max-width:860px){.motion-grid{grid-template-columns:1fr}}
 .dw-note{margin:12px 0 0;padding:10px 14px;border-radius:12px;background:#9fd0bf14;border:1px solid #9fd0bf40;color:#cfe9df;font-size:14px}
+/* Los títulos internos de las demos pasaron de h4 a h3 (orden de títulos); no heredan el estilo de sección */
+:where(.dw-workbench,.pl,.sh,.ld,.inv) h3{letter-spacing:normal}
+/* «Cómo funciona»: una columna por paso (3, 4 o 5) para que ninguno quede huérfano abajo */
+@media(min-width:861px){.how ol{grid-template-columns:repeat(var(--n,3),minmax(0,1fr));gap:clamp(20px,3vw,40px)}}
+.pano-thumbs img{height:auto}
+/* Portada en celular: cada fila es imagen, título, una frase y el botón; la descripción y las cifras viven en la página del proyecto */
+@media(max-width:760px){.row .project-info>p:not(.pitch),.row .project-metrics{display:none}.row{gap:18px}.row .project-links{margin-top:18px}.row .project-media{aspect-ratio:4/3}}
+/* Guía del chip en /nfc */
+.nfc-guide{padding-block:clamp(40px,6vw,72px)}
+.nfc-guide h2{font-size:clamp(28px,3.4vw,44px);line-height:1.05;margin-bottom:24px}
+.nfc-guide-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.nfc-guide article{padding:24px;border-radius:22px;background:var(--surface);border:1px solid #ffffff14}
+.nfc-guide article>span{font:700 12px var(--display);letter-spacing:.08em;color:var(--rose)}
+.nfc-guide h3{margin:10px 0 6px;font-size:22px}
+.nfc-guide article>p{color:var(--text);font-size:15px}
+.nfc-guide ul{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:10px}
+.nfc-guide li{position:relative;padding-left:18px;font-size:14.5px;line-height:1.5;color:var(--muted)}
+.nfc-guide li::before{content:'';position:absolute;left:0;top:.62em;width:7px;height:7px;border-radius:50%;background:color-mix(in srgb,var(--rose) 70%,transparent)}
+@media(max-width:860px){.nfc-guide-grid{grid-template-columns:1fr}}
+/* Demo en vivo caída: capturas con aviso */
+.live-off{display:grid;gap:14px}
+.live-note{margin:0;padding:10px 14px;border-radius:12px;background:#d9c08a14;border:1px solid #d9c08a40;color:#ecd9ab;font-size:14px}
+.live-shots{display:flex;gap:16px;justify-content:center;align-items:flex-start}
+.live-shots figure{margin:0;display:grid;gap:8px;justify-items:center}
+.live-shots.n2 img{width:auto;max-height:520px;max-width:100%;border:5px solid #0f0c15;border-radius:26px;box-shadow:0 24px 60px #0009}
+.live-shots.n1 img{width:100%;height:auto;border-radius:18px;border:1px solid #ffffff17;background:var(--surface);padding:3%}
+.live-shots figcaption{font-size:13px;color:var(--muted)}
+@media(max-width:640px){.live-shots.n2 img{max-height:380px}.live-shots{gap:10px}}
+:root .dw-workbench .dw-pager .dw-link{display:inline-flex;align-items:center;min-height:44px;padding-inline:8px}
+.project-spc{--c:#e2b3a0}
+/* Con 8 proyectos el índice debe caber en una pantalla (si no, la rueda se queda dentro de la zona) */
+.project-index button{padding-block:clamp(8px,1.35vh,16px)}
+.paged .projects-intro{gap:clamp(18px,3vh,36px)}
+/* Guía lateral: la etiqueta oculta no ocupa lugar ni tapa lo que hay debajo */
+.zone-dots button{position:relative;width:44px}
+.zone-dots span{position:absolute;right:48px;top:50%;margin-top:-13px;pointer-events:none}
+.zone-dots button:hover span,.zone-dots button:focus-visible span{pointer-events:auto}
+/* Enlace a GitHub con el resto de proyectos */
+.more-link{gap:10px;max-width:280px;text-align:left;line-height:1.3}
+/* Otros proyectos: dos tarjetas compactas bajo los de negocio */
+.others{display:grid;align-content:center;gap:22px;padding-block:clamp(40px,6vh,72px)}
+.others-head p{margin-top:6px;color:var(--muted);max-width:60ch}
+.others-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.other-card{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto;gap:14px 12px;padding:14px;border-radius:22px;background:var(--surface);border:1px solid color-mix(in srgb,var(--c) 22%,transparent);color:var(--text);transition:border-color .3s,transform .3s}
+.other-card:hover{border-color:var(--c);transform:translateY(-3px)}
+.other-card>svg{grid-row:2;grid-column:2;align-self:end;color:var(--c)}
+.other-media{grid-column:1/-1;display:grid;place-items:center;height:220px;overflow:hidden;border-radius:14px;background:radial-gradient(ellipse 80% 70% at 50% 30%,#2e2447,#150f22 72%)}
+.other-media .phones{height:100%;display:flex;gap:10px;justify-content:center;padding:16px 0}
+.other-media .phones img{height:100%;width:auto;border:4px solid #0f0c15;border-radius:18px}
+.other-media .vibe-shot{width:92%;height:auto}
+.other-copy{display:grid;gap:4px}
+.other-copy em{font-style:normal;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--c)}
+.other-copy strong{font:720 24px/1.1 var(--display);letter-spacing:-.02em}
+.other-copy span{color:var(--muted);font:italic 400 17px var(--serif)}
+@media(max-width:760px){.others-grid{grid-template-columns:1fr}.other-media{height:180px}}

@@ -28,3 +28,15 @@
 2. **T2 · Columnas a mano (P2).** Cuando una columna no se reconoce, se elige de una lista. Prueba con un Excel real de nombres raros.
 3. **T3 · Datos difíciles (P7).** Turno nocturno y fechas dd/mm; pruebas unitarias.
 4. **T4 · Seguimiento (P6).** Marcar excepciones como revisadas y exportarlas; histórico semanal del OEE.
+
+## Estado al 28-09-2026
+**Hecho y validado técnicamente**
+- T1: sin verde vivo, enlaces a 44 px, columna derecha con «Por turno» (peor turno en rosa) y fija al bajar.
+- T2: columnas no reconocidas se eligen de una lista (prueba de navegador con «No. de orden» y «Piezas OK»).
+- T3: turno nocturno anotado con el día siguiente se cruza igual; uno de días después sigue marcándose; fechas dd/mm y con mes escrito (pruebas unitarias).
+- T4 (parte): excepciones con palomita de revisada y exportación a CSV.
+
+**Falta**
+- Histórico semanal del OEE (necesita guardar turnos anteriores).
+- Probar con un Excel real de tu trabajo: eso lo valida en uso.
+- (28-09) OEE por día sacado de las fechas del reporte, con la meta del 85 % y el cambio por línea. Textos: «Incoherencias entre reportes», «Dato inválido».

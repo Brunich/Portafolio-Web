@@ -5,13 +5,15 @@ import AxeBuilder from '@axe-core/playwright';
 test.beforeEach(async ({ page }) => { await page.addInitScript(() => sessionStorage.setItem('bruno-intro', '1')); });
 
 test('portfolio has working bilingual navigation, project pages and CV', async ({ page, request }) => {
+ // El servidor de Punto U se simula arriba: esta prueba revisa la página, no el estado de Supabase.
+ await page.route('**/*supabase.co/**', r => r.fulfill({ status: 200, body: '' }));
   await page.goto('/');
   await expect(page.getByRole('heading', {level:1})).toContainText('Desarrollo web');
   await page.getByRole('button', { name:'Switch to English' }).click();
   await expect(page.locator('html')).toHaveAttribute('lang','en');
   await expect(page.getByRole('link', {name:'View projects',exact:true})).toBeVisible();
   await page.getByRole('button', { name:'Cambiar a español' }).click();
-  await page.locator('.project-punto').getByRole('link',{name:'Ver proyecto',exact:true}).click();
+  await page.locator('.other-card.project-punto').click(); // Punto U va en «Otros proyectos»
   await expect(page).toHaveURL(/\/proyectos\/punto-u$/);
   await expect(page.getByRole('heading',{level:1})).toHaveText('Punto U');
   await expect(page.getByRole('heading',{name:'Cómo funciona'})).toBeVisible();
@@ -68,7 +70,8 @@ test('shift handover: an incident cannot be closed without evidence, and the han
  await expect(board.locator('.c-closed')).toContainText('INC-233');
  await board.getByRole('button',{name:'Entregar turno'}).click();
  await expect(board.locator('.sh-summary')).toContainText('INC-231');
- await expect(board.locator('.sh-summary')).not.toContainText('INC-233');
+ await expect(board.locator('.sh-summary > ol')).not.toContainText('INC-233'); // no está pendiente…
+ await expect(board.locator('.sh-proofs')).toContainText('INC-233'); // …sale con su evidencia
  await page.goto('/');
  await expect(page.locator('a[download]').first()).toHaveAttribute('href','/cv/Bruno-Salas-ES.pdf');
  await page.getByRole('button', { name:'Switch to English' }).click();
@@ -131,7 +134,7 @@ test('customer club demo joins, stamps once per day and sends each message',asyn
  await club.getByRole('button',{name:/\+2 horas/}).click();
  await expect(club.locator('.ld-chat')).toContainText('una reseña nos ayuda');
  await club.getByRole('button',{name:'Dejar reseña en Google'}).click();
- await expect(club.locator('.ld-kpis div').nth(3).locator('dd')).toHaveText('1');
+ await expect(club.locator('.ld-kpis div').nth(3).locator('dd')).toHaveText('19'); // 18 del mes + la de Mariana
  await club.getByRole('button',{name:/Su cumpleaños/}).click();
  await expect(club.locator('.ld-chat')).toContainText('cumpleaños');
  await club.getByRole('button',{name:/Enviar campaña/}).click();
@@ -142,12 +145,14 @@ test('customer club demo joins, stamps once per day and sends each message',asyn
 test('stamp card from the NFC chip: one stamp a day, and the reward resets it',async({page})=>{
  await page.goto('/sello?n=Cafe%20Prueba&m=5&p=Un%20cafe&c=5fcfa9');
  await expect(page.locator('.st-count')).toHaveText('1/5');
- await expect(page.getByRole('heading',{level:1})).toHaveText('¡Sello de hoy listo!');
+ await expect(page.getByRole('heading',{level:1})).toHaveText('¡Bienvenido a Cafe Prueba!');
  await page.reload();
  await expect(page.locator('.st-count')).toHaveText('1/5');
  await expect(page.getByRole('heading',{level:1})).toHaveText('Ya tienes el sello de hoy.');
  await page.goto('/sello?n=Cafe%20Prueba&m=5&p=Un%20cafe&c=5fcfa9&demo');
- for (let i=0;i<4;i++) await page.getByRole('button',{name:/Demo/}).click();
+ await page.getByRole('button',{name:/Demo/}).click();
+ await expect(page.getByRole('heading',{level:1})).toHaveText('¡Sello de hoy listo!');
+ for (let i=0;i<3;i++) await page.getByRole('button',{name:/Demo/}).click();
  await expect(page.locator('.st-count')).toHaveText('5/5');
  await page.getByRole('button',{name:'Canjear premio'}).click();
  await page.getByRole('button',{name:'Sí, canjeado'}).click();
@@ -176,7 +181,7 @@ test('on desktop each wheel step moves one zone, and the index jumps to a projec
  await page.waitForTimeout(400);
  await page.mouse.wheel(0,120);
  await expect(page.locator('.zone-dots .on')).toContainText('NFC para negocios');
- await page.locator('.zone-dots button',{hasText:'Proyectos'}).click();
- await page.locator('.project-index button',{hasText:'Punto U'}).click();
- await expect(page.locator('.zone-dots .on')).toContainText('Punto U');
+ await page.locator('.zone-dots').getByRole('button',{name:'Proyectos',exact:true}).click();
+ await page.locator('.project-index button',{hasText:'Entrega de turno'}).click();
+ await expect(page.locator('.zone-dots .on')).toContainText('Entrega de turno');
 });

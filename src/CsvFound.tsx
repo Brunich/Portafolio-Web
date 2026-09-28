@@ -24,7 +24,7 @@ export default function Found({ lang, issues, rows, done, focus, runKey, onFix, 
 
  return <section className="cf" aria-label={t('Qué encontré', 'What I found')} key={runKey}>
   <header className="cf-head">
-   <div><h4>{t('Qué encontré', 'What I found')}</h4>
+   <div><h3>{t('Qué encontré', 'What I found')}</h3>
     <p>{!real.length ? t('Nada que corregir: el archivo está listo.', 'Nothing to fix: the file is ready.')
      : fixable.length ? t(`${fixable.length} se arreglan con un clic; el resto necesita que alguien decida.`, `${fixable.length} can be fixed in one click; the rest needs someone to decide.`)
      : t('Lo que queda necesita que alguien decida: se marca, no se inventa.', 'What remains needs someone to decide: it is flagged, never made up.')}</p></div>
@@ -45,7 +45,7 @@ export default function Found({ lang, issues, rows, done, focus, runKey, onFix, 
      return <li key={i.id} className={`cf-row k-${kindOf(i)}${isOpen ? ' is-open' : ''}${focus === i.id ? ' is-focus' : ''}`} style={{ ['--w' as string]: `${rowsOf(i) / max * 100}%`, ['--i' as string]: n }}>
       <button className="cf-label" aria-expanded={isOpen} onClick={() => setOpen(isOpen ? null : i.id)}><span>{i.title[L]}</span><i aria-hidden="true">▾</i></button>
       <span className="cf-bar" aria-hidden="true"><i/></span>
-      <span className="cf-n" title={t('filas', 'rows')}>{rowsOf(i)}</span>
+      <span className="cf-n" title={t('filas', 'rows')}>{rowsOf(i).toLocaleString(es ? 'es-MX' : 'en-US')}</span>
       <span className="cf-act">{i.fix && <button className="cf-fix" onClick={() => onFix(i)}>{i.fixLabel![L]}</button>}</span>
       {isOpen && <div className="cf-detail"><p>{i.detail[L]}</p>{i.example && <code>{i.example}</code>}
        <button className="dw-link" onClick={() => onShow(i.id)}>{t('Ver estas filas en la tabla', 'Show these rows in the table')} ↑</button></div>}
