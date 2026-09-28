@@ -277,7 +277,7 @@ function nfcScreen(g, u, t) {
 }
 function sNFC(g, u, t) {
  backdrop(g, t, P.rose, 1350, 560);
- const out = seg(u, 5.95, 6.45);
+ const out = seg(u, 6.25, 6.75);
  titleBlock(g, u, { num: '01', kicker: '01 — NFC PARA NEGOCIOS', l1: 'Que vuelvan,', l2: 'sin quitarles tiempo.', acc: P.rose, out });
  chips(g, u, [['1 s', 'por visita'], ['0', 'apps que instalar'], ['1', 'sello al día']], P.rose, out);
  const chip = { x: 1150, y: 800 }, kc = E.outBack(seg(u, .2, .85));
@@ -315,7 +315,7 @@ const BARS = [['L1', 23], ['L2', 41], ['L3', 30]], ORDER = [1, 2, 0];
 const QUERY = 'SELECT linea, SUM(rechazadas) FROM datos GROUP BY linea ORDER BY 2 DESC';
 function sCSV(g, u, t) {
  backdrop(g, t, P.mint, 1310, 540);
- const out = seg(u, 6.55, 7.0);
+ const out = seg(u, 6.85, 7.3);
  titleBlock(g, u, { num: '02', kicker: '02 — ANALIZADOR DE CSV', l1: 'Tu reporte,', l2: 'limpio en un clic.', acc: P.mint, out });
  chips(g, u, [['7', 'tipos de problema'], ['8', 'gráficas'], ['0', 'servidores']], P.mint, out);
  const X0 = 860, Y0 = 215, CW = 900, CH = 640, kc = E.outExpo(seg(u, .2, .95));
@@ -403,7 +403,7 @@ function ring(g, x, y, r, lw, frac, c, track = .14) {
 }
 function sPlanta(g, u, t) {
  backdrop(g, t, P.blue, 1450, 500);
- const out = seg(u, 5.75, 6.2);
+ const out = seg(u, 6.05, 6.5);
  titleBlock(g, u, { num: '03', kicker: '03 — PLANTA · CONSOLIDADOR Y OEE', l1: 'Tres reportes,', l2: 'un OEE.', acc: P.blue, out });
  chips(g, u, [['3', 'reportes cruzados'], ['6', 'reglas'], ['1', 'Excel listo']], P.blue, out);
  const M = [1235, 470], G = [1520, 440];
@@ -473,7 +473,7 @@ function label(g) {
 }
 function sInv(g, u, t) {
  backdrop(g, t, P.orchid, 1300, 460);
- const out = seg(u, 5.6, 6.0);
+ const out = seg(u, 5.85, 6.3);
  titleBlock(g, u, { num: '04', kicker: '04 — INVENTARIO CON LA CÁMARA', l1: 'La cámara,', l2: 'como lector.', acc: P.orchid, out });
  chips(g, u, [['3', 'modos'], ['0', 'lectores que comprar'], ['1', 'lista automática']], P.orchid, out);
  const V = { x: 890, y: 215, w: 480, h: 420 }, LC = [V.x + 240, V.y + 205], kv = E.outExpo(seg(u, .2, .85));
@@ -570,7 +570,7 @@ function incCard(g, c, x, y, u, t, o) {
 }
 function sTurno(g, u, t) {
  backdrop(g, t, P.gold, 1320, 520);
- const out = seg(u, 6.35, 6.8);
+ const out = seg(u, 6.65, 7.1);
  titleBlock(g, u, { num: '05', kicker: '05 — ENTREGA DE TURNO', l1: 'Nada se pierde', l2: 'entre turnos.', acc: P.gold, out });
  chips(g, u, [['3', 'estados'], ['0', 'cierres sin evidencia'], ['1', 'clic para entregar']], P.gold, out);
  const kh = E.outExpo(seg(u, .2, .8));
