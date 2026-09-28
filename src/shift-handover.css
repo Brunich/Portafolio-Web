@@ -1,5 +1,5 @@
 /* Entrega de turno: tablero de tres columnas y resumen para el siguiente turno. */
-.sh{--open:#ff6b8b;--doing:#f5c84c;--closed:#7fe3c6;background:var(--surface,#171936);border:1px solid var(--line,#2b2f55);border-radius:22px;padding:clamp(16px,3vw,28px);display:grid;gap:20px}
+.sh{--open:#ff6b8b;--doing:#d9c08a;--closed:#9fd0bf;background:var(--surface,#171936);border:1px solid var(--line,#2b2f55);border-radius:22px;padding:clamp(16px,3vw,28px);display:grid;gap:20px}
 .sh-top{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap}
 .sh-kicker{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--doing)}
 .sh-top strong{display:block;margin-top:6px;font:700 clamp(22px,2.4vw,28px)/1.15 var(--display)}
@@ -30,7 +30,7 @@
 .sh-card-head strong{font:650 14.5px/1.3 'DM Sans Variable',sans-serif}
 .sh-card-head small{font-size:12px;color:var(--muted)}
 .sh-sev{font:700 10px 'DM Sans Variable',sans-serif;letter-spacing:.08em;text-transform:uppercase;padding:3px 7px;border-radius:6px}
-.sev-0 .sh-sev,.sh-sev.sev-0{background:#ff6b8b26;color:#ffadc0}.sev-1 .sh-sev,.sh-sev.sev-1{background:#f5c84c24;color:#f8e08e}.sev-2 .sh-sev,.sh-sev.sev-2{background:#ffffff14;color:#cfd2e3}
+.sev-0 .sh-sev,.sh-sev.sev-0{background:#ff6b8b26;color:#ffadc0}.sev-1 .sh-sev,.sh-sev.sev-1{background:#d9c08a24;color:#f8e08e}.sev-2 .sh-sev,.sh-sev.sev-2{background:#ffffff14;color:#cfd2e3}
 .sh-who{display:flex;align-items:center;gap:8px;margin-top:2px}
 .sh-who i{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:color-mix(in srgb,var(--k) 30%,#1e2142);font:700 10.5px 'DM Sans Variable',sans-serif;font-style:normal}
 .sh-who em{font-size:12px;font-style:normal;color:var(--open)}

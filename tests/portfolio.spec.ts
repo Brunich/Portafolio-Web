@@ -164,3 +164,18 @@ test('first visit shows the intro and it gets out of the way',async({browser})=>
  await expect(page.getByRole('heading',{level:1})).toContainText('Desarrollo web');
  await page.close();
 });
+
+test('on desktop each wheel step moves one zone, and the index jumps to a project',async({page})=>{
+ await page.setViewportSize({width:1440,height:860});
+ await page.goto('/');
+ await expect(page.locator('html')).toHaveClass(/paged/);
+ await page.mouse.move(700,400);
+ await page.mouse.wheel(0,120);
+ await expect(page.locator('.zone-dots .on')).toContainText('Proyectos');
+ await page.waitForTimeout(400);
+ await page.mouse.wheel(0,120);
+ await expect(page.locator('.zone-dots .on')).toContainText('NFC para negocios');
+ await page.locator('.zone-dots button',{hasText:'Proyectos'}).click();
+ await page.locator('.project-index button',{hasText:'Punto U'}).click();
+ await expect(page.locator('.zone-dots .on')).toContainText('Punto U');
+});
