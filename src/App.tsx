@@ -317,7 +317,7 @@ function PuntoDemo({ lang, link }: { lang: Lang; link: string }) {
 }
 
 // Cada proyecto tiene su propio repo, con pruebas y README.
-const REPO: Record<string, string> = { club: 'nfc-negocios', csv: 'analizador-csv', planta: 'planta-oee', inventario: 'inventario-camara', turno: 'entrega-de-turno', vibe: 'VibeMap', punto: 'Punto-U-app' };
+const REPO: Record<string, string> = { club: 'nfc-negocios', csv: 'analizador-csv', planta: 'planta-oee', inventario: 'inventario-camara', spc: 'graficas-de-control', turno: 'entrega-de-turno', vibe: 'VibeMap', punto: 'Punto-U-app' };
 
 // Videos de motion design: hoy el reel del portafolio; el espacio está listo para los que sigan.
 function Motion({ lang }: { lang: Lang }) {
