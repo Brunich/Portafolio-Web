@@ -41,4 +41,4 @@
 **Falta**
 - T4: comparar dos cortes del mismo reporte.
 - En celular, «Qué encontré» sigue debajo de la tabla; valorar subirlo.
-- T4 (29-09): pestaña **Comparar**: filas nuevas, las que ya no están y cada celda que cambió, con llave adivinada (acepta pocos folios repetidos y avisa); 60 000 vs 60 000 filas en < 1 s (prueba). Ejemplos antes → después en todas las reglas que se arreglan solas; en celular «Qué encontré» va antes de la tabla; aviso con lenguaje de reporte («Se encontraron incoherencias · revisar»).
+- T4 (28-09): pestaña **Comparar**: filas nuevas, las que ya no están y cada celda que cambió, con llave adivinada (acepta pocos folios repetidos y avisa); 60 000 vs 60 000 filas en < 1 s (prueba). Ejemplos antes → después en todas las reglas que se arreglan solas; en celular «Qué encontré» va antes de la tabla; aviso con lenguaje de reporte («Se encontraron incoherencias · revisar»).
