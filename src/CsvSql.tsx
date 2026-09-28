@@ -68,7 +68,7 @@ export default function CsvSql({ lang, table, onChart }: { lang: 'es' | 'en'; ta
 
  return <div className="sq">
   <aside className="sq-schema">
-   <h5>{t('Tabla', 'Table')} <code>datos</code></h5>
+   <h3>{t('Tabla', 'Table')} <code>datos</code></h3>
    <span className="sq-meta">{table.rows.length} {t('filas · toca una columna para escribirla', 'rows · tap a column to insert it')}</span>
    {table.headers.map((h, i) => <button key={h} onClick={() => insert(/^[a-z_][a-z0-9_]*$/i.test(h) ? h : q(h))}>{h}<small>{profile[i].kind === 'number' ? t('número', 'number') : profile[i].kind === 'date' ? t('fecha', 'date') : t('texto', 'text')}</small></button>)}
   </aside>

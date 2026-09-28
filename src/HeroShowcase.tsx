@@ -53,7 +53,7 @@ export default function HeroShowcase({ lang, paused }: { lang: 'es' | 'en'; paus
     const pos = (i - front + SLIDES.length) % SLIDES.length;
     return <a key={s.slug} href={`/proyectos/${s.slug}`} data-title={s.title} className={`hs-card hs-${s.kind} hs-pos${pos}`} tabIndex={pos === 0 ? 0 : -1} aria-hidden={pos !== 0}
      aria-label={`${s.title} — ${s.note[L]}. ${es ? 'Ver proyecto' : 'View project'}`}>
-     {s.kind === 'nfc' ? (pos === 0 && <NfcTap key={front} lang={lang}/>) : s.kind === 'chart' ? <div className="hs-rect"><CsvChart lang={lang}/></div> : <img src={s.img} alt="" loading={i ? 'lazy' : undefined}/>}
+     {s.kind === 'nfc' ? (pos === 0 && <NfcTap key={front} lang={lang}/>) : s.kind === 'chart' ? <div className="hs-rect"><CsvChart lang={lang}/></div> : <img src={s.img} width="600" height="1300" alt="" loading={i ? 'lazy' : undefined}/>}
     </a>;
    })}
   </div>

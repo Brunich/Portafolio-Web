@@ -131,7 +131,7 @@ export default function LoyaltyDemo({ lang }: { lang: 'es' | 'en' }) {
      {screen === 'join' && <form className="ld-join" onSubmit={join}>
       <span className="ld-url">elcerro.club/t/mesa-7</span>
       <div className="ld-brand" aria-hidden="true">EC</div>
-      <h4>{t('Únete al club de El Cerro', 'Join El Cerro’s club')}</h4>
+      <h3>{t('Únete al club de El Cerro', 'Join El Cerro’s club')}</h3>
       <p>{t(`Cada visita suma un sello. Con ${GOAL}, la comida va por la casa.`, `Every visit adds a stamp. With ${GOAL}, your meal is on the house.`)}</p>
       <label>{t('Nombre', 'Name')}<input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required/></label>
       <label>WhatsApp<input value={form.phone} inputMode="tel" onChange={e => setForm({ ...form, phone: e.target.value })} required/></label>

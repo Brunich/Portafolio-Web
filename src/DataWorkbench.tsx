@@ -48,6 +48,7 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
  const [error, setError] = useState('');
  const [note, setNote] = useState('');
  const [query, setQuery] = useState('');
+ const [allCols, setAllCols] = useState(false);
  const [version, setVersion] = useState(0);
  const [showAll, setShowAll] = useState(false);
  const upload = useRef<HTMLInputElement>(null);
@@ -135,17 +136,18 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
   {tab === 'clean' && <>
 
   <section className="dw-structure" aria-label={t('Cómo está organizado', 'How it is organized')}>
-   <h4>{t('Cómo está organizado', 'How it is organized')}</h4>
+   <h3>{t('Cómo está organizado', 'How it is organized')}</h3>
    <CsvMindMap lang={lang} file={fileName} rows={rows.length} columns={profile} hover={hover} onHover={setHover} runKey={`${version}`}/>
   </section>
 
-  <section className="dw-columns" aria-label={t('Columnas', 'Columns')}>
+  <section className={`dw-columns${allCols ? ' is-open' : ''}`} style={{ '--cols': Math.ceil(profile.length / Math.ceil(profile.length / 5)) } as React.CSSProperties} aria-label={t('Columnas', 'Columns')}>
    {profile.map((p, i) => <article key={p.name} className={`dw-col kind-${p.kind}${hover === i ? ' is-hot' : ''}`} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}>
     <header><strong>{p.name}</strong><span>{({ number: t('número', 'number'), date: t('fecha', 'date'), category: t('categoría', 'category'), text: t('texto', 'text') })[p.kind]}</span></header>
     <p>{p.kind === 'number' ? `${t('de', 'from')} ${p.min?.toLocaleString('es-MX')} ${t('a', 'to')} ${p.max?.toLocaleString('es-MX')} · ${t('mediana', 'median')} ${p.median?.toLocaleString('es-MX')}` : p.kind === 'date' ? `${p.from} → ${p.to}` : `${p.unique} ${t('valores distintos', 'distinct values')}`}{p.blanks ? ` · ${p.blanks} ${t(p.blanks === 1 ? 'vacío' : 'vacíos', 'blank')}` : ''}</p>
     <ColumnChart p={p}/>
    </article>)}
   </section>
+  {profile.length > 4 && <button className="dw-morecols" aria-expanded={allCols} onClick={() => setAllCols(!allCols)}>{allCols ? t('Ver menos columnas', 'Show fewer columns') : t(`Ver las ${profile.length} columnas`, `Show all ${profile.length} columns`)}</button>}
 
   <div className="dw-tabletools" ref={tableTop}>
    <label className="dw-search"><span className="dw-visually-hidden">{t('Buscar en la tabla', 'Search the table')}</span><input type="search" value={query} onChange={e => setQuery(e.target.value)} placeholder={t('Buscar en la tabla…', 'Search the table…')}/></label>
