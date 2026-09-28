@@ -1,5 +1,6 @@
 // Revisión de calidad de un CSV: qué está mal, dónde, y cómo arreglarlo sin adivinar.
 // Las reglas sólo corrigen solas lo que es mecánico; lo que requiere criterio se marca para revisión.
+import { parseDate, toIso } from './dates.ts';
 export type Severity = 'high' | 'medium' | 'low' | 'info';
 export type Issue = {
  id: string; severity: Severity; column?: number;
@@ -9,7 +10,6 @@ export type Issue = {
 };
 
 const fold = (v: string) => v.trim().toLocaleLowerCase('es').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ');
-const ISO = /^\d{4}-\d{2}-\d{2}$/, DMY = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
 const THOUSANDS = /^-?\d{1,3}(,\d{3})+(\.\d+)?$/, PLAIN = /^-?\d+(\.\d+)?$/;
 export const toNumber = (v: string) => { const t = v.trim(); return THOUSANDS.test(t) ? Number(t.replace(/,/g, '')) : PLAIN.test(t) ? Number(t) : NaN; };
 const line = (r: number) => r + 2; // fila en el archivo: la 1 es el encabezado
@@ -43,7 +43,7 @@ export function detectIssues(headers: string[], rows: string[][]): Issue[] {
  rows.forEach((r, i) => { const k = JSON.stringify(r.map(v => v.trim())); if (seen.has(k)) dup.push([i, seen.get(k)!]); else seen.set(k, i); });
  if (dup.length) issues.push({ id: 'dup', severity: 'medium', title: ['Filas repetidas', 'Duplicate rows'],
   detail: [cap(dup.map(([i, j]) => `la fila ${line(i)} repite la ${line(j)}`).join('; ')) + '. Pasa cuando un reporte se exporta dos veces.', cap(dup.map(([i, j]) => `row ${line(i)} repeats row ${line(j)}`).join('; ')) + '. Typical when a report is exported twice.'],
-  example: rows[dup[0][0]][0], cells: dup.flatMap(([i]) => headers.map((_, c) => [i, c] as [number, number])), rows: dup.map(([i]) => i),
+  example: `fila ${line(dup[0][0])} = fila ${line(dup[0][1])} → se queda una`, cells: dup.flatMap(([i]) => headers.map((_, c) => [i, c] as [number, number])), rows: dup.map(([i]) => i),
   fix: rs => { const s = new Set<string>(); return rs.filter(r => { const k = JSON.stringify(r.map(v => v.trim())); if (s.has(k)) return false; s.add(k); return true; }); },
   fixLabel: ['Quitar repetidas', 'Remove duplicates'], fixDone: [`Quité ${plural(dup.length, 'fila repetida', 'filas repetidas')}`, `Removed ${plural(dup.length, 'duplicate row', 'duplicate rows')}`] });
 
@@ -60,19 +60,22 @@ export function detectIssues(headers: string[], rows: string[][]): Issue[] {
    const forms = messy.map(g => [...g.keys()].map(f => `«${f}»`).join(' / '));
    issues.push({ id: `case-${c}`, severity: 'medium', column: c, title: [`«${h}» escrito de varias formas`, `“${h}” written several ways`],
     detail: [`${forms.join('; ')}. Para contar y agrupar deben ser un solo valor; se unifica con la forma más usada.`, `${forms.join('; ')}. To count and group they must be one value; unified to the most common form.`],
-    example: forms[0], cells,
+    example: cells.length ? `«${values[cells[0][0]].trim()}» → «${canon.get(fold(values[cells[0][0]]))}»` : forms[0], cells,
     fix: rs => rs.map(r => r.map((v, j) => j === c && v.trim() && canon.has(fold(v)) ? canon.get(fold(v))! : v)),
     fixLabel: ['Unificar', 'Unify'], fixDone: [`Unifiqué ${plural(cells.length, 'valor', 'valores')} en «${h}»`, `Unified ${plural(cells.length, 'value', 'values')} in “${h}”`] });
   }
-  // 4. Fechas con dos formatos.
-  const iso = present.filter(v => ISO.test(v.trim())).length, dmy = present.filter(v => DMY.test(v.trim())).length;
-  if (iso && dmy && iso + dmy === present.length) {
-   const cells = values.map((v, i) => [i, v] as const).filter(([, v]) => DMY.test(v.trim())).map(([i]) => [i, c] as [number, number]);
-   issues.push({ id: `date-${c}`, severity: 'medium', column: c, title: [`Fechas en dos formatos en «${h}»`, `Two date formats in “${h}”`],
-    detail: [`${iso} en AAAA-MM-DD y ${dmy} en DD/MM/AAAA. Mezcladas se ordenan mal; se convierten a AAAA-MM-DD asumiendo día/mes (formato de México).`, `${iso} as YYYY-MM-DD and ${dmy} as DD/MM/YYYY. Mixed, they sort wrong; converted to YYYY-MM-DD assuming day/month (Mexican format).`],
-    example: values[cells[0][0]].trim(), cells,
-    fix: rs => rs.map(r => r.map((v, j) => { const m = j === c ? DMY.exec(v.trim()) : null; return m ? `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}` : v; })),
-    fixLabel: ['Convertir', 'Convert'], fixDone: [`Convertí ${plural(dmy, 'fecha', 'fechas')} a AAAA-MM-DD`, `Converted ${plural(dmy, 'date', 'dates')} to YYYY-MM-DD`] });
+  // 4. Fechas escritas de varias formas (02/03/2026, 2-mar-2026, 2026-03-02…): mezcladas se ordenan mal.
+  // Se corta en el primer valor que no es fecha: en columnas de texto cuesta una sola lectura.
+  const shapes = new Set<string>(); let allDates = present.length > 0;
+  for (const v of present) { const p = parseDate(v); if (!p) { allDates = false; break; } shapes.add(p.shape); }
+  if (allDates && shapes.size > 1) {
+   const cells = values.map((v, i) => [i, v.trim() ? parseDate(v) : null] as const).filter(([, p]) => p && p.shape !== 'iso').map(([i]) => [i, c] as [number, number]);
+   const n = cells.length, first = values[cells[0][0]].trim();
+   issues.push({ id: `date-${c}`, severity: 'medium', column: c, title: [`Fechas en ${shapes.size} formatos en «${h}»`, `${shapes.size} date formats in “${h}”`],
+    detail: [`${present.length - n} en AAAA-MM-DD y ${n} escritas de otra forma. Mezcladas se ordenan mal; se convierten a AAAA-MM-DD leyendo día antes que mes (formato de México).`, `${present.length - n} as YYYY-MM-DD and ${n} written another way. Mixed, they sort wrong; converted to YYYY-MM-DD reading day before month (Mexican format).`],
+    example: `${first} → ${toIso(first)}`, cells,
+    fix: rs => rs.map(r => r.map((v, j) => j === c && v.trim() ? toIso(v) ?? v : v)),
+    fixLabel: ['Convertir', 'Convert'], fixDone: [`Convertí ${plural(n, 'fecha', 'fechas')} a AAAA-MM-DD`, `Converted ${plural(n, 'date', 'dates')} to YYYY-MM-DD`] });
   }
   // 5. Números con separador de miles, guardados como texto.
   const thousands = values.map((v, i) => [i, v] as const).filter(([, v]) => THOUSANDS.test(v.trim()));
@@ -95,7 +98,7 @@ export function detectIssues(headers: string[], rows: string[][]): Issue[] {
  rows.forEach((r, i) => r.forEach((v, c) => { if (v !== v.trim()) spaced.push([i, c]); }));
  if (spaced.length) issues.push({ id: 'trim', severity: 'low', title: ['Espacios sobrantes', 'Extra spaces'],
   detail: [`${plural(spaced.length, 'celda empieza o termina', 'celdas empiezan o terminan')} con espacios: «Pintura» y «Pintura » no cuentan como lo mismo.`, `${plural(spaced.length, 'cell starts or ends', 'cells start or end')} with spaces: “Paint” and “Paint ” don’t count as the same.`],
-  example: `«${rows[spaced[0][0]][spaced[0][1]]}»`, cells: spaced,
+  example: `«${rows[spaced[0][0]][spaced[0][1]]}» → «${rows[spaced[0][0]][spaced[0][1]].trim()}»`, cells: spaced,
   fix: rs => rs.map(r => r.map(v => v.trim())), fixLabel: ['Recortar', 'Trim'], fixDone: [`Recorté espacios en ${plural(spaced.length, 'celda', 'celdas')}`, `Trimmed ${plural(spaced.length, 'cell', 'cells')}`] });
 
  const order: Record<Severity, number> = { high: 0, medium: 1, low: 2, info: 3 };

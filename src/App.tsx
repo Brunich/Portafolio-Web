@@ -12,10 +12,12 @@ const LoyaltyDemo = lazy(() => import('./LoyaltyDemo'));
 const ShiftHandover = lazy(() => import('./ShiftHandover'));
 const Planta = lazy(() => import('./Planta'));
 const Inventario = lazy(() => import('./Inventario'));
+const Spc = lazy(() => import('./Spc'));
 const MenuPage = lazy(() => import('./Menu').then(m => ({ default: m.MenuPage })));
 const MenuBuilder = lazy(() => import('./Menu').then(m => ({ default: m.MenuBuilder })));
 import PlantaPreview from './PlantaPreview';
 import InventarioPreview from './InventarioPreview';
+import SpcPreview from './SpcPreview';
 import ClubPreview from './ClubPreview';
 import CsvChart from './CsvChart';
 import TurnoPreview from './TurnoPreview';
@@ -29,7 +31,9 @@ import { usePaging, glide, glideTo, zoneList } from './paging';
 import { StampPage, NfcSetup, Qr, bizLink, bizFrom } from './Stamp';
 import './brand.css';
 
-const PROJECT_ORDER = ['club', 'csv', 'planta', 'inventario', 'turno', 'vibe', 'punto'];
+const PROJECT_ORDER = ['club', 'csv', 'planta', 'spc', 'inventario', 'turno', 'vibe', 'punto'];
+// En la portada van al frente los que resuelven un problema de negocio; el hackathon y la app de estudiantes, abajo.
+const OTHER = ['vibe', 'punto'];
 type Project = ReturnType<typeof professional>['projects'][number];
 const external = (url: string) => url.startsWith('http') ? { target: '_blank', rel: 'noreferrer' } : {};
 
@@ -87,7 +91,7 @@ export default function App() {
  return <>
   <a className="skip-link" href="#main">{c.skip}</a>
   <div className="scroll-progress" aria-hidden="true"/>
-  <header className="topbar"><div className="topbar-inner wrap">
+  <header className="topbar" aria-label={es ? 'Navegación del portafolio' : 'Portfolio navigation'}><div className="topbar-inner wrap">
    <a className="brand" href="/" data-title="Bruno Salas" aria-label="Bruno Salas — inicio"><span className="brand-name"><span className="brand-top"><b>Bruno Salas</b><em>{es ? 'portafolio' : 'portfolio'}</em></span><small>{p.role}</small></span></a>
    <nav className="topnav" aria-label={es ? 'Secciones' : 'Sections'}>{[['projects', es ? 'Proyectos' : 'Projects'], ['about', es ? 'Perfil' : 'Profile'], ['graphics', 'Game dev'], ['motion', 'Motion']].map(([id, label]) => <a key={id} href={at(id)}>{label}</a>)}</nav>
    <div className="topbar-tools">
@@ -99,7 +103,7 @@ export default function App() {
   {r.page === 'nfc' ? <NfcPage lang={lang}/> : project ? <ProjectPage lang={lang} project={project} projects={projects}/> : <Home lang={lang} paused={paused} projects={projects}/>}
   <ZoneNav lang={lang} routeKey={`${r.page}:${project?.id ?? ''}`}/>
   {pg.paged && <ZoneDots labels={pg.labels} current={pg.current}/>}
-  <footer className="site-footer wrap">© {new Date().getFullYear()} Bruno Salas Rodríguez <span>{c.location}</span></footer>
+  <footer className="site-footer wrap" aria-label={es ? 'Pie del portafolio' : 'Portfolio footer'}>© {new Date().getFullYear()} Bruno Salas Rodríguez <span>{c.location}</span></footer>
  </>;
 }
 
@@ -108,17 +112,26 @@ function ZoneNav({ lang, routeKey }: { lang: Lang; routeKey: string }) {
  const es = lang === 'es';
  const [next, setNext] = useState<HTMLElement | null>(null);
  const [label, setLabel] = useState('');
+ const [hidden, setHidden] = useState(false);
  useEffect(() => {
+  let lastY = scrollY;
+  // En celular no hay margen libre: arranca oculto y aparece al subir.
+  setHidden(!document.documentElement.classList.contains('paged') && matchMedia('(max-width:760px)').matches);
   const update = () => {
    const zones = [...document.querySelectorAll<HTMLElement>('main [data-zone]')];
    const n = zones.find(z => z.getBoundingClientRect().top > 110) ?? null;
    setNext(n); setLabel(n?.dataset.zone ?? (es ? 'Arriba' : 'Top'));
+   // Fuera de la portada por zonas se esconde mientras bajas leyendo, para no tapar texto; vuelve al subir o al final.
+   const y = scrollY, end = y > 240 && y + innerHeight > document.documentElement.scrollHeight - 80;
+   if (!document.documentElement.classList.contains('paged') && Math.abs(y - lastY) > 6) setHidden(y > lastY && y > 240 && !end);
+   if (end) setHidden(false);
+   lastY = y;
   };
   update(); const late = setTimeout(update, 600);
   addEventListener('scroll', update, { passive: true }); addEventListener('resize', update);
   return () => { clearTimeout(late); removeEventListener('scroll', update); removeEventListener('resize', update); };
  }, [routeKey, es]);
- return <button className={`zone-nav${next ? '' : ' is-top'}`} onClick={() => { if (next) void glideTo(next); else void glide(0); }} aria-label={next ? `${es ? 'Bajar a' : 'Go to'} ${label}` : (es ? 'Volver arriba' : 'Back to top')}>
+ return <button className={`zone-nav${next ? '' : ' is-top'}${hidden ? ' is-hidden' : ''}`} onClick={() => { if (next) void glideTo(next); else void glide(0); }} aria-label={next ? `${es ? 'Bajar a' : 'Go to'} ${label}` : (es ? 'Volver arriba' : 'Back to top')}>
   <span className="zone-label">{label}</span><span className="zone-arrow" aria-hidden="true"><ArrowDown size={18} weight="bold"/></span>
  </button>;
 }
@@ -139,12 +152,17 @@ function HeroArt() {
 
 function Home({ lang, paused, projects }: { lang: Lang; paused: boolean; projects: Project[] }) {
  const c = copy[lang], p = professional(lang), es = lang === 'es';
+ const featured = projects.filter(x => !OTHER.includes(x.id)), others = projects.filter(x => OTHER.includes(x.id));
  const cv = es ? '/cv/Bruno-Salas-ES.pdf' : '/cv/Bruno-Salas-EN.pdf';
  return <main id="main">
   <section id="home" className="hero wrap" data-zone={es ? 'Inicio' : 'Home'}><HeroArt/><div className="hero-copy"><h1>{p.title}<em>{p.accent}</em></h1><p>{p.intro}</p><div className="hero-actions"><a className="button primary" href="#projects">{c.view}<ArrowDown size={19}/></a><a className="button secondary" href={cv} download>{es ? 'Descargar CV' : 'Download CV'}<DownloadSimple size={19}/></a></div><p className="hero-facts">{es ? 'Monterrey, N. L. · UANL 2023–2028 · Español, inglés y portugués' : 'Monterrey, Mexico · UANL 2023–2028 · Spanish, English & Portuguese'}</p></div><div className="hero-workbench"><HeroShowcase lang={lang} paused={paused}/></div></section>
-  <section id="projects" className="wrap section-space"><div className="projects-intro" data-zone={es ? 'Proyectos' : 'Projects'}><div className="section-heading" data-num="01"><div><span className="kicker">01 · {es ? 'Proyectos' : 'Projects'}</span><h2>{p.projectsTitle}</h2><p>{p.projectsIntro}</p></div><a className="inline-link" href={personal.github} {...external(personal.github)}>GitHub<GithubLogo size={21}/></a></div>
-   <ol className="project-index">{projects.map((x, i) => <li key={x.id} className={`project-${x.id}`}><button onClick={() => void glideTo(document.getElementById(`p-${x.id}`))}><span className="pi-num">{String(i + 1).padStart(2, '0')}</span><span className="pi-main"><strong>{x.title}</strong><em>{x.pitch}</em></span><span className="pi-kind">{x.kind}</span><ArrowDown size={18}/></button></li>)}</ol></div>
-   <div className="rows">{projects.map((project, i) => <ProjectRow key={project.id} lang={lang} project={project} flip={i % 2 === 1} n={i + 1} of={projects.length}/>)}</div>
+  <section id="projects" className="wrap section-space"><div className="projects-intro" data-zone={es ? 'Proyectos' : 'Projects'}><div className="section-heading" data-num="01"><div><span className="kicker">01 · {es ? 'Proyectos' : 'Projects'}</span><h2>{p.projectsTitle}</h2><p>{p.projectsIntro}</p></div><a className="inline-link more-link" href={personal.github} {...external(personal.github)}><GithubLogo size={21}/>{es ? 'Tengo más proyectos, pequeños y grandes' : 'I have more projects, small and large'}<ArrowUpRight size={18}/></a></div>
+   <ol className="project-index">{featured.map((x, i) => <li key={x.id} className={`project-${x.id}`}><button onClick={() => void glideTo(document.getElementById(`p-${x.id}`))}><span className="pi-num">{String(i + 1).padStart(2, '0')}</span><span className="pi-main"><strong>{x.title}</strong><em>{x.pitch}</em></span><span className="pi-kind">{x.kind}</span><ArrowDown size={18}/></button></li>)}</ol></div>
+   <div className="rows">{featured.map((project, i) => <ProjectRow key={project.id} lang={lang} project={project} flip={i % 2 === 1} n={i + 1} of={featured.length}/>)}</div>
+   <div className="others" data-zone={es ? 'Otros proyectos' : 'Other projects'}>
+    <div className="others-head"><span className="kicker">{es ? 'Otros proyectos' : 'Other projects'}</span><p>{es ? 'Un hackathon y una app para estudiantes: menos de negocio, igual de hechos a mano.' : 'A hackathon and a student app: less business, just as hand-made.'}</p></div>
+    <div className="others-grid">{others.map(x => <a key={x.id} className={`other-card project-${x.id}`} data-c href={`/proyectos/${x.slug}`} data-title={x.title}><span className={`other-media media-${x.id}`}><Media lang={lang} project={x}/></span><span className="other-copy"><em>{x.kind}</em><strong>{x.title}</strong><span>{x.pitch}</span></span><ArrowUpRight size={20}/></a>)}</div>
+   </div>
   </section>
   <section id="about" className="about-section section-space"><div className="wrap">
    <div className="about-grid" data-zone={es ? 'Perfil' : 'Profile'}>
@@ -169,8 +187,9 @@ function Media({ lang, project }: { lang: Lang; project: Project }) {
   case 'turno': return <TurnoPreview lang={lang}/>;
   case 'planta': return <PlantaPreview lang={lang}/>;
   case 'inventario': return <InventarioPreview lang={lang}/>;
+  case 'spc': return <SpcPreview lang={lang}/>;
   case 'vibemap': return <img className="vibe-shot" src="/media/vibemap-mapa.webp" alt={lang === 'es' ? 'Mapa mental de VibeMap sobre el código de este portafolio' : 'VibeMap mind map of this portfolio’s code'} width="1210" height="350" loading="lazy"/>;
-  default: return <div className="phones"><img src="/media/punto-u-mapa.webp" alt={es ? 'Punto U: mapa del campus con misiones' : 'Punto U: campus map with missions'} loading="lazy"/><img src="/media/punto-u.webp" alt={es ? 'Punto U: crear perfil' : 'Punto U: create profile'} loading="lazy"/></div>;
+  default: return <div className="phones"><img src="/media/punto-u-mapa.webp" width="780" height="2000" alt={es ? 'Punto U: mapa del campus con misiones' : 'Punto U: campus map with missions'} loading="lazy"/><img src="/media/punto-u.webp" width="600" height="1300" alt={es ? 'Punto U: crear perfil' : 'Punto U: create profile'} loading="lazy"/></div>;
  }
 }
 
@@ -189,7 +208,7 @@ function ProjectPage({ lang, project, projects }: { lang: Lang; project: Project
  const es = lang === 'es';
  const next = projects[(projects.indexOf(project) + 1) % projects.length];
  useEffect(() => { scrollTo(0, 0); }, [project.id]);
- return <main id="main" data-c className={`case case-${project.id} project-${project.id}`}>
+ return <main id="main" data-c className={`case case-${project.id} project-${project.id}`} aria-label={project.title}>
   <div className="wrap">
    <a className="case-back" href="/#projects" data-title={es ? 'Proyectos' : 'Projects'}><ArrowLeft size={18}/>{es ? 'Todos los proyectos' : 'All projects'}</a>
    <header className="case-head" data-zone={project.title}>
@@ -201,16 +220,17 @@ function ProjectPage({ lang, project, projects }: { lang: Lang; project: Project
     </div>
     <div className={`case-visual media-${project.id}`} aria-hidden="true">{project.id === 'club' ? <NfcTap lang={lang}/> : <Media lang={lang} project={project}/>}</div>
    </header>
-   <section className="how" data-zone={es ? 'Cómo funciona' : 'How it works'} aria-label={es ? 'Cómo funciona' : 'How it works'}><h2>{es ? 'Cómo funciona' : 'How it works'}</h2><ol>{project.how.map(([title, text], i) => <li key={title}><span>{String(i + 1).padStart(2, '0')}</span><strong>{title}</strong><p>{text}</p></li>)}</ol></section>
+   <section className="how" data-zone={es ? 'Cómo funciona' : 'How it works'} aria-label={es ? 'Cómo funciona' : 'How it works'}><h2>{es ? 'Cómo funciona' : 'How it works'}</h2><ol style={{ '--n': project.how.length } as React.CSSProperties}>{project.how.map(([title, text], i) => <li key={title}><span>{String(i + 1).padStart(2, '0')}</span><strong>{title}</strong><p>{text}</p></li>)}</ol></section>
   </div>
   <section className="case-demo" data-zone={es ? 'Pruébalo' : 'Try it'} aria-label={es ? 'Pruébalo' : 'Try it'}><div className="wrap"><Suspense fallback={<p className="case-loading">{es ? 'Cargando…' : 'Loading…'}</p>}>
-   {project.id === 'punto' && <div className="demo-punto"><div className="case-phone"><iframe src={project.link} title={es ? 'Punto U en vivo' : 'Punto U live'}/></div><div className="demo-punto-copy"><h2>{es ? 'Pruébala aquí mismo.' : 'Try it right here.'}</h2><p>{es ? 'La app real, en vivo: crea tu perfil y publica una misión.' : 'The real app, live: create your profile and post a mission.'}</p><a className="inline-link" href={project.link} {...external(project.link)}>{es ? 'Abrir en otra pestaña' : 'Open in a new tab'}<ArrowUpRight size={18}/></a></div></div>}
+   {project.id === 'punto' && <PuntoDemo lang={lang} link={project.link}/>}
    {project.id === 'club' && <><div className="case-demo-head"><h2>{es ? 'Así se ve en el restaurante.' : 'This is how it looks at the restaurant.'}</h2><p>{es ? 'Apoya el celular en el chip y adelanta el tiempo: así junta sellos el cliente y así le da seguimiento el negocio.' : 'Tap the phone on the chip and fast-forward: this is how the customer collects stamps and how the business follows up.'}</p></div><LoyaltyDemo lang={lang}/><ClubReal lang={lang}/></>}
    {project.id === 'turno' && <ShiftHandover lang={lang}/>}
    {project.id === 'planta' && <><div className="case-demo-head"><h2>{es ? 'Súbele tus reportes del turno.' : 'Upload your shift reports.'}</h2><p>{es ? 'Ya vienen tres de ejemplo. Cambia cualquiera por tu Excel o CSV: todo se procesa en tu navegador.' : 'Three samples are loaded. Swap any for your Excel or CSV: everything runs in your browser.'}</p></div><Planta lang={lang}/></>}
+   {project.id === 'spc' && <><div className="case-demo-head"><h2>{es ? 'Súbele las mediciones de una pieza.' : 'Upload a part’s measurements.'}</h2><p>{es ? 'Ya viene un ejemplo: el diámetro de un buje, cinco piezas cada media hora, con la herramienta desgastándose al final. Cambia la tolerancia o sube tu Excel.' : 'A sample is loaded: a bushing diameter, five parts every half hour, with the tool wearing out at the end. Change the tolerance or upload your Excel.'}</p></div><Spc lang={lang}/></>}
    {project.id === 'inventario' && <><div className="case-demo-head"><h2>{es ? 'Ábrelo en tu celular y escanea algo.' : 'Open it on your phone and scan something.'}</h2><p>{es ? 'Funciona con la cámara, con una foto del código o escribiéndolo. Se guarda en tu navegador.' : 'Works with the camera, a photo of the code or by typing it. Saved in your browser.'}</p></div><Inventario lang={lang}/></>}
    {project.id === 'csv' && <><div className="case-demo-head"><h2>{es ? 'Tus datos, en un mapa.' : 'Your data, as a map.'}</h2><p>{es ? 'Sube o arrastra tu CSV. Se analiza en tu navegador y nada sale de tu equipo.' : 'Upload or drag your CSV. It is analyzed in your browser and nothing leaves your device.'}</p></div><DataWorkbench lang={lang}/></>}
-   {project.id === 'vibe' && <div className="demo-vibe"><div className="case-demo-head"><h2>{es ? 'Pruébalo aquí mismo.' : 'Try it right here.'}</h2><p>{es ? 'Toca «Un RPG en Godot» o suelta la carpeta de tu proyecto. Todo corre en tu navegador.' : 'Tap “Un RPG en Godot” or drop your own project folder. Everything runs in your browser.'}</p></div><div className="case-browser"><span className="case-browser-bar"><i/><i/><i/><b>vibemap-brunich.vercel.app</b></span><iframe src={project.link} title={es ? 'VibeMap en vivo' : 'VibeMap live'} loading="lazy"/></div><p className="demo-vibe-links"><a className="inline-link" href={project.link} {...external(project.link)}>{es ? 'Abrir en otra pestaña' : 'Open in a new tab'}<ArrowUpRight size={18}/></a><a className="inline-link" href="https://github.com/Brunich/VibeMap" {...external('https://github.com/Brunich/VibeMap')}>{es ? 'Ver el código' : 'View the code'}<ArrowUpRight size={18}/></a></p></div>}
+   {project.id === 'vibe' && <div className="demo-vibe"><div className="case-demo-head"><h2>{es ? 'Pruébalo aquí mismo.' : 'Try it right here.'}</h2><p>{es ? 'Toca «Un RPG en Godot» o suelta la carpeta de tu proyecto. Todo corre en tu navegador.' : 'Tap “Un RPG en Godot” or drop your own project folder. Everything runs in your browser.'}</p></div><LiveOrShots probe={project.link} lang={lang} shots={[['/media/vibemap-mapa.webp', 1210, 350, es ? 'Mapa mental de VibeMap' : 'VibeMap mind map']]}><div className="case-browser"><span className="case-browser-bar"><i/><i/><i/><b>vibemap-brunich.vercel.app</b></span><iframe src={project.link} title={es ? 'VibeMap en vivo' : 'VibeMap live'} loading="lazy"/></div></LiveOrShots><p className="demo-vibe-links"><a className="inline-link" href={project.link} {...external(project.link)}>{es ? 'Abrir en otra pestaña' : 'Open in a new tab'}<ArrowUpRight size={18}/></a><a className="inline-link" href="https://github.com/Brunich/VibeMap" {...external('https://github.com/Brunich/VibeMap')}>{es ? 'Ver el código' : 'View the code'}<ArrowUpRight size={18}/></a></p></div>}
   </Suspense></div></section>
   <nav data-c data-zone={es ? 'Siguiente' : 'Next'} className={`case-next wrap project-${next.id}`} aria-label={es ? 'Siguiente proyecto' : 'Next project'}><a href={`/proyectos/${next.slug}`} data-title={next.title}><span>{es ? 'Siguiente proyecto' : 'Next project'}</span><strong>{next.title}</strong><ArrowRight size={26}/></a></nav>
  </main>;
@@ -239,7 +259,7 @@ function NfcPage({ lang }: { lang: Lang }) {
  const es = lang === 'es';
  const [tool, setTool] = useState<'card' | 'menu'>(() => location.hash === '#menu' ? 'menu' : 'card');
  useEffect(() => { scrollTo(0, 0); }, []);
- return <main id="main" data-c className="case project-club">
+ return <main id="main" data-c className="case project-club" aria-label={es ? 'Tu tarjeta NFC' : 'Your NFC card'}>
   <div className="wrap">
    <a className="case-back" href="/proyectos/club-nfc" data-title={es ? 'NFC para negocios' : 'NFC for businesses'}><ArrowLeft size={18}/>{es ? 'NFC para negocios' : 'NFC for businesses'}</a>
    <header className="nfc-head"><h1>{es ? 'Tu tarjeta de sellos, en un chip.' : 'Your stamp card, on a chip.'}</h1><p className="pitch">{es ? 'Tres pasos y queda lista en el mostrador.' : 'Three steps and it’s ready at the counter.'}</p></header>
@@ -250,11 +270,61 @@ function NfcPage({ lang }: { lang: Lang }) {
    </ol>
   </div>
   <section className="case-demo"><div className="wrap"><div className="dw-tabs nfc-tabs" role="tablist">{([['card', es ? 'Tarjeta de sellos' : 'Stamp card'], ['menu', es ? 'Menú' : 'Menu']] as const).map(([k, label]) => <button key={k} role="tab" aria-selected={tool === k} onClick={() => { setTool(k); history.replaceState(null, '', k === 'menu' ? '#menu' : location.pathname); }}>{label}</button>)}</div><Suspense fallback={null}>{tool === 'card' ? <NfcSetup lang={lang}/> : <MenuBuilder lang={lang}/>}</Suspense></div></section>
+  <NfcGuide lang={lang}/>
  </main>;
 }
 
+// Guía de compra y grabado: qué chip pedir, cómo grabarlo y cómo dejarlo seguro.
+function NfcGuide({ lang }: { lang: Lang }) {
+ const es = lang === 'es';
+ const cards: [string, string, string[]][] = es ? [
+  ['Qué comprar', 'Stickers NTAG215 redondos de 25 mm, en paquete de 10.', ['Tarjeta de sellos: basta un NTAG213; con enlace de reseñas, NTAG215.', 'Menú: NTAG216 sin descripciones; el QR sí aguanta el menú completo.', 'Sobre metal (caja, refri, terminal) pide la versión «anti-metal»: un sticker normal no se lee ahí.', 'Evita MIFARE Classic 1K: el iPhone no lo abre como enlace.']],
+  ['Cómo grabarlo', 'Dos minutos, sin instalar nada en Android.', ['Android: abre esta página en Chrome y toca «Grabar en el chip».', 'iPhone: app gratuita NFC Tools → Escribir → Añadir registro → URL → pega el enlace.', 'Acerca el chip a la parte de atrás del celular, cerca de la cámara.']],
+  ['Antes de pegarlo', 'Que lo lea un celular que no sea el tuyo.', ['En Android, «¿Quedó bien grabado?» lee el chip y lo compara con tu enlace.', 'Cuando funcione, bloquéalo en NFC Tools (Otros → Bloquear etiqueta) para que nadie lo reescriba. Es para siempre: hazlo al final.', 'Pega también el QR al lado, para los celulares sin NFC.']],
+ ] : [
+  ['What to buy', 'Round 25 mm NTAG215 stickers, in packs of 10.', ['Stamp card: an NTAG213 is enough; with a review link, NTAG215.', 'Menu: NTAG216 without descriptions; the QR holds the full menu.', 'On metal (register, fridge, card terminal) get the “anti-metal” kind: a regular sticker will not read there.', 'Avoid MIFARE Classic 1K: iPhones will not open it as a link.']],
+  ['How to write it', 'Two minutes, nothing to install on Android.', ['Android: open this page in Chrome and tap “Write to the chip”.', 'iPhone: free NFC Tools app → Write → Add record → URL → paste the link.', 'Hold the chip to the back of the phone, near the camera.']],
+  ['Before sticking it', 'Have a phone other than yours read it.', ['On Android, “Was it written right?” reads the chip and compares it with your link.', 'Once it works, lock it in NFC Tools (Other → Lock tag) so nobody rewrites it. It is permanent: do it last.', 'Stick the QR next to it too, for phones without NFC.']],
+ ];
+ return <section className="wrap nfc-guide" data-zone={es ? 'Guía' : 'Guide'} aria-labelledby="nfc-guide-title">
+  <h2 id="nfc-guide-title">{es ? 'Guía rápida del chip' : 'Chip quick guide'}</h2>
+  <div className="nfc-guide-grid">{cards.map(([title, lead, items], i) => <article key={title}><span>{String(i + 1).padStart(2, '0')}</span><h3>{title}</h3><p>{lead}</p><ul>{items.map(x => <li key={x}>{x}</li>)}</ul></article>)}</div>
+ </section>;
+}
+
+// Una demo en vivo depende de otro servidor: si no contesta, se enseñan capturas y se dice por qué, en vez de una app vacía.
+const PUNTO_API = 'https://wugsixqhygqvamgywymn.supabase.co/rest/v1/';
+function useLive(probe: string) {
+ const [live, setLive] = useState<boolean | null>(null);
+ useEffect(() => {
+  const stop = new AbortController(), timer = setTimeout(() => stop.abort(), 6000);
+  fetch(probe, { mode: 'no-cors', signal: stop.signal, cache: 'no-store' }).then(() => setLive(true), () => setLive(false)).finally(() => clearTimeout(timer));
+  return () => { clearTimeout(timer); stop.abort(); };
+ }, [probe]);
+ return live;
+}
+function LiveOrShots({ probe, shots, lang, children, live: given }: { probe: string; shots: [string, number, number, string][]; lang: Lang; children: React.ReactNode; live?: boolean | null }) {
+ const es = lang === 'es';
+ const probed = useLive(probe), live = given === undefined ? probed : given;
+ if (live !== false) return <>{children}</>;
+ return <div className="live-off">
+  <p className="live-note" role="status">{es ? 'El servidor de esta demo no está respondiendo ahora mismo, así que te enseño capturas de la app real.' : 'This demo’s server is not responding right now, so here are screenshots of the real app.'}</p>
+  <div className={`live-shots n${shots.length}`}>{shots.map(([src, w, h, alt]) => <figure key={src}><img src={src} width={w} height={h} alt={alt} loading="lazy"/><figcaption>{alt}</figcaption></figure>)}</div>
+ </div>;
+}
+
+function PuntoDemo({ lang, link }: { lang: Lang; link: string }) {
+ const es = lang === 'es', live = useLive(PUNTO_API);
+ return <div className="demo-punto">
+  <LiveOrShots probe={PUNTO_API} live={live} lang={lang} shots={[['/media/punto-u-mapa.webp', 780, 2000, es ? 'Mapa del campus con misiones' : 'Campus map with missions'], ['/media/punto-u.webp', 600, 1300, es ? 'Crear perfil' : 'Create a profile']]}><div className="case-phone"><iframe src={link} title={es ? 'Punto U en vivo' : 'Punto U live'}/></div></LiveOrShots>
+  <div className="demo-punto-copy">{live === false
+   ? <><h2>{es ? 'Así se ve la app.' : 'This is the app.'}</h2><p>{es ? 'El mapa del campus con las misiones abiertas y el registro con matrícula y facultad. La versión en vivo vuelve cuando su servidor esté arriba.' : 'The campus map with open missions and sign-up with student ID and school. The live version returns once its server is back up.'}</p></>
+   : <><h2>{es ? 'Pruébala aquí mismo.' : 'Try it right here.'}</h2><p>{es ? 'La app real, en vivo: crea tu perfil y publica una misión.' : 'The real app, live: create your profile and post a mission.'}</p><a className="inline-link" href={link} target="_blank" rel="noreferrer">{es ? 'Abrir en otra pestaña' : 'Open in a new tab'}<ArrowUpRight size={18}/></a></>}</div>
+ </div>;
+}
+
 // Cada proyecto tiene su propio repo, con pruebas y README.
-const REPO: Record<string, string> = { club: 'nfc-negocios', csv: 'analizador-csv', planta: 'planta-oee', inventario: 'inventario-camara', turno: 'entrega-de-turno', vibe: 'VibeMap', punto: 'Punto-U-app' };
+const REPO: Record<string, string> = { club: 'nfc-negocios', csv: 'analizador-csv', planta: 'planta-oee', inventario: 'inventario-camara', spc: 'graficas-de-control', turno: 'entrega-de-turno', vibe: 'VibeMap', punto: 'Punto-U-app' };
 
 // Videos de motion design: hoy el reel del portafolio; el espacio está listo para los que sigan.
 function Motion({ lang }: { lang: Lang }) {

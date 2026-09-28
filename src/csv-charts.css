@@ -60,7 +60,7 @@ html[data-motion=paused] .ch-canvas *{animation:none!important}
 /* SQL */
 .sq{display:grid;grid-template-columns:minmax(200px,250px) minmax(0,1fr);gap:20px;align-items:start}
 .sq-schema{display:grid;gap:6px;font-size:13px}
-.sq-schema h5{margin:0 0 4px;font:650 14px var(--display,'Manrope'),sans-serif}
+.sq-schema h3{margin:0 0 4px;font:650 14px var(--display,'Manrope'),sans-serif}
 .sq-schema code{font:600 12.5px ui-monospace,Consolas,monospace;color:#d6bdf0}
 .dw-workbench .sq-schema button{display:flex;justify-content:space-between;gap:8px;min-height:32px;padding:4px 10px;font:500 12.5px ui-monospace,Consolas,monospace;text-align:left}
 .sq-schema button small{font:500 10.5px 'DM Sans Variable',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--dw-muted)}

@@ -30,3 +30,13 @@
    *Listo cuando:* la captura sin tocar nada ya cuenta la historia.
 3. **T3 · Guía de compra y grabado dentro de `/nfc`.** Qué chip comprar (NTAG215 de 25 mm; anti-metal sobre metal; evitar MIFARE Classic), grabarlo en Android desde la página y en iPhone con NFC Tools, y una prueba de «¿quedó bien grabado?» (leer el chip y comparar).
 4. **T4 · Prueba en el mundo real.** Tú compras 10 stickers y grabamos uno juntos. Esa es la validación en uso: hasta entonces queda en «validado técnicamente».
+
+## Estado al 28-09-2026
+**Hecho y validado técnicamente**
+- T1: la tarjeta de sellos dice en qué chip cabe (NTAG213 por defecto, prueba unitaria) y avisa si estás en una copia local; nombre de ejemplo «Café Aurora» en `/nfc`.
+- T2: el panel del restaurante arranca con el mes (37 miembros, 212 visitas, reseñas) y la actividad del día; paleta morada.
+- T3: guía de compra y grabado dentro de `/nfc`; botón «¿Quedó bien grabado?» que lee el chip y lo compara (Web NFC, sólo Android).
+- Sellos dibujados con las iniciales del negocio; colores apagados; bienvenida en la primera visita.
+
+**Falta**
+- T4 (validación en uso): comprar 10 stickers NTAG215 y grabar uno. El botón «comprobar» no se ha probado con un chip real.

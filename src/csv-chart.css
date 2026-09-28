@@ -1,28 +1,28 @@
 /* Ciclo de 8 s: aparece lo encontrado, se limpia lo mecánico, queda la regla de negocio. */
-.cc{height:100%;min-height:300px;display:grid;grid-template-columns:minmax(150px,.8fr) 1.6fr;gap:clamp(18px,4%,44px);align-items:center;padding:clamp(22px,5%,48px);background:radial-gradient(ellipse 70% 80% at 20% 40%,#1c2a27,#15171e 70%)}
+.cc{height:100%;min-height:300px;display:grid;grid-template-columns:minmax(150px,.8fr) 1.6fr;gap:clamp(18px,4%,44px);align-items:center;padding:clamp(22px,5%,48px);background:radial-gradient(ellipse 70% 80% at 20% 40%,#1c2a27,#181320 70%)}
 .cc-gauge{position:relative;aspect-ratio:1;width:100%;max-width:230px;justify-self:center}
 .cc-gauge svg{width:100%;height:100%;transform:rotate(-90deg)}
-.cc-track{fill:none;stroke:#262b36;stroke-width:10}
-.cc-arc{fill:none;stroke:var(--mint,#7fe3c6);stroke-width:10;stroke-linecap:round;stroke-dasharray:100;animation:cc-arc 8s cubic-bezier(.65,0,.35,1) infinite}
-@keyframes cc-arc{0%,8%{stroke-dashoffset:100;stroke:#ff6b8b}30%,40%{stroke-dashoffset:32;stroke:#ff6b8b}60%,90%{stroke-dashoffset:2;stroke:#7fe3c6}100%{stroke-dashoffset:100;stroke:#ff6b8b}}
+.cc-track{fill:none;stroke:#2b223a;stroke-width:10}
+.cc-arc{fill:none;stroke:var(--mint,#9fd0bf);stroke-width:10;stroke-linecap:round;stroke-dasharray:100;animation:cc-arc 8s cubic-bezier(.65,0,.35,1) infinite}
+@keyframes cc-arc{0%,8%{stroke-dashoffset:100;stroke:#e58fa0}30%,40%{stroke-dashoffset:32;stroke:#e58fa0}60%,90%{stroke-dashoffset:2;stroke:#9fd0bf}100%{stroke-dashoffset:100;stroke:#e58fa0}}
 .cc-score{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
 .cc-score b{position:relative;display:block;height:1.05em;font:750 clamp(40px,5vw,60px)/1.05 var(--display);overflow:hidden}
 .cc-score b span{display:block;animation:cc-num 8s cubic-bezier(.65,0,.35,1) infinite}
-.cc-before{color:#ffadc0}.cc-after{color:#a8f0da}
+.cc-before{color:#e8b3c0}.cc-after{color:#b5dccd}
 @keyframes cc-num{0%,45%{transform:translateY(0)}55%,92%{transform:translateY(-100%)}100%{transform:translateY(0)}}
 .cc-score small{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .cc-bars{display:grid;gap:9px;min-width:0}
-.cc-title{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:#a8f0da;margin-bottom:4px}
+.cc-title{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:#b5dccd;margin-bottom:4px}
 .cc-row{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 18px;gap:10px;align-items:center;font-size:12.5px}
-.cc-label{color:#c9cfdb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cc-bar{height:8px;border-radius:4px;background:#232833;overflow:hidden}
-.cc-bar i{display:block;height:100%;width:var(--w);border-radius:4px;background:#ff6b8b;transform-origin:left;animation:cc-bar 8s cubic-bezier(.65,0,.35,1) infinite;animation-delay:var(--d)}
-@keyframes cc-bar{0%{transform:scaleX(0)}20%,45%{transform:scaleX(1);background:#ff6b8b}62%,92%{transform:scaleX(0);background:#7fe3c6}100%{transform:scaleX(0)}}
+.cc-label{color:#d0cada;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cc-bar{height:8px;border-radius:4px;background:#281f37;overflow:hidden}
+.cc-bar i{display:block;height:100%;width:var(--w);border-radius:4px;background:#e58fa0;transform-origin:left;animation:cc-bar 8s cubic-bezier(.65,0,.35,1) infinite;animation-delay:var(--d)}
+@keyframes cc-bar{0%{transform:scaleX(0)}20%,45%{transform:scaleX(1);background:#e58fa0}62%,92%{transform:scaleX(0);background:#9fd0bf}100%{transform:scaleX(0)}}
 .cc-row.stays-rule .cc-bar i{animation-name:cc-stay}
-@keyframes cc-stay{0%{transform:scaleX(0)}20%,92%{transform:scaleX(1);background:#f5c84c}100%{transform:scaleX(0)}}
-.cc-n{text-align:right;font-weight:700;color:#eef0f5}
+@keyframes cc-stay{0%{transform:scaleX(0)}20%,92%{transform:scaleX(1);background:#d9c08a}100%{transform:scaleX(0)}}
+.cc-n{text-align:right;font-weight:700;color:#f1eff4}
 .cc-legend{display:flex;align-items:center;gap:6px 8px;flex-wrap:wrap;margin-top:6px;font-size:11.5px;color:var(--muted)}
 .cc-legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
-.cc-legend i.fix{background:#7fe3c6}.cc-legend i.rule{background:#f5c84c;margin-left:10px}
+.cc-legend i.fix{background:#9fd0bf}.cc-legend i.rule{background:#d9c08a;margin-left:10px}
 html[data-motion=paused] .cc *{animation-play-state:paused!important}
 @media(max-width:560px){.cc{grid-template-columns:1fr;gap:14px}.cc-gauge{max-width:140px}}

@@ -32,3 +32,13 @@ Auditoría del 28-09-2026: 12 páginas, escritorio 1440 px y celular 390 px, con
 3. **T3 · Portada (G4, G9, G10, OG).** Quitar o rehacer `/propuestas`; vitrina con los proyectos nuevos; filas más cortas en celular; imagen para compartir.
    *Listo cuando:* la portada en celular mide ≤ 9 000 px y el enlace se ve con vista previa en WhatsApp.
 4. **T4 · Publicar.** `vercel --prod` con tu permiso, y recorrido en tu celular real.
+
+## Estado al 28-09-2026
+**Hecho y validado técnicamente**
+- T1: encabezado en una columna a 390 px en las 7 páginas (prueba `on a phone every project header…`); botón flotante que se esconde al bajar y no tapa texto (0 choques medidos en escritorio y celular); objetivos táctiles a 44 px.
+- T2: paleta morada en analizador, gráfica, demo del restaurante, sellos y menú (conversión que conserva la luminosidad); títulos h4→h3; imágenes con tamaño; «Cómo funciona» en una fila según el número de pasos. **axe: 0 avisos en 24 combinaciones, incluidas best-practice.**
+- T3: Planta sustituye a Punto U en la vitrina; `og.png` nuevo (la imagen existía, pero era la versión gris: corregido el diagnóstico original); `/propuestas` fuera; filas de la portada más cortas en celular (15 083 → 12 893 px).
+
+**Falta**
+- T4: publicar con `vercel --prod` (espera tu «sí, publica») y recorrerlo en tu celular: eso es la validación en uso.
+- La portada en celular sigue larga (perfil y experiencia); decidir si se recorta.
