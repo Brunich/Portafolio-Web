@@ -27,7 +27,7 @@ test('mobile and desktop have no horizontal overflow or serious accessibility er
   test.setTimeout(180000);
   for (const width of [1440,390]) {
     await page.setViewportSize({width,height:900});
-    for (const path of ['/','/proyectos/club-nfc','/proyectos/analizador-csv','/proyectos/entrega-de-turno']) {
+    for (const path of ['/','/proyectos/club-nfc','/proyectos/analizador-csv','/proyectos/entrega-de-turno','/proyectos/planta','/proyectos/inventario','/menu','/nfc']) {
       await page.goto(path,{waitUntil:'networkidle'});
       await expect(page.getByRole('heading',{level:1})).toBeVisible();
       expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth), `${path} @${width}`).toBe(true);
@@ -43,7 +43,8 @@ test('landing stays a summary: heavy demos live on their own pages', async ({pag
  await expect(page.locator('.ld-stage')).toHaveCount(0);
  await expect(page.locator('.sh')).toHaveCount(0);
  await expect(page.locator('body')).not.toContainText(/en desarrollo|in development/i);
- expect(await page.evaluate(()=>document.documentElement.scrollHeight)).toBeLessThan(10000);
+ // Siete proyectos, cada uno en su pantalla: el límite cuida que no vuelvan los apartados largos.
+ expect(await page.evaluate(()=>document.documentElement.scrollHeight)).toBeLessThan(14000);
  await page.locator('.hs-tabs button').nth(1).click();
  await page.locator('.hs-pos0').click();
  await expect(page).toHaveURL(/\/proyectos\/analizador-csv$/);

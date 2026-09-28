@@ -58,6 +58,6 @@
 .sh-send{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
 .sh-send a{display:inline-flex;align-items:center;min-height:42px;padding:9px 16px;border-radius:10px;background:#25d366;color:#08210f;font-weight:700;font-size:13.5px}
 .sh-note{margin:0;font-size:13px;color:var(--muted)}
-@keyframes sh-in{from{opacity:0;transform:translateY(10px) scale(.98)}}
+@keyframes sh-in{from{transform:translateY(10px) scale(.98)}}
 html[data-motion=paused] .sh *{animation:none!important}
 @media(max-width:900px){.sh-board{grid-template-columns:1fr}}

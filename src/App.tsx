@@ -10,6 +10,12 @@ import OriginalScenes from './OriginalScenes';
 const DataWorkbench = lazy(() => import('./DataWorkbench'));
 const LoyaltyDemo = lazy(() => import('./LoyaltyDemo'));
 const ShiftHandover = lazy(() => import('./ShiftHandover'));
+const Planta = lazy(() => import('./Planta'));
+const Inventario = lazy(() => import('./Inventario'));
+const MenuPage = lazy(() => import('./Menu').then(m => ({ default: m.MenuPage })));
+const MenuBuilder = lazy(() => import('./Menu').then(m => ({ default: m.MenuBuilder })));
+import PlantaPreview from './PlantaPreview';
+import InventarioPreview from './InventarioPreview';
 import ClubPreview from './ClubPreview';
 import CsvChart from './CsvChart';
 import TurnoPreview from './TurnoPreview';
@@ -23,7 +29,7 @@ import { usePaging, glide, glideTo, zoneList } from './paging';
 import { StampPage, NfcSetup, Qr, bizLink, bizFrom } from './Stamp';
 import './brand.css';
 
-const PROJECT_ORDER = ['club', 'csv', 'turno', 'vibe', 'punto'];
+const PROJECT_ORDER = ['club', 'csv', 'planta', 'inventario', 'turno', 'vibe', 'punto'];
 type Project = ReturnType<typeof professional>['projects'][number];
 const external = (url: string) => url.startsWith('http') ? { target: '_blank', rel: 'noreferrer' } : {};
 
@@ -32,6 +38,7 @@ function route() {
  const path = location.pathname.replace(/\/+$/, '');
  if (path === '/sello') return { page: 'sello' as const };
  if (path === '/nfc') return { page: 'nfc' as const };
+ if (path === '/menu') return { page: 'menu' as const };
  const m = /^\/proyectos\/([a-z0-9-]+)$/.exec(path);
  return m ? { page: 'project' as const, slug: m[1] } : { page: 'home' as const };
 }
@@ -72,9 +79,10 @@ export default function App() {
  useEffect(() => { document.documentElement.lang = lang; try { localStorage.setItem('bruno-language', lang); } catch { /* Preferencia opcional. */ } }, [lang]);
  useEffect(() => { document.documentElement.dataset.motion = paused ? 'paused' : 'active'; }, [paused]);
  useEffect(() => { const pref = matchMedia('(prefers-reduced-motion: reduce)'); const change = () => setPaused(pref.matches); pref.addEventListener('change', change); return () => pref.removeEventListener('change', change); }, []);
- useEffect(() => { if (r.page === 'sello') return; document.title = r.page === 'nfc' ? (es ? 'Arma tu tarjeta NFC — Bruno Salas' : 'Build your NFC card — Bruno Salas') : project ? `${project.title} — Bruno Salas` : (es ? 'Bruno Salas — Web, datos y automatización' : 'Bruno Salas — Web, data & automation'); }, [project, es, r.page]);
+ useEffect(() => { if (r.page === 'sello' || r.page === 'menu') return; document.title = r.page === 'nfc' ? (es ? 'Arma tu tarjeta NFC — Bruno Salas' : 'Build your NFC card — Bruno Salas') : project ? `${project.title} — Bruno Salas` : (es ? 'Bruno Salas — Web, datos y automatización' : 'Bruno Salas — Web, data & automation'); }, [project, es, r.page]);
  const at = (id: string) => home ? `#${id}` : `/#${id}`;
  if (r.page === 'sello') return <StampPage lang={lang}/>;
+ if (r.page === 'menu') return <Suspense fallback={null}><MenuPage lang={lang}/></Suspense>;
 
  return <>
   <a className="skip-link" href="#main">{c.skip}</a>
@@ -158,6 +166,8 @@ function Media({ lang, project }: { lang: Lang; project: Project }) {
   case 'club': return <ClubPreview lang={lang}/>;
   case 'analizador': return <CsvChart lang={lang}/>;
   case 'turno': return <TurnoPreview lang={lang}/>;
+  case 'planta': return <PlantaPreview lang={lang}/>;
+  case 'inventario': return <InventarioPreview lang={lang}/>;
   case 'vibemap': return <img className="vibe-shot" src="/media/vibemap-mapa.webp" alt={lang === 'es' ? 'Mapa mental de VibeMap sobre el código de este portafolio' : 'VibeMap mind map of this portfolio’s code'} width="1210" height="350" loading="lazy"/>;
   default: return <div className="phones"><img src="/media/punto-u-mapa.webp" alt={es ? 'Punto U: mapa del campus con misiones' : 'Punto U: campus map with missions'} loading="lazy"/><img src="/media/punto-u.webp" alt={es ? 'Punto U: crear perfil' : 'Punto U: create profile'} loading="lazy"/></div>;
  }
@@ -195,6 +205,8 @@ function ProjectPage({ lang, project, projects }: { lang: Lang; project: Project
    {project.id === 'punto' && <div className="demo-punto"><div className="case-phone"><iframe src={project.link} title={es ? 'Punto U en vivo' : 'Punto U live'}/></div><div className="demo-punto-copy"><h2>{es ? 'Pruébala aquí mismo.' : 'Try it right here.'}</h2><p>{es ? 'La app real, en vivo: crea tu perfil y publica una misión.' : 'The real app, live: create your profile and post a mission.'}</p><a className="inline-link" href={project.link} {...external(project.link)}>{es ? 'Abrir en otra pestaña' : 'Open in a new tab'}<ArrowUpRight size={18}/></a></div></div>}
    {project.id === 'club' && <><div className="case-demo-head"><h2>{es ? 'Así se ve en el restaurante.' : 'This is how it looks at the restaurant.'}</h2><p>{es ? 'Apoya el celular en el chip y adelanta el tiempo: así junta sellos el cliente y así le da seguimiento el negocio.' : 'Tap the phone on the chip and fast-forward: this is how the customer collects stamps and how the business follows up.'}</p></div><LoyaltyDemo lang={lang}/><ClubReal lang={lang}/></>}
    {project.id === 'turno' && <ShiftHandover lang={lang}/>}
+   {project.id === 'planta' && <><div className="case-demo-head"><h2>{es ? 'Súbele tus reportes del turno.' : 'Upload your shift reports.'}</h2><p>{es ? 'Ya vienen tres de ejemplo. Cambia cualquiera por tu Excel o CSV: todo se procesa en tu navegador.' : 'Three samples are loaded. Swap any for your Excel or CSV: everything runs in your browser.'}</p></div><Planta lang={lang}/></>}
+   {project.id === 'inventario' && <><div className="case-demo-head"><h2>{es ? 'Ábrelo en tu celular y escanea algo.' : 'Open it on your phone and scan something.'}</h2><p>{es ? 'Funciona con la cámara, con una foto del código o escribiéndolo. Se guarda en tu navegador.' : 'Works with the camera, a photo of the code or by typing it. Saved in your browser.'}</p></div><Inventario lang={lang}/></>}
    {project.id === 'csv' && <><div className="case-demo-head"><h2>{es ? 'Tus datos, en un mapa.' : 'Your data, as a map.'}</h2><p>{es ? 'Sube o arrastra tu CSV. Se analiza en tu navegador y nada sale de tu equipo.' : 'Upload or drag your CSV. It is analyzed in your browser and nothing leaves your device.'}</p></div><DataWorkbench lang={lang}/></>}
    {project.id === 'vibe' && <div className="demo-vibe"><div className="case-demo-head"><h2>{es ? 'Pruébalo aquí mismo.' : 'Try it right here.'}</h2><p>{es ? 'Toca «Un RPG en Godot» o suelta la carpeta de tu proyecto. Todo corre en tu navegador.' : 'Tap “Un RPG en Godot” or drop your own project folder. Everything runs in your browser.'}</p></div><div className="case-browser"><span className="case-browser-bar"><i/><i/><i/><b>vibemap-brunich.vercel.app</b></span><iframe src={project.link} title={es ? 'VibeMap en vivo' : 'VibeMap live'} loading="lazy"/></div><p className="demo-vibe-links"><a className="inline-link" href={project.link} {...external(project.link)}>{es ? 'Abrir en otra pestaña' : 'Open in a new tab'}<ArrowUpRight size={18}/></a><a className="inline-link" href="https://github.com/Brunich/VibeMap" {...external('https://github.com/Brunich/VibeMap')}>{es ? 'Ver el código' : 'View the code'}<ArrowUpRight size={18}/></a></p></div>}
   </Suspense></div></section>
@@ -206,16 +218,24 @@ function ProjectPage({ lang, project, projects }: { lang: Lang; project: Project
 function ClubReal({ lang }: { lang: Lang }) {
  const es = lang === 'es';
  const demo = `${bizLink(bizFrom(''))}&demo`;
- return <div className="club-real">
+ const menuDemo = `${location.origin}/menu?mesa=7`;
+ return <><div className="club-real">
   <Qr text={demo} label={es ? 'QR para abrir la tarjeta de sellos' : 'QR to open the stamp card'}/>
   <div><span className="kicker">{es ? 'Pruébalo con tu celular' : 'Try it on your phone'}</span><h3>{es ? 'Escanéalo: es lo mismo que tocar el chip.' : 'Scan it: same as tapping the chip.'}</h3>
    <p>{es ? 'Se abre la tarjeta de sellos real con el sello de hoy. Vuelve mañana y suma otro; al llenarla, el premio.' : 'The real stamp card opens with today’s stamp. Come back tomorrow for another; fill it for the reward.'}</p>
    <div className="club-real-links"><a className="button primary" href="/nfc" data-title={es ? 'Tu tarjeta NFC' : 'Your NFC card'}>{es ? 'Arma la de tu negocio' : 'Build one for your business'}<ArrowRight size={18}/></a><a className="inline-link" href={demo} target="_blank" rel="noreferrer">{es ? 'Abrirla aquí' : 'Open it here'}<ArrowUpRight size={18}/></a></div></div>
- </div>;
+ </div>
+ <div className="club-real club-menu">
+  <Qr text={menuDemo} label={es ? 'QR para abrir el menú de ejemplo' : 'QR to open the sample menu'}/>
+  <div><span className="kicker">{es ? 'El mismo chip, el menú' : 'Same chip, the menu'}</span><h3>{es ? 'La carta en el celular y el pedido por WhatsApp.' : 'The menu on the phone, the order via WhatsApp.'}</h3>
+   <p>{es ? 'El cliente ve platillos, precios y alérgenos, arma su pedido y lo manda con el número de mesa. El negocio arma su menú en un minuto y no paga servidor.' : 'The customer sees dishes, prices and allergens, builds an order and sends it with the table number. The business builds its menu in a minute, with no server to pay for.'}</p>
+   <div className="club-real-links"><a className="button primary" href="/nfc#menu" data-title={es ? 'Tu menú' : 'Your menu'}>{es ? 'Arma tu menú' : 'Build your menu'}<ArrowRight size={18}/></a><a className="inline-link" href={menuDemo} target="_blank" rel="noreferrer">{es ? 'Ver el menú de ejemplo' : 'See the sample menu'}<ArrowUpRight size={18}/></a></div></div>
+ </div></>;
 }
 
 function NfcPage({ lang }: { lang: Lang }) {
  const es = lang === 'es';
+ const [tool, setTool] = useState<'card' | 'menu'>(() => location.hash === '#menu' ? 'menu' : 'card');
  useEffect(() => { scrollTo(0, 0); }, []);
  return <main id="main" data-c className="case project-club">
   <div className="wrap">
@@ -227,7 +247,7 @@ function NfcPage({ lang }: { lang: Lang }) {
     <li><span>03</span><strong>{es ? 'Grábalo y pégalo' : 'Write it and stick it'}</strong><p>{es ? 'Graba el enlace en el chip y pégalo en la carpeta de la cuenta o en la caja. iPhone y Android lo leen sin app.' : 'Write the link to the chip and stick it on the bill folder or the counter. iPhone and Android read it with no app.'}</p></li>
    </ol>
   </div>
-  <section className="case-demo"><div className="wrap"><NfcSetup lang={lang}/></div></section>
+  <section className="case-demo"><div className="wrap"><div className="dw-tabs nfc-tabs" role="tablist">{([['card', es ? 'Tarjeta de sellos' : 'Stamp card'], ['menu', es ? 'Menú' : 'Menu']] as const).map(([k, label]) => <button key={k} role="tab" aria-selected={tool === k} onClick={() => { setTool(k); history.replaceState(null, '', k === 'menu' ? '#menu' : location.pathname); }}>{label}</button>)}</div><Suspense fallback={null}>{tool === 'card' ? <NfcSetup lang={lang}/> : <MenuBuilder lang={lang}/>}</Suspense></div></section>
  </main>;
 }
 

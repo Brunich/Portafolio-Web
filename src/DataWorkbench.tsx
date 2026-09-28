@@ -8,6 +8,9 @@ import CsvMindMap from './CsvMindMap';
 import Found, { doneOf } from './CsvFound';
 import type { Done } from './CsvFound';
 import { personal } from './personal';
+import CsvCharts from './CsvCharts';
+import type { Table } from './CsvCharts';
+import CsvSql from './CsvSql';
 import './data-workbench.css';
 
 const LIMIT = 2 * 1024 * 1024;
@@ -47,9 +50,12 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
  const [showAll, setShowAll] = useState(false);
  const upload = useRef<HTMLInputElement>(null);
  const tableTop = useRef<HTMLDivElement>(null), found = useRef<HTMLDivElement>(null);
+ const [tab, setTab] = useState<'clean' | 'chart' | 'sql'>('clean');
+ const [chartFrom, setChartFrom] = useState<Table | null>(null);
  const headers = original.headers;
 
  const issues = useMemo(() => detectIssues(headers, rows), [headers, rows]);
+ const whole = useMemo<Table>(() => ({ headers, rows, name: fileName }), [headers, rows, fileName]);
  const profile = useMemo(() => profileColumns(headers, rows), [headers, rows]);
  const flagged = useMemo(() => {
   const m = new Map<string, Issue['severity']>();
@@ -62,7 +68,7 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
  const focusRows = focusIssue ? new Set(issues.find(i => i.id === focusIssue)?.cells.map(([r]) => r)) : null;
  const visible = (focusRows ? matches.filter(([, i]) => focusRows.has(i)) : matches).slice(0, showAll ? 500 : 10);
 
- const load = (data: CsvData, id: string, name: string) => { setOriginal(data); setRows(data.rows); setSource(id); setFileName(name); setDone([]); setFocusIssue(null); setQuery(''); setError(''); setShowAll(false); setVersion(v => v + 1); };
+ const load = (data: CsvData, id: string, name: string) => { setOriginal(data); setRows(data.rows); setSource(id); setFileName(name); setDone([]); setFocusIssue(null); setQuery(''); setChartFrom(null); setError(''); setShowAll(false); setVersion(v => v + 1); };
  const apply = (issue: Issue) => { if (!issue.fix) return; setRows(r => issue.fix!(r)); setDone(d => [...d, doneOf(issue)]); setFocusIssue(null); };
  const applyAll = () => { let r = rows; const fixed: Done[] = []; for (let pass = 0; pass < 4; pass++) { const next = detectIssues(headers, r).filter(i => i.fix); if (!next.length) break; next.forEach(i => { r = i.fix!(r); fixed.push(doneOf(i)); }); } setRows(r); setDone(d => [...d, ...fixed]); setFocusIssue(null); };
  function describeError(err: unknown) {
@@ -113,6 +119,13 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
    <div className={issues.some(i => i.severity !== 'info') ? 'dw-kpi-warn' : 'dw-kpi-ok'}><dt>{t('Problemas', 'Issues')}</dt><dd>{issues.filter(i => i.severity !== 'info').length}</dd></div>
   </dl>
 
+  <div className="dw-tabs" role="tablist" aria-label={t('Qué hacer con el archivo', 'What to do with the file')}>
+   {([['clean', t('Revisar y limpiar', 'Review & clean')], ['chart', t('Graficar', 'Chart')], ['sql', t('Preguntar con SQL', 'Ask with SQL')]] as const).map(([k, label]) => <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)}>{label}</button>)}
+  </div>
+  {tab === 'chart' && <CsvCharts key={`${version}:${chartFrom ? 'sql' : 'all'}`} lang={lang} table={chartFrom ?? whole} onBack={chartFrom ? () => setChartFrom(null) : undefined}/>}
+  {tab === 'sql' && <CsvSql key={version} lang={lang} table={whole} onChart={r => { setChartFrom(r); setTab('chart'); }}/>}
+  {tab === 'clean' && <>
+
   <section className="dw-structure" aria-label={t('Cómo está organizado', 'How it is organized')}>
    <h4>{t('Cómo está organizado', 'How it is organized')}</h4>
    <CsvMindMap lang={lang} file={fileName} rows={rows.length} columns={profile} hover={hover} onHover={setHover} runKey={`${version}`}/>
@@ -142,5 +155,6 @@ export default function DataWorkbench({ lang }: { lang: 'es' | 'en' }) {
   <div ref={found}><Found lang={lang} issues={issues} rows={rows.length} done={done} focus={focusIssue} runKey={`${version}`}
    onFix={apply} onFixAll={applyAll} onUndo={() => { setRows(original.rows); setDone([]); }}
    onShow={id => { setFocusIssue(id); tableTop.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}/></div>
+  </>}
  </div>;
 }
