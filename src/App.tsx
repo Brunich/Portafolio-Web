@@ -196,6 +196,7 @@ function ProjectPage({ lang, project, projects }: { lang: Lang; project: Project
      {project.metrics.length > 0 && <dl className="project-metrics case-metrics">{project.metrics.map(([value, label]) => <div key={value + label}><dt>{value}</dt><dd>{label}</dd></div>)}</dl>}
      <div className="tags">{project.tags.map(t => <span key={t}>{t}</span>)}</div>
      {project.link.startsWith('http') && <a className="button primary case-action" href={project.link} {...external(project.link)}>{project.action}<ArrowUpRight size={18}/></a>}
+     {REPO[project.id] && <a className="inline-link case-code" href={`https://github.com/Brunich/${REPO[project.id]}`} {...external('https://github.com')}><GithubLogo size={20}/>{es ? 'Código en GitHub' : 'Code on GitHub'}<ArrowUpRight size={16}/></a>}
     </div>
     <div className={`case-visual media-${project.id}`} aria-hidden="true">{project.id === 'club' ? <NfcTap lang={lang}/> : <Media lang={lang} project={project}/>}</div>
    </header>
@@ -250,6 +251,9 @@ function NfcPage({ lang }: { lang: Lang }) {
   <section className="case-demo"><div className="wrap"><div className="dw-tabs nfc-tabs" role="tablist">{([['card', es ? 'Tarjeta de sellos' : 'Stamp card'], ['menu', es ? 'Menú' : 'Menu']] as const).map(([k, label]) => <button key={k} role="tab" aria-selected={tool === k} onClick={() => { setTool(k); history.replaceState(null, '', k === 'menu' ? '#menu' : location.pathname); }}>{label}</button>)}</div><Suspense fallback={null}>{tool === 'card' ? <NfcSetup lang={lang}/> : <MenuBuilder lang={lang}/>}</Suspense></div></section>
  </main>;
 }
+
+// Cada proyecto tiene su propio repo, con pruebas y README.
+const REPO: Record<string, string> = { club: 'nfc-negocios', csv: 'analizador-csv', planta: 'planta-oee', inventario: 'inventario-camara', turno: 'entrega-de-turno', vibe: 'VibeMap', punto: 'Punto-U-app' };
 
 function Contact({ lang }: { lang: Lang }) {
  const c = copy[lang], es = lang === 'es';

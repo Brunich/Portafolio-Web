@@ -273,3 +273,4 @@ html,body{overflow-x:clip}
 .nfc-tabs button[aria-selected=true]{background:linear-gradient(120deg,#a894f0,#c9a8e8);color:#150f22}
 .club-real+.club-real{margin-top:16px}
 .club-menu{background:linear-gradient(120deg,#a894f022,#1b1629 55%);border-color:#a894f033}
+.case-code{display:flex;width:max-content;margin-top:14px;color:var(--muted)}.case-code:hover{color:var(--text)}

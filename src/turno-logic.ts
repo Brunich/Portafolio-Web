@@ -15,7 +15,7 @@ export const sample = (now = Date.now()): Incident[] => [
  { id: 'INC-229', line: 'L3', lot: '4459', defect: 'Fuga en sello de parabrisas', sev: 'Mayor', status: 'doing', owner: 'L. Treviño', action: 'Cambiar lote de sellador', photo: 'demo', at: now - 5 * H },
  { id: 'INC-226', line: 'L1', lot: '4450', defect: 'Rayón en puerta trasera', sev: 'Menor', status: 'closed', owner: 'A. Cantú', action: 'Pulido y reinspección', photo: 'demo', at: now - 6.5 * H },
 ];
-export const sampleLog = (items: Incident[]): Log[] => items.map(i => ({ at: i.at, id: i.id, tone: 'new' as const, text: `registrada · ${i.line} · lote ${i.lot} · ${i.sev.toUpperCase()}` }));
+export const sampleLog = (items: Incident[]): Log[] => items.map(i => ({ at: i.at, id: i.id, tone: 'new' as const, text: `registrada · ${i.line} · lote ${i.lot} · ${i.sev.toUpperCase()}` })).sort((a, b) => b.at - a.at); // la más nueva arriba, como en la consola
 
 // Turnos de planta: matutino 06–14, vespertino 14–22, nocturno 22–06.
 export function shiftNow(d = new Date()) {
