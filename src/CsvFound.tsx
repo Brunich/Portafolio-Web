@@ -45,7 +45,7 @@ export default function Found({ lang, issues, rows, done, focus, runKey, onFix, 
      return <li key={i.id} className={`cf-row k-${kindOf(i)}${isOpen ? ' is-open' : ''}${focus === i.id ? ' is-focus' : ''}`} style={{ ['--w' as string]: `${rowsOf(i) / max * 100}%`, ['--i' as string]: n }}>
       <button className="cf-label" aria-expanded={isOpen} onClick={() => setOpen(isOpen ? null : i.id)}><span>{i.title[L]}</span><i aria-hidden="true">▾</i></button>
       <span className="cf-bar" aria-hidden="true"><i/></span>
-      <span className="cf-n" title={t('filas', 'rows')}>{rowsOf(i)}</span>
+      <span className="cf-n" title={t('filas', 'rows')}>{rowsOf(i).toLocaleString(es ? 'es-MX' : 'en-US')}</span>
       <span className="cf-act">{i.fix && <button className="cf-fix" onClick={() => onFix(i)}>{i.fixLabel![L]}</button>}</span>
       {isOpen && <div className="cf-detail"><p>{i.detail[L]}</p>{i.example && <code>{i.example}</code>}
        <button className="dw-link" onClick={() => onShow(i.id)}>{t('Ver estas filas en la tabla', 'Show these rows in the table')} ↑</button></div>}

@@ -163,3 +163,17 @@ html[data-motion=paused] .cf *{animation:none!important}
 }
 .dw-morecols{display:none}
 @media(max-width:700px){.dw-morecols{display:flex}}
+/* Hoja de Excel y aviso de lectura */
+.dw-sheet{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:12px 0 0;padding:10px 14px;border-radius:12px;background:#a894f014;border:1px solid #a894f040}
+.dw-sheet label{display:flex;align-items:center;gap:10px;font-weight:600;font-size:14px}
+.dw-sheet select{min-height:44px;padding:6px 12px;border-radius:10px;border:1px solid var(--dw-line);background:#120e19;color:var(--dw-text);font:500 14px 'DM Sans Variable',sans-serif}
+.dw-sheet small{color:var(--dw-muted);font-size:13px}
+.dw-busy{display:flex;align-items:center;gap:10px;background:#a894f014;border-color:#a894f040;color:var(--dw-text)}
+.dw-busy i{width:14px;height:14px;border-radius:50%;border:2px solid #a894f055;border-top-color:#a894f0;animation:dw-spin .8s linear infinite}
+@keyframes dw-spin{to{transform:rotate(360deg)}}
+.dw-pager{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}
+.dw-pager small{color:var(--dw-muted)}
+.dw-pager .dw-link:disabled{opacity:.35;cursor:default}
+.dw-pager .dw-link[aria-label]{width:44px;justify-content:center;padding:0;border:1px solid var(--dw-line);border-radius:10px;font-size:20px;text-decoration:none}
+.dw-spark-axis{display:flex;justify-content:space-between;gap:8px;margin-top:4px;font:500 11px ui-monospace,Consolas,monospace;color:var(--dw-muted)}
+.dw-spark-axis em{font-style:normal;color:#d9c08a}
