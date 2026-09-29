@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { flushSync } from 'react-dom';
-import { ArrowUpRight, ArrowDown, ArrowLeft, ArrowRight, DownloadSimple, GithubLogo, EnvelopeSimple, LinkedinLogo, WhatsappLogo, Pause, Play, AndroidLogo, UserCircle, Globe } from '@phosphor-icons/react';
+import { ArrowUpRight, ArrowDown, ArrowLeft, ArrowRight, DownloadSimple, GithubLogo, EnvelopeSimple, LinkedinLogo, WhatsappLogo, Pause, Play, AndroidLogo, UserCircle, Globe, MusicNotes } from '@phosphor-icons/react';
 import { copy, certificates } from './content';
 import type { Lang } from './content';
 import { professional } from './professional-content';
@@ -49,6 +49,7 @@ function route() {
  if (path === '/sello') return { page: 'sello' as const };
  if (path === '/nfc') return { page: 'nfc' as const };
  if (path === '/menu') return { page: 'menu' as const };
+ if (path === '/sobre-mi') return { page: 'about' as const };
  const m = /^\/proyectos\/([a-z0-9-]+)$/.exec(path);
  return m ? { page: 'project' as const, slug: m[1] } : { page: 'home' as const };
 }
@@ -89,7 +90,7 @@ export default function App() {
  useEffect(() => { document.documentElement.lang = lang; try { localStorage.setItem('bruno-language', lang); } catch { /* Preferencia opcional. */ } }, [lang]);
  useEffect(() => { document.documentElement.dataset.motion = paused ? 'paused' : 'active'; }, [paused]);
  useEffect(() => { const pref = matchMedia('(prefers-reduced-motion: reduce)'); const change = () => setPaused(pref.matches); pref.addEventListener('change', change); return () => pref.removeEventListener('change', change); }, []);
- useEffect(() => { if (r.page === 'sello' || r.page === 'menu') return; document.title = r.page === 'nfc' ? (es ? 'Arma tu tarjeta NFC — Bruno Salas' : 'Build your NFC card — Bruno Salas') : project ? `${project.title} — Bruno Salas` : (es ? 'Bruno Salas — Web, datos y automatización' : 'Bruno Salas — Web, data & automation'); }, [project, es, r.page]);
+ useEffect(() => { if (r.page === 'sello' || r.page === 'menu') return; document.title = r.page === 'about' ? (es ? 'Sobre mí — Bruno Salas' : 'About me — Bruno Salas') : r.page === 'nfc' ? (es ? 'Arma tu tarjeta NFC — Bruno Salas' : 'Build your NFC card — Bruno Salas') : project ? `${project.title} — Bruno Salas` : (es ? 'Bruno Salas — Web, datos y automatización' : 'Bruno Salas — Web, data & automation'); }, [project, es, r.page]);
  const at = (id: string) => home ? `#${id}` : `/#${id}`;
  if (r.page === 'sello') return <StampPage lang={lang}/>;
  if (r.page === 'menu') return <Suspense fallback={null}><MenuPage lang={lang}/></Suspense>;
@@ -99,14 +100,14 @@ export default function App() {
   <div className="scroll-progress" aria-hidden="true"/>
   <header className="topbar" aria-label={es ? 'Navegación del portafolio' : 'Portfolio navigation'}><div className="topbar-inner wrap">
    <a className="brand" href="/" data-title="Bruno Salas" aria-label="Bruno Salas — inicio"><span className="brand-name"><span className="brand-top"><b>Bruno Salas</b><em>{es ? 'portafolio' : 'portfolio'}</em></span><small>{p.role}</small></span></a>
-   <nav className="topnav" aria-label={es ? 'Secciones' : 'Sections'}>{[['projects', es ? 'Proyectos' : 'Projects'], ['about', 'CV'], ['graphics', 'Game dev'], ['motion', 'Motion'], ['hobbies', es ? 'Sobre mí' : 'About me']].map(([id, label]) => <a key={id} href={at(id)}>{label}</a>)}</nav>
+   <nav className="topnav" aria-label={es ? 'Secciones' : 'Sections'}>{[['projects', es ? 'Proyectos' : 'Projects'], ['about', 'CV'], ['graphics', 'Game dev'], ['motion', 'Motion']].map(([id, label]) => <a key={id} href={at(id)}>{label}</a>)}</nav>
    <div className="topbar-tools">
     <button className="icon-button" aria-label={paused ? c.play : c.pause} onClick={() => setPaused(!paused)}>{paused ? <Play size={16} weight="fill"/> : <Pause size={16} weight="fill"/>}</button>
     <div className="language-control" aria-label={es ? 'Idioma' : 'Language'}>{(['es', 'en'] as const).map(l => <button key={l} aria-label={l === 'es' ? 'Cambiar a español' : 'Switch to English'} aria-pressed={lang === l} onClick={() => setLang(l)}>{l.toUpperCase()}</button>)}</div>
     <a className="topbar-cta" href={at('contact')}>{c.contact}</a>
    </div>
   </div></header>
-  {r.page === 'nfc' ? <NfcPage lang={lang}/> : project ? <ProjectPage lang={lang} project={project} projects={projects}/> : <Home lang={lang} paused={paused} projects={projects}/>}
+  {r.page === 'about' ? <Hobbies lang={lang}/> : r.page === 'nfc' ? <NfcPage lang={lang}/> : project ? <ProjectPage lang={lang} project={project} projects={projects}/> : <Home lang={lang} paused={paused} projects={projects}/>}
   <ZoneNav lang={lang} routeKey={`${r.page}:${project?.id ?? ''}`}/>
   {pg.paged && <ZoneDots labels={pg.labels} current={pg.current}/>}
   <footer className="site-footer wrap" aria-label={es ? 'Pie del portafolio' : 'Portfolio footer'}>© {new Date().getFullYear()} Bruno Salas Rodríguez <span>{c.location}</span></footer>
@@ -188,7 +189,6 @@ function Home({ lang, paused, projects }: { lang: Lang; paused: boolean; project
   </div></section>
   <OriginalScenes lang={lang} paused={paused}/>
   <Motion lang={lang}/>
-  <Hobbies lang={lang}/>
   <Contact lang={lang}/>
  </main>;
 }
@@ -368,5 +368,5 @@ function Motion({ lang }: { lang: Lang }) {
 
 function Contact({ lang }: { lang: Lang }) {
  const c = copy[lang], es = lang === 'es';
- return <section id="contact" className="contact-section wrap" data-zone={es ? 'Contacto' : 'Contact'}><div className="section-heading" data-num="06"><div><span className="kicker">06 · {es ? 'Contacto' : 'Contact'}</span><h2>{es ? 'Hablemos de tu proyecto.' : 'Let’s talk about your project.'}</h2><p>{c.contactText}</p></div></div><div className="contact-links"><a href={`mailto:${personal.email}`}><EnvelopeSimple size={25}/><span>Email<small>{personal.email}</small></span><ArrowUpRight size={22}/></a><a href={personal.github} {...external(personal.github)}><GithubLogo size={25}/><span>GitHub<small>Brunich</small></span><ArrowUpRight size={22}/></a>{personal.linkedIn && <a href={personal.linkedIn} {...external(personal.linkedIn)}><LinkedinLogo size={25}/><span>LinkedIn<small>Bruno Salas</small></span><ArrowUpRight size={22}/></a>}<a href={`https://wa.me/${personal.phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer"><WhatsappLogo size={25}/><span>WhatsApp<small>{personal.phone}</small></span><ArrowUpRight size={22}/></a></div></section>;
+ return <section id="contact" className="contact-section wrap" data-zone={es ? 'Contacto' : 'Contact'}><div className="section-heading" data-num="05"><div><span className="kicker">05 · {es ? 'Contacto' : 'Contact'}</span><h2>{es ? 'Hablemos de tu proyecto.' : 'Let’s talk about your project.'}</h2><p>{c.contactText}</p></div></div><div className="contact-links"><a href={`mailto:${personal.email}`}><EnvelopeSimple size={25}/><span>Email<small>{personal.email}</small></span><ArrowUpRight size={22}/></a><a href={personal.github} {...external(personal.github)}><GithubLogo size={25}/><span>GitHub<small>Brunich</small></span><ArrowUpRight size={22}/></a>{personal.linkedIn && <a href={personal.linkedIn} {...external(personal.linkedIn)}><LinkedinLogo size={25}/><span>LinkedIn<small>Bruno Salas</small></span><ArrowUpRight size={22}/></a>}<a href={`https://wa.me/${personal.phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer"><WhatsappLogo size={25}/><span>WhatsApp<small>{personal.phone}</small></span><ArrowUpRight size={22}/></a><a className="contact-about" href="/sobre-mi" data-title={es ? 'Sobre mí' : 'About me'}><MusicNotes size={25}/><span>{es ? 'Sobre mí' : 'About me'}<small>{es ? 'Música y viajes' : 'Music and travel'}</small></span><ArrowRight size={22}/></a></div></section>;
 }

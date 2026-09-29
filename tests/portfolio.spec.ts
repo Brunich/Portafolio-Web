@@ -29,7 +29,7 @@ test('mobile and desktop have no horizontal overflow or serious accessibility er
   test.setTimeout(180000);
   for (const width of [1440,390]) {
     await page.setViewportSize({width,height:900});
-    for (const path of ['/','/proyectos/club-nfc','/proyectos/analizador-csv','/proyectos/entrega-de-turno','/proyectos/planta','/proyectos/inventario','/menu','/nfc']) {
+    for (const path of ['/','/proyectos/club-nfc','/proyectos/analizador-csv','/proyectos/entrega-de-turno','/sobre-mi','/proyectos/planta','/proyectos/inventario','/menu','/nfc']) {
       await page.goto(path,{waitUntil:'networkidle'});
       await expect(page.getByRole('heading',{level:1})).toBeVisible();
       expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth), `${path} @${width}`).toBe(true);
@@ -204,4 +204,13 @@ test('on desktop each wheel step moves one zone, and the index jumps to a projec
  await page.locator('.zone-dots').getByRole('button',{name:'Proyectos',exact:true}).click();
  await page.locator('.project-index button',{hasText:'Entrega de turno'}).click();
  await expect(page.locator('.zone-dots .on')).toContainText('Entrega de turno');
+});
+
+test('about me lives on its own page, reached from the contact section', async ({page})=>{
+ await page.goto('/');
+ await expect(page.locator('#hobbies')).toHaveCount(0);
+ await page.locator('.contact-about').click();
+ await expect(page).toHaveURL(/\/sobre-mi$/);
+ await expect(page.locator('.hob-video video')).toHaveCount(4);
+ await expect(page.locator('.hob-photos img')).toHaveCount(9);
 });

@@ -2,7 +2,14 @@
 .hobbies .kicker{color:var(--rose,#dd9fbd)}
 .hob-h{margin:clamp(28px,4vw,44px) 0 14px;font:700 clamp(20px,2vw,26px)/1.1 var(--display);letter-spacing:-.02em}
 .hob-lead{margin:-4px 0 16px;color:var(--muted);max-width:60ch}
-.hob-videos{display:grid;grid-template-columns:minmax(0,3.1fr) minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+.hobbies{padding-block:clamp(28px,5vw,56px) clamp(60px,8vw,110px)}
+.hob-head{margin:18px 0 8px}
+.hob-head h1{margin:8px 0 6px;font:800 clamp(40px,6vw,76px)/1 var(--display);letter-spacing:-.04em}
+.hob-head p{margin:0;font:italic 400 clamp(20px,2vw,26px)/1.2 var(--serif);color:var(--rose,#dd9fbd)}
+/* Dos videos horizontales a la izquierda y los dos verticales a la derecha, a la misma altura. */
+.hob-videos{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.62fr) minmax(0,.62fr);gap:14px;align-items:start}
+.v-bohemian-rhapsody{grid-column:1;grid-row:1}.v-graduacion{grid-column:1;grid-row:2}
+.v-improvisacion{grid-column:2;grid-row:1/span 2}.v-bar{grid-column:3;grid-row:1/span 2}
 .hob-video{margin:0;display:grid;gap:10px}
 .hob-video video{width:100%;height:auto;display:block;border-radius:18px;background:#0a0710;border:1px solid #ffffff14;box-shadow:0 30px 60px -30px #000c}
 .hob-video.wide video{aspect-ratio:16/9;object-fit:cover}
@@ -10,8 +17,8 @@
 .hob-video figcaption{display:grid;gap:2px}
 .hob-video strong{font:650 15px var(--display)}
 .hob-video span{font-size:14px;color:var(--muted)}
-.hob-photos{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:10px;scrollbar-width:thin}
+.hob-photos{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:10px;scrollbar-width:thin;scrollbar-color:#ffffff30 transparent}
 .hob-photos img{flex:none;height:clamp(260px,32vw,380px);width:auto;scroll-snap-align:start;border-radius:14px;border:1px solid #ffffff12;transition:transform .35s cubic-bezier(.16,1,.3,1)}
 .hob-photos img:hover{transform:translateY(-3px)}
-@media(max-width:900px){.hob-videos{grid-template-columns:1fr 1fr}.hob-video.wide{grid-column:1/-1}}
+@media(max-width:900px){.hob-videos{grid-template-columns:1fr 1fr}.hob-video.wide{grid-column:1/-1;grid-row:auto}.hob-video.tall{grid-row:auto}.v-improvisacion{grid-column:1}.v-bar{grid-column:2}}
 
