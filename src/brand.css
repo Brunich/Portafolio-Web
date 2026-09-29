@@ -380,3 +380,4 @@ a.native-note:hover{border-color:#b8a4ec88}
 .case-cta span{color:var(--muted)}
 .project-portal .other-icon{color:#c9b6ec}
 @media(min-width:1000px){.others.is-dev .others-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.others.is-dev .other-media{height:190px}}
+.web-note{display:flex;align-items:center;gap:8px;margin:14px 0 0;font-size:14px;color:var(--muted)}.web-note svg{flex:none;color:var(--c)}
