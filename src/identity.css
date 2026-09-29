@@ -1,0 +1,39 @@
+/* Identidad: un perla tornasol que se repite en pocos detalles, y cada apartado con su propio tono de fondo
+   para que la página no se sienta igual de arriba a abajo. Todo muy bajo de opacidad. */
+:root{
+ --pearl:linear-gradient(110deg,#f3e9ff 0%,#cfdcfa 26%,#f8d7e8 50%,#d3f1e4 74%,#efe4ff 100%);
+ --pearl-line:linear-gradient(90deg,transparent,#e9e1f7 18%,#d4e1f6 40%,#f2d9e7 62%,#d6efe5 82%,transparent);
+}
+
+/* Tono de cada apartado */
+#projects{--tint:#a894f0;--tx:82%}
+#about{--tint:#9fb6e6;--tx:18%}
+#graphics{--tint:#d9a86a;--tx:85%}
+#motion{--tint:#7fc9c4;--tx:15%}
+#contact{--tint:#dd9fbd;--tx:70%}
+#projects,#about,#graphics,#motion{position:relative;isolation:isolate}
+#projects::after,#about::after,#graphics::after,#motion::after{content:'';position:absolute;z-index:-2;pointer-events:none;left:50%;width:100vw;transform:translateX(-50%);top:0;height:min(1100px,80%);
+ background:radial-gradient(55% 60% at var(--tx) 12%,color-mix(in srgb,var(--tint) 22%,transparent),transparent 72%);
+ -webkit-mask-image:linear-gradient(transparent,#000 180px);mask-image:linear-gradient(transparent,#000 180px)}
+/* Una línea perla marca el paso de un apartado a otro */
+#about::before,#graphics::before,#motion::before{content:'';position:absolute;left:50%;top:0;width:min(1180px,calc(100% - 40px));height:1px;transform:translateX(-50%);background:var(--pearl-line);opacity:.35;pointer-events:none}
+#about::before{z-index:1}
+
+/* Kicker con su marca perla y el color del apartado */
+#projects .kicker,#about .kicker,#graphics .kicker,#motion .kicker,#contact .kicker{display:flex;align-items:center;gap:10px;color:color-mix(in srgb,var(--tint) 80%,#fff)}
+#projects .kicker::before,#about .kicker::before,#graphics .kicker::before,#motion .kicker::before,#contact .kicker::before{content:'';width:26px;height:2px;border-radius:2px;background:var(--pearl);flex:none}
+
+/* Títulos de sección con brillo perla que se mueve muy lento */
+.section-heading h2{background:var(--pearl);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:pearl 14s ease-in-out infinite alternate}
+@keyframes pearl{to{background-position:100% 0}}
+.section-heading[data-num]::before{-webkit-text-stroke-color:color-mix(in srgb,var(--tint,#a894f0) 60%,transparent)}
+
+/* Contacto: el recuadro lleva un filo perla */
+#contact{position:relative}
+#contact::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:var(--pearl);opacity:.22;pointer-events:none;-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+
+/* Botones principales con un filo perla */
+.button.primary{box-shadow:inset 0 0 0 1px #ffffff40,0 10px 30px -12px color-mix(in srgb,var(--accent) 60%,transparent)}
+
+html[data-motion=paused] .section-heading h2{animation:none}
+@media(prefers-reduced-motion:reduce){.section-heading h2{animation:none}}
