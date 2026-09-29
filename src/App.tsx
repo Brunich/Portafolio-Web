@@ -6,6 +6,7 @@ import type { Lang } from './content';
 import { professional } from './professional-content';
 import { personal } from './personal';
 import OriginalScenes from './OriginalScenes';
+import Hobbies from './Hobbies';
 // Las demos pesadas se cargan sólo en su página.
 const DataWorkbench = lazy(() => import('./DataWorkbench'));
 const LoyaltyDemo = lazy(() => import('./LoyaltyDemo'));
@@ -98,7 +99,7 @@ export default function App() {
   <div className="scroll-progress" aria-hidden="true"/>
   <header className="topbar" aria-label={es ? 'Navegación del portafolio' : 'Portfolio navigation'}><div className="topbar-inner wrap">
    <a className="brand" href="/" data-title="Bruno Salas" aria-label="Bruno Salas — inicio"><span className="brand-name"><span className="brand-top"><b>Bruno Salas</b><em>{es ? 'portafolio' : 'portfolio'}</em></span><small>{p.role}</small></span></a>
-   <nav className="topnav" aria-label={es ? 'Secciones' : 'Sections'}>{[['projects', es ? 'Proyectos' : 'Projects'], ['about', 'CV'], ['graphics', 'Game dev'], ['motion', 'Motion']].map(([id, label]) => <a key={id} href={at(id)}>{label}</a>)}</nav>
+   <nav className="topnav" aria-label={es ? 'Secciones' : 'Sections'}>{[['projects', es ? 'Proyectos' : 'Projects'], ['about', 'CV'], ['graphics', 'Game dev'], ['motion', 'Motion'], ['hobbies', es ? 'Sobre mí' : 'About me']].map(([id, label]) => <a key={id} href={at(id)}>{label}</a>)}</nav>
    <div className="topbar-tools">
     <button className="icon-button" aria-label={paused ? c.play : c.pause} onClick={() => setPaused(!paused)}>{paused ? <Play size={16} weight="fill"/> : <Pause size={16} weight="fill"/>}</button>
     <div className="language-control" aria-label={es ? 'Idioma' : 'Language'}>{(['es', 'en'] as const).map(l => <button key={l} aria-label={l === 'es' ? 'Cambiar a español' : 'Switch to English'} aria-pressed={lang === l} onClick={() => setLang(l)}>{l.toUpperCase()}</button>)}</div>
@@ -187,6 +188,7 @@ function Home({ lang, paused, projects }: { lang: Lang; paused: boolean; project
   </div></section>
   <OriginalScenes lang={lang} paused={paused}/>
   <Motion lang={lang}/>
+  <Hobbies lang={lang}/>
   <Contact lang={lang}/>
  </main>;
 }
@@ -366,5 +368,5 @@ function Motion({ lang }: { lang: Lang }) {
 
 function Contact({ lang }: { lang: Lang }) {
  const c = copy[lang], es = lang === 'es';
- return <section id="contact" className="contact-section wrap" data-zone={es ? 'Contacto' : 'Contact'}><div className="section-heading" data-num="05"><div><span className="kicker">05 · {es ? 'Contacto' : 'Contact'}</span><h2>{es ? 'Hablemos de tu proyecto.' : 'Let’s talk about your project.'}</h2><p>{c.contactText}</p></div></div><div className="contact-links"><a href={`mailto:${personal.email}`}><EnvelopeSimple size={25}/><span>Email<small>{personal.email}</small></span><ArrowUpRight size={22}/></a><a href={personal.github} {...external(personal.github)}><GithubLogo size={25}/><span>GitHub<small>Brunich</small></span><ArrowUpRight size={22}/></a>{personal.linkedIn && <a href={personal.linkedIn} {...external(personal.linkedIn)}><LinkedinLogo size={25}/><span>LinkedIn<small>Bruno Salas</small></span><ArrowUpRight size={22}/></a>}<a href={`https://wa.me/${personal.phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer"><WhatsappLogo size={25}/><span>WhatsApp<small>{personal.phone}</small></span><ArrowUpRight size={22}/></a></div></section>;
+ return <section id="contact" className="contact-section wrap" data-zone={es ? 'Contacto' : 'Contact'}><div className="section-heading" data-num="06"><div><span className="kicker">06 · {es ? 'Contacto' : 'Contact'}</span><h2>{es ? 'Hablemos de tu proyecto.' : 'Let’s talk about your project.'}</h2><p>{c.contactText}</p></div></div><div className="contact-links"><a href={`mailto:${personal.email}`}><EnvelopeSimple size={25}/><span>Email<small>{personal.email}</small></span><ArrowUpRight size={22}/></a><a href={personal.github} {...external(personal.github)}><GithubLogo size={25}/><span>GitHub<small>Brunich</small></span><ArrowUpRight size={22}/></a>{personal.linkedIn && <a href={personal.linkedIn} {...external(personal.linkedIn)}><LinkedinLogo size={25}/><span>LinkedIn<small>Bruno Salas</small></span><ArrowUpRight size={22}/></a>}<a href={`https://wa.me/${personal.phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer"><WhatsappLogo size={25}/><span>WhatsApp<small>{personal.phone}</small></span><ArrowUpRight size={22}/></a></div></section>;
 }

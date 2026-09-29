@@ -41,3 +41,6 @@ Capturas de la sesión de IA Rogue con `tools/capture_portafolio_v2.gd` (ruta re
 - escenas/templo-noche-{pixel,suave}.webp: cámara 1 de frente, misma toma e instante en la pareja; recorte 1600×900 desde (480,0) a tamaño nativo, para dejar fuera el aviso «[E] Open system board» que sale al pie.
 Descartadas: bosque_camara_3 (planos de luz translúcidos cruzan la toma) y agua_desde_arriba_espuma (no muestra líneas de espuma).
 - 2026-09-27 (noche): bruno-retrato.jpg es un recorte 4:5 de medio cuerpo (x 55–571, y 0–645 del original, escalado a 640×800) para la tarjeta de Perfil.
+
+## Sobre mí (`about/`)
+Videos y fotos personales de Bruno (WhatsApp, 28-09-2026). `bohemian-rhapsody.mp4` une dos grabaciones del mismo número con un fundido de 0,6 s. Fotos reducidas a 1200 px en WebP.
