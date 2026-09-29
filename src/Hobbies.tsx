@@ -5,8 +5,8 @@ import './hobbies.css';
 // Fuera del código: música y viajes. Los videos no cargan hasta que se reproducen.
 const VIDEOS = [
  { src: 'bohemian-rhapsody', w: 848, h: 480, es: ['Bohemian Rhapsody', 'Al piano, en un festival de Thanksgiving en el teatro.'], en: ['Bohemian Rhapsody', 'On piano, at a Thanksgiving festival in the theater.'] },
- { src: 'improvisacion', w: 480, h: 848, es: ['Improvisación', 'A cuatro manos con un compañero alemán, en un voluntariado.'], en: ['Improvisation', 'Four hands with a German friend, during a volunteer trip.'] },
- { src: 'bar', w: 480, h: 864, es: ['En el bar', 'Tocando en el bar donde trabajaba de barman.'], en: ['At the bar', 'Playing at the bar where I worked as a bartender.'] },
+ { src: 'improvisacion', w: 480, h: 848, es: ['Improvisación', 'A cuatro manos con un compañero escocés, en un voluntariado.'], en: ['Improvisation', 'Four hands with a Scottish friend, during a volunteer trip.'] },
+ { src: 'bar', w: 480, h: 864, es: ['En el bar', 'Tocando en Cubo Bar, en Milán, donde trabajaba de barman.'], en: ['At the bar', 'Playing at Cubo Bar in Milan, where I worked as a bartender.'] },
  { src: 'graduacion', w: 400, h: 220, es: ['Graduación', 'Teoría musical, en la Casa de la Cultura.'], en: ['Graduation', 'Music theory, at the Casa de la Cultura.'] },
 ];
 // Orden pensado para que no queden juntas dos fotos con la misma pose.
