@@ -33,6 +33,7 @@ import { curtain } from './transition';
 import { usePaging, glide, glideTo, zoneList } from './paging';
 import { StampPage, NfcSetup, Qr, bizLink, bizFrom } from './Stamp';
 import './brand.css';
+import './identity.css';
 
 const PROJECT_ORDER = ['club', 'csv', 'planta', 'spc', 'inventario', 'turno', 'agente', 'vibe', 'punto'];
 // En la portada van al frente los que resuelven un problema de negocio; el hackathon y la app de estudiantes, abajo.
