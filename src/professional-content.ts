@@ -4,12 +4,12 @@ export function professional(lang:Lang){
  return {
   title:es?'Desarrollo web,':'Web development,',accent:es?'datos y automatización.':'data & automation.',
   intro:es?'Estudiante de Ingeniería en Software en la UANL. Hago aplicaciones que puedes probar aquí mismo.':'Software Engineering student at UANL. I build apps you can try right here.',
-  projectsTitle:es?'Útiles para el mercado.':'Built for the market.',projectsIntro:es?'Herramientas para negocios y manufactura. Todas funcionan: entra y pruébala.':'Tools for businesses and manufacturing. They all work: open one and try it.',
+  projectsTitle:es?'Útiles para el mercado.':'Built for the market.',projectsIntro:es?'Para negocios y manufactura. Todas se pueden probar.':'For businesses and manufacturing. All of them can be tried.',
   role:es?'Estudiante de Ingeniería en Software · UANL':'Software Engineering student · UANL',
   aboutTitle:es?'Perfil profesional.':'Professional profile.',
   about:es?'Estudio Ingeniería en Software en la UANL (2023–2028). He dado soporte de sistemas, validado datos y dado tutorías de programación. Hago interfaces web conectadas a bases de datos y APIs.':'I study Software Engineering at UANL (2023–2028). I have done systems support, data validation and programming tutoring. I build web interfaces connected to databases and APIs.',
   about2:es?'Primero entiendo el problema; luego compruebo que la solución funciona.':'First I understand the problem; then I verify the solution works.',
-  profilePoints:es?[['Formación','Ingeniería en Software · UANL'],['Áreas','Web, datos y automatización'],['Experiencia','Soporte, validación y tutoría'],['Ubicación','Monterrey, Nuevo León']]:[['Education','Software Engineering · UANL'],['Focus','Web, data & automation'],['Experience','Support, validation & tutoring'],['Location','Monterrey, Nuevo León']],
+  profilePoints:es?[['Áreas','Web, datos y automatización'],['Experiencia','Soporte, validación y tutoría']]:[['Focus','Web, data & automation'],['Experience','Support, validation and tutoring']],
   techTitle:es?'Herramientas que sé manejar.':'Tools I work with.',
   skills:es?[
    {name:'Aplicaciones web',desc:'Interfaces responsivas y conectadas.',tools:['React','TypeScript','JavaScript','HTML','CSS','Vite']},

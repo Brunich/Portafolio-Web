@@ -1,6 +1,6 @@
 import './csv-chart.css';
 
-// Portada del analizador: lo que encuentra y lo que queda después de un clic, como gráfica.
+// Portada del analizador: los problemas del reporte y cuáles se arreglan con un clic.
 // Los números son los del ejemplo de la planta (7 problemas → 1 que requiere criterio).
 const BARS: { es: string; en: string; n: number; stays?: 'rule' | 'info' }[] = [
  { es: 'Escrito de varias formas', en: 'Written several ways', n: 3 },
@@ -20,13 +20,12 @@ export default function CsvChart({ lang }: { lang: 'es' | 'en' }) {
    <div className="cc-score"><b><span className="cc-before">7</span><span className="cc-after">1</span></b><small>{es ? 'problemas' : 'issues'}</small></div>
   </div>
   <div className="cc-bars">
-   <span className="cc-title">{es ? 'Qué encontró · qué queda' : 'What it found · what remains'}</span>
    {BARS.map((b, i) => <div key={b.en} className={`cc-row${b.stays ? ` stays-${b.stays}` : ''}`} style={{ ['--w' as string]: `${(b.n / MAX) * 100}%`, ['--d' as string]: `${i * .12}s` }}>
     <span className="cc-label">{es ? b.es : b.en}</span>
     <span className="cc-bar"><i/></span>
     <span className="cc-n">{b.n}</span>
    </div>)}
-   <span className="cc-legend"><i className="fix"/>{es ? 'se corrige solo' : 'fixed automatically'}<i className="rule"/>{es ? 'requiere criterio' : 'needs judgment'}</span>
+   <span className="cc-legend"><i className="fix"/>{es ? 'automático' : 'automatic'}<i className="rule"/>{es ? 'por revisar' : 'to review'}</span>
   </div>
  </div>;
 }
