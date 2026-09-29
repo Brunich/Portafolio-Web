@@ -8,7 +8,7 @@
 .hob-head p{margin:0;font:italic 400 clamp(20px,2vw,26px)/1.2 var(--serif);color:var(--rose,#dd9fbd)}
 /* Dos videos horizontales a la izquierda y los dos verticales a la derecha, a la misma altura. */
 .hob-videos{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.62fr) minmax(0,.62fr);gap:14px;align-items:start}
-.v-bohemian-rhapsody{grid-column:1;grid-row:1}.v-graduacion{grid-column:1;grid-row:2}
+.v-graduacion{grid-column:1;grid-row:1}.v-bohemian-rhapsody{grid-column:1;grid-row:2}
 .v-improvisacion{grid-column:2;grid-row:1/span 2}.v-bar{grid-column:3;grid-row:1/span 2}
 .hob-video{margin:0;display:grid;gap:10px}
 .hob-video video{width:100%;height:auto;display:block;border-radius:18px;background:#0a0710;border:1px solid #ffffff14;box-shadow:0 30px 60px -30px #000c}
