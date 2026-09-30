@@ -383,3 +383,8 @@ a.native-note:hover{border-color:#b8a4ec88}
 .web-note{display:flex;align-items:center;gap:8px;margin:14px 0 0;font-size:14px;color:var(--muted)}.web-note svg{flex:none;color:var(--c)}
 .contact-links>.contact-about{grid-column:1/-1;border-color:color-mix(in srgb,var(--rose) 40%,transparent);background:linear-gradient(110deg,color-mix(in srgb,var(--rose) 14%,#120e1d),#120e1d59 70%)}
 .contact-links>.contact-about svg:first-child{color:var(--rose)}
+.monitor-live{margin-top:clamp(40px,6vw,72px)}
+.monitor-shots{display:grid;grid-template-columns:1.6fr 1fr;gap:14px;align-items:start}
+.monitor-shots img{width:100%;height:auto;display:block;border-radius:10px;border:1px solid #ffffff1a;box-shadow:0 30px 60px -30px #000c}
+.monitor-shots img+img{object-fit:cover;object-position:54% 50%;aspect-ratio:1/1.1}
+@media(max-width:760px){.monitor-shots{grid-template-columns:1fr}.monitor-shots img+img{display:none}}
