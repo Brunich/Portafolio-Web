@@ -1,6 +1,6 @@
 # Bruno Salas · Portafolio
 
-[![CI](https://github.com/Brunich/bruno-portfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/Brunich/bruno-portfolio/actions/workflows/ci.yml)
+[![CI](https://github.com/Brunich/Portafolio-Web/actions/workflows/ci.yml/badge.svg)](https://github.com/Brunich/Portafolio-Web/actions/workflows/ci.yml)
 
 **En vivo: https://bruno-portfolio-azure.vercel.app**
 
@@ -47,3 +47,7 @@ npm test             # recorridos y accesibilidad con Playwright + axe
 ```
 
 Los datos de ejemplo son inventados y de empresas ficticias. La procedencia de cada imagen está en [`public/media/SOURCES.md`](public/media/SOURCES.md).
+
+## Licencia
+
+[MIT](LICENSE). Úsalo, cámbialo y compártelo; sólo conserva el aviso de copyright.
