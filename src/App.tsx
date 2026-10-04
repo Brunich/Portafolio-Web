@@ -35,9 +35,9 @@ import { StampPage, NfcSetup, Qr, bizLink, bizFrom } from './Stamp';
 import './brand.css';
 import './identity.css';
 
-const PROJECT_ORDER = ['club', 'csv', 'planta', 'spc', 'inventario', 'turno', 'agente', 'vibe', 'punto'];
-// En la portada van al frente los que resuelven un problema de negocio; el hackathon y la app de estudiantes, abajo.
-const OTHER = ['spc', 'vibe', 'punto'];
+const PROJECT_ORDER = ['punto', 'csv', 'planta', 'spc', 'inventario', 'turno', 'agente', 'vibe', 'club'];
+// En la portada van al frente Punto U y los que resuelven un problema de negocio; las gráficas de control y el hackathon, abajo.
+const OTHER = ['spc', 'vibe'];
 // Lo que todavía no está listo va en su propio apartado, para que la lista principal sea sólo lo que ya funciona.
 const DEV = ['agente'];
 type Project = ReturnType<typeof professional>['projects'][number];
@@ -174,7 +174,7 @@ function Home({ lang, paused, projects }: { lang: Lang; paused: boolean; project
      <div className="other-card other-plain project-android"><span className="other-media other-icon" aria-hidden="true"><AndroidLogo size={72} weight="duotone"/><small>NFC · CameraX · Compose</small></span><span className="other-copy"><em>Android · Kotlin</em><strong>{es ? 'Apps Android nativas' : 'Native Android apps'}</strong><span>{es ? 'NFC, Inventario y Entrega de turno, con el lector NFC y la cámara del teléfono.' : 'NFC, Inventory and Shift handover, with the phone’s NFC reader and camera.'}</span></span></div></div>
    </div>
    <div className="others" data-zone={es ? 'Otros códigos' : 'Other code'}>
-    <div className="others-head"><span className="kicker">{es ? 'Otros códigos' : 'Other code'}</span><p>{es ? 'Extras: gráficas de control, un hackathon, una app para estudiantes y más en mi GitHub.' : 'Extras: control charts, a hackathon, a student app and more on my GitHub.'}</p></div>
+    <div className="others-head"><span className="kicker">{es ? 'Otros códigos' : 'Other code'}</span><p>{es ? 'Extras: gráficas de control, un hackathon y más en mi GitHub.' : 'Extras: control charts, a hackathon and more on my GitHub.'}</p></div>
     <div className="others-grid">{others.map(x => <a key={x.id} className={`other-card project-${x.id}`} data-c href={`/proyectos/${x.slug}`} data-title={x.title}><span className={`other-media media-${x.id}`}><Media lang={lang} project={x}/></span><span className="other-copy"><em>{x.kind}</em><strong>{x.title}</strong><span>{x.pitch}</span></span><ArrowUpRight size={20}/></a>)}
      <a className="other-card other-plain other-github" href={personal.github} {...external(personal.github)}><span className="other-copy"><em>GitHub · Brunich</em><strong>{es ? 'Tengo más proyectos, pequeños y grandes' : 'I have more projects, small and large'}</strong><span>{es ? 'Juegos, herramientas y pruebas: todo el código.' : 'Games, tools and experiments: all the code.'}</span></span><GithubLogo size={26}/></a></div>
    </div>
