@@ -13,14 +13,14 @@ test('portfolio has working bilingual navigation, project pages and CV', async (
   await expect(page.locator('html')).toHaveAttribute('lang','en');
   await expect(page.getByRole('link', {name:'View projects',exact:true})).toBeVisible();
   await page.getByRole('button', { name:'Cambiar a español' }).click();
-  await page.locator('.other-card.project-punto').click(); // Punto U va en «Otros proyectos»
+  await page.locator('#p-punto h3 a').click(); // Punto U abre la lista de proyectos
   await expect(page).toHaveURL(/\/proyectos\/punto-u$/);
   await expect(page.getByRole('heading',{level:1})).toHaveText('Punto U');
   await expect(page.getByRole('heading',{name:'Cómo funciona'})).toBeVisible();
   await expect(page.locator('.how li')).toHaveCount(3);
   await expect(page.locator('.case-phone iframe')).toHaveAttribute('src','https://punto-u-app.vercel.app');
   await page.locator('.case-next a').click();
-  await expect(page).toHaveURL(/\/proyectos\/club-nfc$/);
+  await expect(page).toHaveURL(/\/proyectos\/analizador-csv$/);
   expect((await request.get('/cv/Bruno-Salas-ES.pdf')).status()).toBe(200);
   expect((await request.get('/og.png')).status()).toBe(200);
 });
@@ -200,7 +200,7 @@ test('on desktop each wheel step moves one zone, and the index jumps to a projec
  await expect(page.locator('.zone-dots .on')).toContainText('Proyectos');
  await page.waitForTimeout(400);
  await page.mouse.wheel(0,120);
- await expect(page.locator('.zone-dots .on')).toContainText('NFC para negocios');
+ await expect(page.locator('.zone-dots .on')).toContainText('Punto U');
  await page.locator('.zone-dots').getByRole('button',{name:'Proyectos',exact:true}).click();
  await page.locator('.project-index button',{hasText:'Entrega de turno'}).click();
  await expect(page.locator('.zone-dots .on')).toContainText('Entrega de turno');
