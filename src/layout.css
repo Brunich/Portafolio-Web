@@ -141,3 +141,4 @@ section{scroll-margin-top:96px}
 html[data-motion=paused] :is(.phones img,.vibe-shot){animation-play-state:paused}
 @media (prefers-reduced-motion:reduce){:is(.phones img,.vibe-shot){animation:none}}
 .client-shot .cap-phone{width:23%;border-width:5px}
+.portrait picture{display:block}

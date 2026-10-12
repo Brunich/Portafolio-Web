@@ -192,7 +192,7 @@ function Home({ lang, paused, projects }: { lang: Lang; paused: boolean; project
   </section>
   <section id="about" className="about-section section-space"><div className="wrap">
    <div className="about-grid" data-zone="CV">
-    <figure className="portrait"><img src="/media/bruno-retrato.jpg" alt="Bruno Salas" width="560" height="700" loading="lazy"/><figcaption><strong>Bruno Salas</strong><span>Monterrey, N. L.</span></figcaption></figure>
+    <figure className="portrait"><picture><source srcSet="/media/bruno-retrato.avif" type="image/avif"/><source srcSet="/media/bruno-retrato.webp" type="image/webp"/><img src="/media/bruno-retrato.jpg" alt="Bruno Salas" width="560" height="700" loading="lazy"/></picture><figcaption><strong>Bruno Salas</strong><span>Monterrey, N. L.</span></figcaption></figure>
     <div className="about-copy"><span className="kicker">02 · CV</span><h2>{p.aboutTitle}</h2><p>{p.about}</p><a className="inline-link" href={cv} download>{es ? 'Descargar CV' : 'Download CV'}<DownloadSimple size={20}/></a></div>
    </div>
    <div className="client-works" data-zone={es ? 'Trabajos' : 'Client work'}><h3>{p.worksTitle}</h3>{works.map(x => <article key={x.id} className="client-work">
