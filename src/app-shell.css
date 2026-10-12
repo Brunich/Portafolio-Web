@@ -1,0 +1,75 @@
+/* Los morados de las herramientas giran hacia el tono de cada app (--k-hue, --k-chroma). */
+/* Las apps no usan la piel del portafolio: cada una redefine las variables que leen sus componentes. */
+html.is-app body::before{display:none}
+.ax{--ax-r:12px;--ax-body:'Manrope Variable',sans-serif;--ax-pattern:none;
+ min-height:100vh;display:flex;flex-direction:column;background:var(--ax-pattern),var(--bg);color:var(--text);font-family:var(--ax-body);color-scheme:dark}
+.ax ::selection{background:var(--k-1);color:var(--k-ink)}
+.ax-wrap{width:min(1180px,calc(100% - 32px));margin-inline:auto}
+.ax-bar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.ax-bar-in{display:flex;align-items:center;gap:14px;min-height:64px}
+.ax-logo{display:grid;place-items:center;width:38px;height:38px;border-radius:var(--ax-r);background:var(--k-1);color:var(--k-ink);flex:none}
+.ax-name{display:flex;flex-direction:column;line-height:1.15;min-width:0}
+.ax-name strong{font-family:var(--display);font-size:19px;font-weight:700;letter-spacing:-.01em}
+.ax-name small{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ax-badge{margin-left:auto;font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:4px 12px;white-space:nowrap}
+.ax-lang{display:flex}
+.ax-lang button{min-width:38px;min-height:40px;border:0;border-radius:var(--ax-r);background:transparent;color:var(--muted);font-size:12px;cursor:pointer}
+.ax-lang button[aria-pressed=true]{color:var(--text);font-weight:700;background:var(--surface)}
+.ax-main{flex:1;padding-bottom:40px}
+.ax-title{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.ax .ax-stage{background:none;border:0;padding-top:34px}
+.ax .case-demo-head h2{font-family:var(--display)}
+.ax-foot{border-top:1px solid var(--line);padding-block:22px 30px;font-size:13px;color:var(--muted)}
+.ax-foot .ax-wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 20px}
+.ax a:focus-visible,.ax button:focus-visible{outline:2px solid var(--k-1);outline-offset:3px}
+@media (max-width:640px){.ax-badge{display:none}.ax-lang{margin-left:auto}.ax-name small{max-width:52vw}}
+
+/* Sellito: un café de noche, madera oscura y caramelo */
+.ax-club{--k-hue:120;--k-chroma:.8;--bg:#1b1210;--surface:#251916;--surface-2:#2e201b;--line:#3d2a24;--text:#f6ebdd;--muted:#c4ab98;--k-1:#e3a26f;--k-1d:#7a4a2a;--k-2:#d98b95;--k-ok:#9cc59a;--k-bad:#e07a86;--k-warn:#e8c27a;--k-ink:#120b09;--display:'Instrument Serif',serif;--ax-r:20px;
+ --ax-pattern:radial-gradient(#ffffff0a 1px,transparent 1.3px) 0 0/22px 22px}
+.ax-club .ax-name strong{font-weight:400;font-size:24px;font-style:italic}
+
+/* Cuadro: plano azul con cuadrícula, monoespaciada */
+.ax-csv{--k-hue:-35;--k-chroma:1.1;--bg:#0b1630;--surface:#0f1e3d;--surface-2:#132548;--line:#23365e;--text:#e8efff;--muted:#9fb0d4;--k-1:#5b8cff;--k-1d:#2a4bb0;--k-2:#4fd1ff;--k-ok:#5fd3a5;--k-bad:#ff7a8a;--k-warn:#ffd166;--k-ink:#060d1f;--display:'JetBrains Mono Variable',monospace;--ax-r:4px;
+ --ax-pattern:linear-gradient(#ffffff0b 1px,transparent 1px) 0 0/100% 24px,linear-gradient(90deg,#ffffff0b 1px,transparent 1px) 0 0/24px 100%,linear-gradient(#5b8cff1f 1px,transparent 1px) 0 0/100% 120px,linear-gradient(90deg,#5b8cff1f 1px,transparent 1px) 0 0/120px 100%}
+.ax-csv .dw-workbench{--dw-bg:#0f1e3d;--dw-surface:#132548;--dw-line:#2a4170;--dw-text:#e8efff;--dw-muted:#a8b8d8;--dw-accent:#9fbaff;--low:#a8b8d8;--info:#8fa3c9;border-color:#2a4170;border-radius:6px}
+.ax-csv .dw-col{background:#0d1b38}
+.ax-csv .dw-search input{background:#091428;border-color:#2a4170}
+.ax-csv .dw-workbench th{background:#16294f;color:#dbe5ff}
+.ax-csv .dw-workbench button[aria-pressed=true]{background:#1d3a78;border-color:#9fbaff}
+.ax-csv .dw-fileicon{background:linear-gradient(160deg,#2a4bb0,#16294f);border-color:#5b8cff}
+.ax-csv .dw-col.is-hot,.ax-csv .dw-workbench th.dw-hot,.ax-csv .dw-workbench td.dw-hot{background:#1a3366}
+.ax-csv .dw-workbench td{border-bottom-color:#1d3159}
+.ax-csv .dw-workbench tbody tr:hover td{background:#132a55}
+.ax-csv .mm-root rect,.ax-csv .mm-hot .mm-node rect{fill:#16294f}
+.ax-csv .mm-tree ul::before{background:#2a4bb0}
+.ax-csv .cf-track{stroke:#16294f}
+
+/* Línea: grafito de nave industrial y naranja de seguridad */
+.ax-planta{--k-hue:70;--k-chroma:.12;--bg:#161616;--surface:#1f1f1f;--surface-2:#262626;--line:#343330;--text:#f2f0ea;--muted:#aaa59a;--k-1:#ff7a3d;--k-1d:#8a3a14;--k-2:#ffb703;--k-ok:#7fd18b;--k-bad:#ff5d5d;--k-warn:#ffb703;--k-ink:#0d0d0d;--display:'Bricolage Grotesque Variable',sans-serif;--ax-r:3px}
+.ax-planta .ax-bar{border-bottom:0}
+.ax-planta .ax-bar::after{content:'';position:absolute;left:0;right:0;bottom:-6px;height:6px;background:repeating-linear-gradient(-45deg,#0d0d0d 0 12px,#ffb703 12px 24px)}
+.ax-planta .ax-name strong{text-transform:uppercase;font-weight:800}
+
+/* Tolerancia: papel milimétrico verde, como bitácora de calidad */
+.ax-spc{--k-hue:-150;--k-chroma:.8;--bg:#0d1a14;--surface:#12241b;--surface-2:#173023;--line:#24402f;--text:#e7f3ea;--muted:#9cb8a6;--k-1:#58c98b;--k-1d:#24603f;--k-2:#7cc7ff;--k-ok:#58c98b;--k-bad:#ff8a7a;--k-warn:#f2c14e;--k-ink:#07110c;--display:'JetBrains Mono Variable',monospace;--ax-r:4px;
+ --ax-pattern:linear-gradient(#58c98b0d 1px,transparent 1px) 0 0/100% 12px,linear-gradient(90deg,#58c98b0d 1px,transparent 1px) 0 0/12px 100%,linear-gradient(#58c98b1a 1px,transparent 1px) 0 0/100% 60px,linear-gradient(90deg,#58c98b1a 1px,transparent 1px) 0 0/60px 100%}
+
+/* Estante: tienda de barrio, turquesa y esquinas redondas */
+.ax-inventario{--k-hue:-120;--k-chroma:.9;--bg:#0a2321;--surface:#0f2f2c;--surface-2:#133935;--line:#1e4a45;--text:#e9fbf7;--muted:#9cc7c0;--k-1:#2fd4b5;--k-1d:#137a68;--k-2:#ffd166;--k-ok:#2fd4b5;--k-bad:#ff8c7a;--k-warn:#ffd166;--k-ink:#051513;--display:'Bricolage Grotesque Variable',sans-serif;--ax-r:999px;
+ --ax-pattern:radial-gradient(70% 50% at 100% 0%,#2fd4b51a,transparent 70%)}
+.ax-inventario .ax-logo{border-radius:14px}
+
+/* Relevo: cuarto de control, azul noche y ámbar */
+.ax-turno{--k-hue:-45;--k-chroma:.9;--bg:#0c1422;--surface:#111c2e;--surface-2:#16233a;--line:#1f2c42;--text:#e6edf7;--muted:#8fa1bb;--k-1:#ffb020;--k-1d:#8a5a00;--k-2:#5cc8ff;--k-ok:#4fd1a1;--k-bad:#ff6b6b;--k-warn:#ffb020;--k-ink:#070d18;--display:'JetBrains Mono Variable',monospace;--ax-r:8px;
+ --ax-pattern:repeating-linear-gradient(0deg,#ffffff05 0 1px,transparent 1px 4px)}
+
+/* Casero: cálido y tranquilo, nada de neón */
+.ax-agente{--k-hue:-170;--k-chroma:.45;--bg:#191613;--surface:#211d19;--surface-2:#29241f;--line:#352e27;--text:#f3ece1;--muted:#b3a796;--k-1:#a8c79a;--k-1d:#56704b;--k-2:#d9b48f;--k-ok:#a8c79a;--k-bad:#e39a8c;--k-warn:#e6c98a;--k-ink:#0f0d0b;--display:'Instrument Serif',serif;--ax-r:16px;
+ --ax-pattern:radial-gradient(60% 50% at 85% 0%,#a8c79a1c,transparent 70%)}
+.ax-agente .ax-name strong{font-weight:400;font-size:24px}
+
+/* Las variables de color que usan los botones y textos de los componentes */
+.ax{--lilac:var(--k-1);--violet:var(--k-1);--mint:var(--k-ok);--cyan:var(--k-2);--amber:var(--k-warn);--coral:var(--k-bad);--accent:var(--k-1);--on-accent:var(--k-ink)}
+.ax .nfc-tabs{background:var(--k-ink);border-color:var(--line)}
+.ax .nfc-tabs button[aria-selected=true]{background:var(--k-1);color:var(--k-ink)}

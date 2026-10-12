@@ -388,3 +388,10 @@ a.native-note:hover{border-color:#b8a4ec88}
 .monitor-shots img{width:100%;height:auto;display:block;border-radius:10px;border:1px solid #ffffff1a;box-shadow:0 30px 60px -30px #000c}
 .monitor-shots img+img{object-fit:cover;object-position:54% 50%;aspect-ratio:1/1.1}
 @media(max-width:760px){.monitor-shots{grid-template-columns:1fr}.monitor-shots img+img{display:none}}
+
+/* Pruébalo: la app vive en su propia pestaña, aquí sólo se lanza */
+.case-launch{display:flex;align-items:center;justify-content:space-between;gap:18px 30px;flex-wrap:wrap;margin-top:clamp(40px,6vw,72px);padding:30px 32px;border-radius:22px;background:linear-gradient(120deg,color-mix(in srgb,var(--c,var(--lilac)) 16%,var(--surface)),var(--surface));border:1px solid color-mix(in srgb,var(--c,var(--lilac)) 30%,transparent)}
+.case-launch h2{font-size:clamp(28px,3vw,40px)}
+.case-launch p{max-width:620px;margin-top:8px;color:var(--muted)}
+.case-visual.media-casa{aspect-ratio:auto;overflow:visible;border:0;background:none}
+.case-visual.media-casa>*{height:auto}

@@ -47,3 +47,6 @@ Videos y fotos personales de Bruno (WhatsApp, 28-09-2026). `bohemian-rhapsody.mp
 
 ## La Casa del Ángel
 Capturas de la página pública https://la-casa-del-angel.vercel.app (12-10-2026): página completa recortada en `casa-angel-web-recorrido.webp` (escritorio) y `casa-angel-movil-recorrido.webp` (celular).
+
+## Retrato
+12-10-2026: en bruno-retrato se reconstruyó con Codex sólo el fondo izquierdo (la mancha donde se difuminó a otra persona). La cara, los lentes y la ropa quedaron idénticos al recorte anterior (comparado píxel a píxel). Se sirve en AVIF y WebP, con JPG de respaldo.

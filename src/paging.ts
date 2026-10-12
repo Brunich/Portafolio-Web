@@ -12,7 +12,7 @@ export function glide(y: number): Promise<void> {
  const max = document.documentElement.scrollHeight - innerHeight;
  const to = Math.max(0, Math.min(max, Math.round(y)));
  if (still()) { scrollTo({ top: to, behavior: 'instant' }); return Promise.resolve(); }
- const from = scrollY, dist = to - from, start = performance.now(), ms = Math.min(1050, 520 + Math.abs(dist) * .3);
+ const from = scrollY, dist = to - from, start = performance.now(), ms = Math.min(620, 280 + Math.abs(dist) * .18);
  gliding = new Promise(done => {
   const step = (now: number) => {
    const t = Math.min(1, (now - start) / ms), e = t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;

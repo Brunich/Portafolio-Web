@@ -14,7 +14,7 @@ function AppNav({ es, view, onView, slug, icons }: { es: boolean; view: View; on
  return <nav className="ha-nav" aria-label={es ? 'Vistas de la app' : 'App views'}>
   <button type="button" aria-pressed={view === 'sum'} onClick={() => onView('sum')}><Sum size={17} weight={view === 'sum' ? 'fill' : 'regular'}/><span>{es ? 'Resumen' : 'Summary'}</span></button>
   <button type="button" aria-pressed={view === 'full'} onClick={() => onView('full')}><Full size={17} weight={view === 'full' ? 'fill' : 'regular'}/><span>{es ? 'Completo' : 'Full'}</span></button>
-  <a href={`/proyectos/${slug}/app`}><ArrowSquareOut size={17}/><span>{es ? 'Abrir' : 'Open'}</span></a>
+  <a href={`/proyectos/${slug}/app`} target="_blank" rel="noopener"><ArrowSquareOut size={17}/><span>{es ? 'Abrir' : 'Open'}</span></a>
  </nav>;
 }
 

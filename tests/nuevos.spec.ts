@@ -109,7 +109,7 @@ test('on a phone every project page is one column, the title fits and nothing ov
  await page.setViewportSize({ width: 390, height: 844 });
  for (const slug of ['club-nfc', 'analizador-csv', 'planta', 'graficas-de-control', 'inventario', 'entrega-de-turno', 'asistente-ia-local', 'vibemap', 'punto-u', 'la-casa-del-angel']) {
   await page.goto(`/proyectos/${slug}`);
-  const head = await page.locator('.ps-hero').evaluate(e => ({ cols: getComputedStyle(e).gridTemplateColumns.split(' ').length, h1: e.querySelector('h1')!.getBoundingClientRect().right, doc: document.documentElement.scrollWidth }));
+  const head = await page.locator('.case-head').evaluate(e => ({ cols: getComputedStyle(e).gridTemplateColumns.split(' ').length, h1: e.querySelector('h1')!.getBoundingClientRect().right, doc: document.documentElement.scrollWidth }));
   expect(head.cols, slug).toBe(1);
   expect(head.h1, slug).toBeLessThanOrEqual(390);
   expect(head.doc, slug).toBe(390);
@@ -224,19 +224,24 @@ test('shift handover with 60 incidents: filters by line and severity, and long c
  await expect(open.locator('.sh-card')).toHaveCount(4);
 });
 
-test('projects with their own site open it directly, and the rest open their app on its own page', async ({ page }) => {
+test('projects with their own site open it directly, and the rest open their app as a separate site in a new tab', async ({ page }) => {
  for (const [slug, url] of [['punto-u', 'https://punto-u-app.vercel.app'], ['vibemap', 'https://vibemap-brunich.vercel.app'], ['la-casa-del-angel', 'https://la-casa-del-angel.vercel.app']]) {
   await page.goto(`/proyectos/${slug}`);
-  await expect(page.locator('.ps-hero .ps-btn')).toHaveAttribute('href', url);
-  await expect(page.locator('iframe')).toHaveCount(0);
+  await expect(page.locator('.case-head .case-action')).toHaveAttribute('href', url);
  }
  await page.goto('/proyectos/planta');
- await expect(page.locator('#demo')).toHaveCount(0);
- await page.locator('.ps-hero .ps-btn').click();
- await expect(page).toHaveURL(/\/proyectos\/planta\/app$/);
- await expect(page.locator('#demo')).toBeVisible();
- await page.getByRole('link', { name: 'Presentación' }).click();
- await expect(page).toHaveURL(/\/proyectos\/planta$/);
+ await expect(page.locator('.topbar')).toBeVisible();
+ await expect(page.getByRole('heading', { name: 'Cómo funciona' })).toBeVisible();
+ const launch = page.locator('.case-launch a');
+ await expect(launch).toHaveAttribute('target', '_blank');
+ const [app] = await Promise.all([page.waitForEvent('popup'), launch.click()]);
+ await expect(app).toHaveURL(/\/proyectos\/planta\/app$/);
+ await expect(app.locator('#demo')).toBeVisible();
+ await expect(app).toHaveTitle(/^Línea/);
+ await expect(app.locator('html')).toHaveClass(/is-app/);
+ // Sin nada del portafolio: ni su barra ni un enlace de regreso
+ await expect(app.locator('.topbar, a[href="/"], a[href="/#projects"]')).toHaveCount(0);
+ await expect(app.getByRole('link', { name: /Presentación|Bruno Salas/ })).toHaveCount(0);
 });
 
 test('csv analyzer compares two snapshots of the same report and lists what changed', async ({ page }) => {
