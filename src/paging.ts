@@ -34,16 +34,18 @@ function currentIndex(zs: HTMLElement[]) {
 async function step(dir: 1 | -1) {
  const zs = zoneList(); if (!zs.length) return;
  const i = currentIndex(zs), r = zs[i].getBoundingClientRect(), view = innerHeight - TOP;
+ // Una zona puede contener otras (Game dev): termina donde empieza la siguiente, no en su borde.
+ const end = (n: number) => Math.min(zs[n].getBoundingClientRect().bottom, zs[n + 1]?.getBoundingClientRect().top ?? Infinity);
  let target: number | null = null;
  if (dir > 0) {
-  const rest = r.bottom - innerHeight;
+  const rest = end(i) - innerHeight;
   if (rest > 8) target = scrollY + Math.min(rest, view * .85);
   else if (zs[i + 1]) target = zs[i + 1].getBoundingClientRect().top + scrollY - TOP;
   else target = document.documentElement.scrollHeight;
  } else {
   const over = TOP - r.top;
   if (over > 8) target = scrollY - Math.min(over, view * .85);
-  else if (zs[i - 1]) { const p = zs[i - 1].getBoundingClientRect(); target = scrollY + Math.max(p.top - TOP, p.bottom - innerHeight); }
+  else if (zs[i - 1]) { const p = zs[i - 1].getBoundingClientRect(); target = scrollY + Math.max(p.top - TOP, end(i - 1) - innerHeight); }
   else target = 0;
  }
  if (Math.abs(target - scrollY) > 2) await glide(target);

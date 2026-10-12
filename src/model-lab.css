@@ -12,3 +12,6 @@
 .ml-controls label{display:flex;align-items:center;gap:12px;font-size:13px;color:#e0e5eb}
 .ml-controls input{width:180px;accent-color:#cbd5e0}
 @media(max-width:640px){.ml-stage{aspect-ratio:4/5}.ml-controls{padding:14px 16px 0}.ml-controls input{width:140px}}
+
+/* Con la portada por zonas el comparador tiene que caber entero en la pantalla, si no la rueda lo deja a medias. */
+.paged .ml-stage{width:100%;aspect-ratio:auto;height:min(calc(100vh - 380px),696px)}
