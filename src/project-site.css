@@ -78,9 +78,6 @@
 .pa .pa-stage{margin-top:18px;padding-top:24px;--display:'Manrope Variable',sans-serif}
 
 /* Fotos de un sitio real (La Casa del Ángel) */
-.ps .ps-shots{position:relative;display:block;height:auto;padding:0 0 40px}
-.ps .ps-shots img{width:88%;height:auto;border-radius:var(--ps-r);border:1px solid var(--ps-line);box-shadow:0 24px 50px -28px #0006}
-.ps .ps-shots .is-phone{position:absolute;right:0;bottom:0;width:30%;border-radius:22px;border:6px solid #1f3a31}
 
 @media (max-width:860px){
  .ps-hero{grid-template-columns:1fr;gap:36px;padding-block:44px 40px}

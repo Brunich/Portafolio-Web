@@ -31,9 +31,12 @@ export default function OriginalScenes({ lang, paused }: { lang: 'es' | 'en'; pa
  useEffect(() => { if (open) dialog.current?.showModal(); else dialog.current?.close(); }, [open]);
 
  return <section id="graphics" className="wrap section-space gamedev" data-zone="Game dev"><div className="section-heading" data-num="03"><div><span className="kicker">03 · Game development</span><h2>{es ? 'IA Rogue, mi videojuego en Godot.' : 'IA Rogue, my Godot game.'}</h2><p>{es ? 'Proyecto personal de modelado y diseño en Blender, con escenas jugables, mecánicas y distintas cámaras funcionales.' : 'A personal project of modeling and design in Blender, with playable scenes, mechanics and several working cameras.'}</p><div className="tags gamedev-tags">{(es ? ['Dirección visual', 'Game dev', 'Modelado 3D', 'Shaders', 'Hobby profesional'] : ['Visual direction', 'Game dev', '3D modeling', 'Shaders', 'Professional hobby']).map(tag => <span key={tag}>{tag}</span>)}</div></div></div>
+  <div className="gd-block" data-zone={es ? 'Tres estilos' : 'Three styles'}>
   <div className="original-compare-heading"><h3>{es ? 'Un personaje, tres estilos.' : 'One character, three styles.'}</h3><p>{es ? 'Gíralo, acércate y cambia el tamaño del píxel.' : 'Rotate it, zoom in and change the pixel size.'}</p></div>
   <ModelLab lang={lang} paused={paused}/>
+  </div>
 
+  <div className="gd-block" data-zone={es ? 'Escenas' : 'Scenes'}>
   <div className="original-compare-heading"><h3>{es ? 'Escenas del juego.' : 'Scenes from the game.'}</h3><p>{es ? 'Capturas del juego, sin retoque. Toca una para verla completa.' : 'In-game captures, untouched. Tap one to see it in full.'}</p></div>
   <div className="pano" onMouseEnter={() => setHovering(true)} onMouseLeave={() => setHovering(false)}>
    <button className="pano-stage" onClick={() => setOpen(true)} aria-label={`${PANORAMAS[pano].title[L]} — ${es ? 'ver a pantalla completa' : 'view full screen'}`}>
@@ -48,5 +51,6 @@ export default function OriginalScenes({ lang, paused }: { lang: 'es' | 'en'; pa
    <img src={src(cur)} width={cur.w} height={cur.h} alt={cur.title[L]}/>
    <div className="pano-dialog-bar"><button onClick={() => setPano((pano + PANORAMAS.length - 1) % PANORAMAS.length)} aria-label={es ? 'Anterior' : 'Previous'}>←</button><span>{PANORAMAS[pano].title[L]} · {PANORAMAS[pano].note[L]}</span><button onClick={() => setPano((pano + 1) % PANORAMAS.length)} aria-label={es ? 'Siguiente' : 'Next'}>→</button><button onClick={() => setOpen(false)} aria-label={es ? 'Cerrar' : 'Close'}>✕</button></div>
   </dialog>
+  </div>
  </section>;
 }

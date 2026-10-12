@@ -1,0 +1,13 @@
+.cap{position:relative;padding:0 0 34px}
+.cap-web{position:relative;width:88%;aspect-ratio:16/10.6;border-radius:12px;overflow:hidden;background:#f9f7f1;border:1px solid #33594c33;box-shadow:0 24px 50px -28px #0006}
+.cap-dots{position:absolute;inset:0 0 auto;z-index:1;display:flex;align-items:center;gap:5px;height:26px;padding:0 10px;background:#eceae3;border-bottom:1px solid #00000014}
+.cap-dots i{width:8px;height:8px;border-radius:50%;background:#c9c4b8}
+.cap-dots b{margin-left:10px;font:500 10.5px 'DM Sans Variable',sans-serif;color:#6b6a63;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cap img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 0}
+.cap-web img{position:absolute;inset:26px 0 0;height:calc(100% - 26px);animation:cap-scroll 22s cubic-bezier(.65,0,.35,1) infinite}
+.cap-phone{position:absolute;right:0;bottom:0;width:29%;aspect-ratio:9/19;border-radius:22px;overflow:hidden;border:6px solid #1f3a31;background:#f9f7f1;box-shadow:0 20px 40px -18px #0008}
+.cap-phone img{animation:cap-scroll 22s cubic-bezier(.65,0,.35,1) -4s infinite}
+/* Se detiene en cada sección, como alguien que la está leyendo, y regresa arriba. */
+@keyframes cap-scroll{0%,12%{object-position:50% 0}26%,38%{object-position:50% 30%}52%,64%{object-position:50% 62%}78%,88%{object-position:50% 100%}100%{object-position:50% 0}}
+html[data-motion=paused] .cap img{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){.cap img{animation:none}}

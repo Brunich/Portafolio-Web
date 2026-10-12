@@ -207,6 +207,21 @@ test('on desktop each wheel step moves one zone, and the index jumps to a projec
  await expect(page.locator('.zone-dots .on')).toContainText('Entrega de turno');
 });
 
+test('the three-styles character fits whole in one wheel stop, even on a small laptop',async({page})=>{
+ await page.setViewportSize({width:1366,height:768});
+ await page.goto('/');
+ await expect(page.locator('html')).toHaveClass(/paged/);
+ await page.locator('.zone-dots').getByRole('button',{name:'Game dev',exact:true}).click();
+ await expect(page.locator('.zone-dots .on')).toContainText('Game dev');
+ await page.waitForTimeout(1200);
+ await page.mouse.move(700,400);
+ await page.mouse.wheel(0,120);
+ await expect(page.locator('.zone-dots .on')).toContainText('Tres estilos');
+ await page.waitForTimeout(1200);
+ const box=await page.locator('.model-lab').evaluate(e=>{const r=e.getBoundingClientRect();return {top:r.top,bottom:r.bottom};});
+ expect(box.top).toBeGreaterThan(74);
+ expect(box.bottom).toBeLessThanOrEqual(768);
+});
 test('about me lives on its own page, reached from the contact section', async ({page})=>{
  await page.goto('/');
  await expect(page.locator('#hobbies')).toHaveCount(0);

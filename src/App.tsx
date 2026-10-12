@@ -20,6 +20,7 @@ const MenuBuilder = lazy(() => import('./Menu').then(m => ({ default: m.MenuBuil
 import PlantaPreview from './PlantaPreview';
 import InventarioPreview from './InventarioPreview';
 import SpcPreview from './SpcPreview';
+import CasaPreview from './CasaPreview';
 import AgentePreview from './AgentePreview';
 import ClubPreview from './ClubPreview';
 import CsvChart from './CsvChart';
@@ -181,7 +182,7 @@ function Home({ lang, paused, projects }: { lang: Lang; paused: boolean; project
    <div className="others is-dev" data-zone={es ? 'En desarrollo' : 'In development'}>
     <div className="others-head"><span className="kicker">{es ? 'En desarrollo' : 'In development'}</span><p>{es ? 'Lo que estoy construyendo ahora.' : 'What I am building now.'}</p></div>
     <div className="others-grid">{dev.map(x => <a key={x.id} className={`other-card project-${x.id}`} data-c href={`/proyectos/${x.slug}`} data-title={x.title}><span className={`other-media media-${x.id}`}><Media lang={lang} project={x}/></span><span className="other-copy"><em>{x.kind}</em><strong>{x.title}</strong><span>{x.pitch}</span></span><ArrowUpRight size={20}/></a>)}
-     <div className="other-card other-plain project-android"><span className="other-media other-icon" aria-hidden="true"><AndroidLogo size={72} weight="duotone"/><small>NFC · {es ? 'cámara · avisos' : 'camera · alerts'}</small></span><span className="other-copy"><em>Android</em><strong>{es ? 'Apps Android nativas' : 'Native Android apps'}</strong><span>{es ? 'Ya en Android: La Casa del Ángel y Punto U. En otros proyectos todavía faltan: NFC para negocios, Inventario y Entrega de turno van en camino.' : 'Already on Android: La Casa del Ángel and Punto U. Other projects still need theirs: NFC for businesses, Inventory and Shift handover are on the way.'}</span></span></div></div>
+     <div className="other-card other-plain project-android"><span className="other-media other-icon" aria-hidden="true"><AndroidLogo size={72} weight="duotone"/><small>NFC · {es ? 'cámara · avisos' : 'camera · alerts'}</small></span><span className="other-copy"><em>Android</em><strong>{es ? 'Apps Android nativas' : 'Native Android apps'}</strong><span>{es ? 'Ya en Android: La Casa del Ángel, Punto U y NFC para negocios. Todavía faltan las de Inventario y Entrega de turno.' : 'Already on Android: La Casa del Ángel, Punto U and NFC for businesses. Inventory and Shift handover still need theirs.'}</span></span></div></div>
    </div>
    <div className="others" data-zone={es ? 'Otros códigos' : 'Other code'}>
     <div className="others-head"><span className="kicker">{es ? 'Otros códigos' : 'Other code'}</span><p>{es ? 'Extras: gráficas de control, un hackathon, una app para estudiantes y más en mi GitHub.' : 'Extras: control charts, a hackathon, a student app and more on my GitHub.'}</p></div>
@@ -195,7 +196,7 @@ function Home({ lang, paused, projects }: { lang: Lang; paused: boolean; project
     <div className="about-copy"><span className="kicker">02 · CV</span><h2>{p.aboutTitle}</h2><p>{p.about}</p><a className="inline-link" href={cv} download>{es ? 'Descargar CV' : 'Download CV'}<DownloadSimple size={20}/></a></div>
    </div>
    <div className="client-works" data-zone={es ? 'Trabajos' : 'Client work'}><h3>{p.worksTitle}</h3>{works.map(x => <article key={x.id} className="client-work">
-    <a className="client-shot" href={x.link} {...external(x.link)} aria-label={`${x.title} — ${x.action}`}><img src="/media/casa-angel-web.jpg" width="1440" height="900" alt="" loading="lazy"/></a>
+    <a className="client-shot" href={x.link} {...external(x.link)} aria-label={`${x.title} — ${x.action}`}><CasaPreview lang={lang}/></a>
     <div className="client-copy"><em>{x.kind}</em><strong>{x.title}</strong><p>{es ? 'Residencia para adultos mayores en Celaya: su página y su portal de cuidados, con app para Android.' : 'A senior residence in Celaya: its website and care portal, with an Android app.'}</p>
      <div className="client-links"><a className="button primary" href={x.link} {...external(x.link)}>{x.action}<ArrowUpRight size={18}/></a><a className="inline-link" href={`/proyectos/${x.slug}`} data-title={x.title}>{es ? 'Ver presentación' : 'See overview'}<ArrowRight size={18}/></a></div></div>
    </article>)}</div>
@@ -218,7 +219,7 @@ function Media({ lang, project }: { lang: Lang; project: Project }) {
   case 'inventario': return <InventarioPreview lang={lang}/>;
   case 'spc': return <SpcPreview lang={lang}/>;
   case 'agente': return <AgentePreview lang={lang}/>;
-  case 'casa': return <div className="ps-shots"><img src="/media/casa-angel-web.jpg" width="1440" height="900" alt={es ? 'Página de La Casa del Ángel en computadora' : 'La Casa del Ángel website on desktop'} loading="lazy"/><img className="is-phone" src="/media/casa-angel-movil.jpg" width="780" height="1688" alt={es ? 'La misma página en el celular' : 'The same page on a phone'} loading="lazy"/></div>;
+  case 'casa': return <CasaPreview lang={lang}/>;
   case 'vibemap': return <img className="vibe-shot" src="/media/vibemap-mapa.webp" alt={lang === 'es' ? 'Mapa mental de VibeMap sobre el código de este portafolio' : 'VibeMap mind map of this portfolio’s code'} width="1210" height="350" loading="lazy"/>;
   default: return <div className="phones"><img src="/media/punto-u-mapa.webp" width="780" height="2000" alt={es ? 'Punto U: mapa del campus con misiones' : 'Punto U: campus map with missions'} loading="lazy"/><img src="/media/punto-u.webp" width="600" height="1300" alt={es ? 'Punto U: crear perfil' : 'Punto U: create profile'} loading="lazy"/></div>;
  }
@@ -306,11 +307,11 @@ function NfcGuide({ lang }: { lang: Lang }) {
 }
 
 // Cada proyecto tiene su propio repo, con pruebas y README.
-// La versión nativa de cada herramienta: la de escritorio ya se descarga; las de Android van en camino, con plan.
+// La versión nativa de cada herramienta: las que ya existen se descargan; las demás van en camino.
 const NATIVE: Record<string, Native> = {
  spc: { es: 'También como app de escritorio para Windows', en: 'Also as a Windows desktop app', href: 'https://github.com/Brunich/graficas-de-control/releases/latest' },
  casa: { es: 'App para Android, ya en uso', en: 'Android app, already in use', href: 'https://la-casa-del-angel.vercel.app/instalar', android: true },
- club: { es: 'App Android nativa con lector NFC', en: 'Native Android app with NFC reader' },
+ club: { es: 'App Android con lector NFC', en: 'Android app with NFC reader', href: 'https://github.com/Brunich/Chip-NFC-Para-Empresas-Y-Negocios/releases/latest/download/nfc-negocios.apk', android: true },
  inventario: { es: 'App Android nativa con escáner de cámara', en: 'Native Android app with camera scanner' },
  turno: { es: 'App Android nativa con cámara y avisos', en: 'Native Android app with camera and alerts' },
 };
