@@ -20,6 +20,7 @@ const MenuBuilder = lazy(() => import('./Menu').then(m => ({ default: m.MenuBuil
 import PlantaPreview from './PlantaPreview';
 import InventarioPreview from './InventarioPreview';
 import SpcPreview from './SpcPreview';
+import CasaPreview from './CasaPreview';
 import AgentePreview from './AgentePreview';
 import ClubPreview from './ClubPreview';
 import CsvChart from './CsvChart';
@@ -195,7 +196,7 @@ function Home({ lang, paused, projects }: { lang: Lang; paused: boolean; project
     <div className="about-copy"><span className="kicker">02 · CV</span><h2>{p.aboutTitle}</h2><p>{p.about}</p><a className="inline-link" href={cv} download>{es ? 'Descargar CV' : 'Download CV'}<DownloadSimple size={20}/></a></div>
    </div>
    <div className="client-works" data-zone={es ? 'Trabajos' : 'Client work'}><h3>{p.worksTitle}</h3>{works.map(x => <article key={x.id} className="client-work">
-    <a className="client-shot" href={x.link} {...external(x.link)} aria-label={`${x.title} — ${x.action}`}><img src="/media/casa-angel-web.jpg" width="1440" height="900" alt="" loading="lazy"/></a>
+    <a className="client-shot" href={x.link} {...external(x.link)} aria-label={`${x.title} — ${x.action}`}><CasaPreview lang={lang}/></a>
     <div className="client-copy"><em>{x.kind}</em><strong>{x.title}</strong><p>{es ? 'Residencia para adultos mayores en Celaya: su página y su portal de cuidados, con app para Android.' : 'A senior residence in Celaya: its website and care portal, with an Android app.'}</p>
      <div className="client-links"><a className="button primary" href={x.link} {...external(x.link)}>{x.action}<ArrowUpRight size={18}/></a><a className="inline-link" href={`/proyectos/${x.slug}`} data-title={x.title}>{es ? 'Ver presentación' : 'See overview'}<ArrowRight size={18}/></a></div></div>
    </article>)}</div>
@@ -218,7 +219,7 @@ function Media({ lang, project }: { lang: Lang; project: Project }) {
   case 'inventario': return <InventarioPreview lang={lang}/>;
   case 'spc': return <SpcPreview lang={lang}/>;
   case 'agente': return <AgentePreview lang={lang}/>;
-  case 'casa': return <div className="ps-shots"><img src="/media/casa-angel-web.jpg" width="1440" height="900" alt={es ? 'Página de La Casa del Ángel en computadora' : 'La Casa del Ángel website on desktop'} loading="lazy"/><img className="is-phone" src="/media/casa-angel-movil.jpg" width="780" height="1688" alt={es ? 'La misma página en el celular' : 'The same page on a phone'} loading="lazy"/></div>;
+  case 'casa': return <CasaPreview lang={lang}/>;
   case 'vibemap': return <img className="vibe-shot" src="/media/vibemap-mapa.webp" alt={lang === 'es' ? 'Mapa mental de VibeMap sobre el código de este portafolio' : 'VibeMap mind map of this portfolio’s code'} width="1210" height="350" loading="lazy"/>;
   default: return <div className="phones"><img src="/media/punto-u-mapa.webp" width="780" height="2000" alt={es ? 'Punto U: mapa del campus con misiones' : 'Punto U: campus map with missions'} loading="lazy"/><img src="/media/punto-u.webp" width="600" height="1300" alt={es ? 'Punto U: crear perfil' : 'Punto U: create profile'} loading="lazy"/></div>;
  }

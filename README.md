@@ -14,18 +14,18 @@ Cada proyecto tiene su propia página con su estilo, y la app se abre aparte, en
 
 | Proyecto | Qué es | Enlaces |
 |---|---|---|
-| **La Casa del Ángel** | Residencia para adultos mayores en Celaya: su página, un portal de cuidados para el personal y las familias, y app para Android. La diseñé, la publiqué y le doy soporte. | [Sitio](https://la-casa-del-angel.vercel.app) · [Presentación](https://bruno-portfolio-azure.vercel.app/proyectos/la-casa-del-angel) |
+| **La Casa del Ángel** | Residencia para adultos mayores en Celaya: su página, un portal de cuidados para el personal y las familias, y app para Android. La diseñé, la publiqué y le doy soporte. | [Sitio](https://la-casa-del-angel.vercel.app) · [App Android](https://la-casa-del-angel.vercel.app/instalar) · [Presentación](https://bruno-portfolio-azure.vercel.app/proyectos/la-casa-del-angel) |
 
 ## Proyectos para negocios y manufactura
 
-| Proyecto | Para qué sirve | Pruébalo | Código |
-|---|---|---|---|
-| **NFC para negocios** | Tarjeta de sellos en el celular: el cliente acerca su teléfono a un chip, suma un sello y vuelve por su premio. El mismo chip abre el menú. | [Probar](https://bruno-portfolio-azure.vercel.app/proyectos/club-nfc) | [nfc-negocios](https://github.com/Brunich/nfc-negocios) |
-| **Analizador de CSV** | Limpia un reporte en un clic: duplicados, fechas mezcladas, valores mal escritos y reglas rotas. Lo grafica y responde consultas SQL. | [Probar](https://bruno-portfolio-azure.vercel.app/proyectos/analizador-csv) | [analizador-csv](https://github.com/Brunich/analizador-csv) |
-| **Planta: consolidador y OEE** | Cruza producción, calidad y paros; marca las incoherencias y calcula el OEE de cada línea. Saca el reporte en Excel. | [Probar](https://bruno-portfolio-azure.vercel.app/proyectos/planta) | [planta-oee](https://github.com/Brunich/planta-oee) |
-| **Gráficas de control (SPC)** | Dice si la máquina se está desajustando antes de que salga pieza mala, con Cp y Cpk. **App de escritorio para Windows.** | [Probar](https://bruno-portfolio-azure.vercel.app/proyectos/graficas-de-control) · [Descargar](https://github.com/Brunich/graficas-de-control/releases/latest) | [graficas-de-control](https://github.com/Brunich/graficas-de-control) |
-| **Inventario con la cámara** | La cámara del celular como lector de códigos: entradas, ventas, conteo y lista para el proveedor. | [Probar](https://bruno-portfolio-azure.vercel.app/proyectos/inventario) | [inventario-camara](https://github.com/Brunich/inventario-camara) |
-| **Entrega de turno** | Las incidencias de calidad pasan de un turno a otro con responsable, foto de evidencia y cierre. | [Probar](https://bruno-portfolio-azure.vercel.app/proyectos/entrega-de-turno) | [entrega-de-turno](https://github.com/Brunich/entrega-de-turno) |
+| Proyecto | Para qué sirve | Pruébalo | Código | APK |
+|---|---|---|---|---|
+| **NFC para negocios** | Tarjeta de sellos en el celular: el cliente acerca su teléfono a un chip, suma un sello y vuelve por su premio. El mismo chip abre el menú. | [Probar](https://bruno-portfolio-azure.vercel.app/proyectos/club-nfc/app) | [nfc-negocios](https://github.com/Brunich/nfc-negocios) | Pronto |
+| **Analizador de CSV** | Limpia un reporte en un clic: duplicados, fechas mezcladas, valores mal escritos y reglas rotas. Lo grafica y responde consultas SQL. | [Probar](https://bruno-portfolio-azure.vercel.app/proyectos/analizador-csv/app) | [analizador-csv](https://github.com/Brunich/analizador-csv) | — |
+| **Planta: consolidador y OEE** | Cruza producción, calidad y paros; marca las incoherencias y calcula el OEE de cada línea. Saca el reporte en Excel. | [Probar](https://bruno-portfolio-azure.vercel.app/proyectos/planta/app) | [planta-oee](https://github.com/Brunich/planta-oee) | — |
+| **Gráficas de control (SPC)** | Dice si la máquina se está desajustando antes de que salga pieza mala, con Cp y Cpk. **App de escritorio para Windows.** | [Probar](https://bruno-portfolio-azure.vercel.app/proyectos/graficas-de-control/app) · [Descargar](https://github.com/Brunich/graficas-de-control/releases/latest) | [graficas-de-control](https://github.com/Brunich/graficas-de-control) | — |
+| **Inventario con la cámara** | La cámara del celular como lector de códigos: entradas, ventas, conteo y lista para el proveedor. | [Probar](https://bruno-portfolio-azure.vercel.app/proyectos/inventario/app) | [inventario-camara](https://github.com/Brunich/inventario-camara) | Pronto |
+| **Entrega de turno** | Las incidencias de calidad pasan de un turno a otro con responsable, foto de evidencia y cierre. | [Probar](https://bruno-portfolio-azure.vercel.app/proyectos/entrega-de-turno/app) | [entrega-de-turno](https://github.com/Brunich/entrega-de-turno) | Pronto |
 
 ## En desarrollo
 
