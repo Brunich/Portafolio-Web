@@ -26,6 +26,7 @@ export const copy = {
     footer:'Diseñado para explorar. Construido para funcionar.', pause:'Pausar movimiento', play:'Activar movimiento', menu:'Abrir navegación', close:'Cerrar navegación',
     skip:'Ir al contenido', updated:'CV · septiembre 2026',
     experience:[
+      {year:'2026',role:'Diseño y soporte de páginas web',org:'Pequeñas empresas',text:'Web y app de La Casa del Ángel, residencia en Celaya: diseño, publicación y soporte.'},
       {year:'2024',role:'Tutoría de programación y bases de datos',org:'UANL',text:'Diagnóstico de errores, consultas SQL y apoyo en C, C# y JavaScript. Guías y demostraciones para explicar conceptos con claridad.'},
       {year:'2023',role:'Desarrollo de software y soporte de sistemas',org:'UANL · Asistente',text:'Validación de actualizaciones, reproducción de defectos y revisión de flujos de datos. Documentación para equipos técnicos.'}
     ],
@@ -54,6 +55,7 @@ export const copy = {
     contactTitle:'What should we build next?',contactText:'An idea, an opportunity, or an interesting problem. I’d love to hear about it.',
     mail:'Email me',copyMail:'Copy email',copied:'Email copied',copyError:'Could not copy. You can select the email below.',footer:'Designed to explore. Built to work.',pause:'Pause motion',play:'Enable motion',menu:'Open navigation',close:'Close navigation',skip:'Skip to content',updated:'CV · September 2026',
     experience:[
+      {year:'2026',role:'Website design & support',org:'Small businesses',text:'Website and app for La Casa del Ángel, a residence in Celaya: design, launch and support.'},
       {year:'2024',role:'Programming & database tutoring',org:'UANL',text:'Error diagnosis, SQL queries and support in C, C# and JavaScript. Guides and demonstrations to explain concepts clearly.'},
       {year:'2023',role:'Software development & systems support',org:'UANL · Assistant',text:'Update validation, defect reproduction and data-flow reviews. Process documentation for technical teams.'}
     ],

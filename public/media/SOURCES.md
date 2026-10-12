@@ -44,3 +44,6 @@ Descartadas: bosque_camara_3 (planos de luz translúcidos cruzan la toma) y agua
 
 ## Sobre mí (`about/`)
 Videos y fotos personales de Bruno (WhatsApp, 28-09-2026). `bohemian-rhapsody.mp4` une dos grabaciones del mismo número con un fundido de 0,6 s. Fotos reducidas a 1200 px en WebP.
+
+## La Casa del Ángel
+Capturas de la página pública https://la-casa-del-angel.vercel.app (12-10-2026): `casa-angel-web.jpg` (escritorio) y `casa-angel-movil.jpg` (celular).
