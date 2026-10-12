@@ -73,3 +73,5 @@ html.is-app body::before{display:none}
 .ax{--lilac:var(--k-1);--violet:var(--k-1);--mint:var(--k-ok);--cyan:var(--k-2);--amber:var(--k-warn);--coral:var(--k-bad);--accent:var(--k-1);--on-accent:var(--k-ink)}
 .ax .nfc-tabs{background:var(--k-ink);border-color:var(--line)}
 .ax .nfc-tabs button[aria-selected=true]{background:var(--k-1);color:var(--k-ink)}
+.ax-lang{margin-left:auto}
+.ax-badge+.ax-lang{margin-left:0}

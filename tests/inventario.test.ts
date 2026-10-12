@@ -57,3 +57,15 @@ test('valor en tienda y vendido hoy, a precio de venta', async () => {
  const moves = [{ at: now - 1000, code: 'A', name: 'a', delta: -2, mode: 'out' as const }, { at: ayer, code: 'A', name: 'a', delta: -5, mode: 'out' as const }, { at: now, code: 'A', name: 'a', delta: 4, mode: 'in' as const }];
  assert.equal(soldToday(ps, moves, now), 20);
 });
+
+test('el QR de la etiqueta abre la app en el producto y la cámara se queda con el código', async () => {
+ const { scanUrl, codeFromScan, normalizeCode, SAMPLE } = await import('../src/inventario-logic.ts');
+ const url = scanUrl('https://tienda.mx', 'GR-HUEVO');
+ assert.equal(url, 'https://tienda.mx/proyectos/inventario/app?c=GR-HUEVO');
+ assert.equal(normalizeCode(codeFromScan(url)), 'GR-HUEVO');
+ assert.equal(codeFromScan('7501000000012'), '7501000000012');
+ assert.equal(codeFromScan(scanUrl('https://x', 'A B&C')), 'A B&C');
+ // Productos de abarrotes y a granel, sin códigos repetidos.
+ assert.equal(SAMPLE.length, 27);
+ assert.equal(new Set(SAMPLE.map(p => p.code)).size, SAMPLE.length);
+});

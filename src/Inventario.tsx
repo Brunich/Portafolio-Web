@@ -1,15 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Barcode, Camera, CameraSlash, ImageSquare, Plus, Minus, ListChecks, Printer, WhatsappLogo, DownloadSimple, ArrowCounterClockwise, MagnifyingGlass, Trash, WarningCircle, UploadSimple, CheckCircle } from '@phosphor-icons/react';
-import { SAMPLE, codeKind, importCatalog, labelSvg, normalizeCode, printable, shopping, soldToday, stockValue } from './inventario-logic';
+import { Barcode, Camera, CameraSlash, ImageSquare, Plus, Minus, ListChecks, Printer, WhatsappLogo, DownloadSimple, ArrowCounterClockwise, MagnifyingGlass, Trash, WarningCircle, UploadSimple, CheckCircle, X } from '@phosphor-icons/react';
+import qrcode from 'qrcode-generator';
+import { SAMPLE, codeFromScan, scanUrl, codeKind, importCatalog, labelSvg, normalizeCode, printable, shopping, soldToday, stockValue } from './inventario-logic';
 import { readTable, TABLE_ACCEPT } from './read-file';
 import type { Move, Mode, Product } from './inventario-logic';
 import './inventario.css';
 
 // Inventario con la cámara del celular: cada código escaneado suma, resta o se cuenta.
 // Todo se guarda en este navegador; la lista de compras sale sola de lo que está bajo el mínimo.
-const KEY = 'bruno-inventario-v1';
+// v2: la tiendita trae más productos y lo de granel; lo guardado con la lista corta se reinicia.
+const KEY = 'bruno-inventario-v2';
 type Store = { products: Product[]; moves: Move[] };
 const load = (): Store => { try { const s = JSON.parse(localStorage.getItem(KEY) ?? ''); if (Array.isArray(s.products)) { const known = new Map(SAMPLE.map(p => [p.code, p.price])); return { ...s, products: s.products.map((p: Product) => p.price === undefined && known.has(p.code) ? { ...p, price: known.get(p.code) } : p) }; } } catch { /* tienda de ejemplo */ } return { products: SAMPLE, moves: [] }; };
+
+// QR en SVG para la etiqueta y para el detalle de cada producto.
+const qrSvg = (text: string) => { const qr = qrcode(0, 'M'); qr.addData(text); qr.make(); return qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true }); };
+const fromLink = () => { try { const c = new URLSearchParams(location.search).get('c'); return c ? normalizeCode(c) : null; } catch { return null; } };
 
 export default function Inventario({ lang }: { lang: 'es' | 'en' }) {
  const es = lang === 'es', t = (a: string, b: string) => es ? a : b;
@@ -27,12 +33,21 @@ export default function Inventario({ lang }: { lang: 'es' | 'en' }) {
  const [open, setOpen] = useState<string | null>(null);
  const [removed, setRemoved] = useState<{ p: Product; at: number } | null>(null);
  const sheet = useRef<HTMLElement>(null);
+ // Llegaste por el QR de una etiqueta: el producto queda arriba, listo para vender o surtir.
+ const [picked, setPicked] = useState<string | null>(fromLink);
+ const pickRef = useRef<HTMLElement>(null);
  const video = useRef<HTMLVideoElement>(null);
  const stopCam = useRef<(() => void) | null>(null);
  const last = useRef({ code: '', at: 0 });
  const modeRef = useRef(mode); modeRef.current = mode;
  useEffect(() => { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch { /* sin espacio */ } }, [store]);
  useEffect(() => () => stopCam.current?.(), []);
+ useEffect(() => {
+  if (!picked) return;
+  history.replaceState(null, '', location.pathname); // al recargar no se vuelve a abrir
+  if (!store.products.some(p => p.code === picked)) { setUnknown(picked); setPicked(null); return; }
+  pickRef.current?.scrollIntoView({ block: 'center' });
+ }, []);
 
  const low = useMemo(() => shopping(store.products), [store.products]);
  const units = store.products.reduce((s, p) => s + p.stock, 0);
@@ -52,14 +67,14 @@ export default function Inventario({ lang }: { lang: 'es' | 'en' }) {
  const counted = store.products.filter(p => p.counted !== undefined);
  const diffs = counted.filter(p => p.counted !== p.stock);
 
- function apply(raw: string) {
-  const code = normalizeCode(raw);
+ function apply(raw: string, as?: Mode) {
+  const code = normalizeCode(codeFromScan(raw));
   if (!code) return;
   const now = Date.now();
   if (code === last.current.code && now - last.current.at < 1500) return; // la cámara lee el mismo código varias veces seguidas
   last.current = { code, at: now };
   navigator.vibrate?.(60);
-  const m = modeRef.current;
+  const m = as ?? modeRef.current;
   setStore(s => {
    const p = s.products.find(x => x.code === code);
    if (!p) { setUnknown(code); setFlash({ code, text: t('Código nuevo: ¿qué producto es?', 'New code: which product is it?'), ok: false, n: now }); return s; }
@@ -104,9 +119,24 @@ export default function Inventario({ lang }: { lang: 'es' | 'en' }) {
  // Borrar con red: el producto se puede recuperar mientras el aviso siga a la vista.
  function remove(p: Product) { setStore(s => ({ ...s, products: s.products.filter(x => x.code !== p.code) })); setRemoved({ p, at: Date.now() }); setOpen(null); }
  function undo() { if (!removed) return; const p = removed.p; setStore(s => s.products.some(x => x.code === p.code) ? s : { ...s, products: [...s.products, p] }); setRemoved(null); }
+ const pickedP = picked ? store.products.find(p => p.code === picked) : undefined;
+ const quick = (m: Mode) => { if (!pickedP) return; last.current = { code: '', at: 0 }; apply(pickedP.code, m); };
  function showLabels() { setLabels(true); setTimeout(() => sheet.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60); }
 
  return <div className="inv">
+  {pickedP && <section className="inv-picked" ref={pickRef} aria-label={t('Producto escaneado', 'Scanned product')}>
+   <div className="inv-picked-name"><small>{t('Escaneaste', 'You scanned')}</small><strong>{pickedP.name}</strong><span>{t(`Quedan ${pickedP.stock}`, `${pickedP.stock} left`)}{pickedP.price ? ` · ${money(pickedP.price)}` : ''}</span></div>
+   <div className="inv-picked-actions">
+    <button className="m-out" onClick={() => quick('out')}><Minus size={18} weight="bold"/>{t('Vendí 1', 'Sold 1')}</button>
+    <button className="m-in" onClick={() => quick('in')}><Plus size={18} weight="bold"/>{t('Llegó 1', 'Got 1 in')}</button>
+    <button className="inv-picked-close" aria-label={t('Cerrar', 'Close')} onClick={() => setPicked(null)}><X size={18}/></button>
+   </div>
+  </section>}
+  <ol className="inv-how" aria-label={t('Cómo se usa en la tienda', 'How the store uses it')}>
+   <li><b>1</b>{t('Imprime las etiquetas y pégalas en el anaquel. Lo de granel lleva su QR en el bote o junto a la báscula.', 'Print the labels for the shelf. Loose goods get their QR on the jar or next to the scale.')}</li>
+   <li><b>2</b>{t('Cuando llega el proveedor, modo Entrada y escaneas. Al cobrar, Venta. Con el QR basta la cámara normal del celular.', 'When the supplier arrives, Stock in and scan. When you charge, Sale. With the QR any phone camera works.')}</li>
+   <li><b>3</b>{t('En Resurtir sale lo que falta y se lo mandas al proveedor por WhatsApp.', 'Restock lists what is missing and sends it to the supplier on WhatsApp.')}</li>
+  </ol>
   <dl className="inv-kpis">
    <div><dt>{t('Productos', 'Products')}</dt><dd>{store.products.length}</dd></div>
    <div><dt>{t('Piezas en tienda', 'Units in store')}</dt><dd>{units}</dd></div>
@@ -135,7 +165,7 @@ export default function Inventario({ lang }: { lang: 'es' | 'en' }) {
      <input value={manual} placeholder={t('O escribe el código', 'Or type the code')} aria-label={t('Código de barras', 'Barcode')} onChange={e => setManual(e.target.value)}/>
      <button type="submit">{t('Aplicar', 'Apply')}</button>
     </form>
-    <p className="inv-hint">{t('¿Sin productos a la mano? ', 'No products at hand? ')}<button className="pl-link" onClick={showLabels}>{t('Abre las etiquetas de ejemplo', 'Open the sample labels')}</button>{t(' y apunta la cámara a la pantalla. Lee EAN-13, EAN-8, UPC-A y códigos internos (Code 128).', ' and point the camera at the screen. Reads EAN-13, EAN-8, UPC-A and internal codes (Code 128).')}</p>
+    <p className="inv-hint">{t('Para probarlo: ', 'To try it: ')}<button className="pl-link" onClick={showLabels}>{t('abre las etiquetas', 'open the labels')}</button>{t(' y escanea un QR con la cámara de tu celular, o apunta esta cámara a un código de barras. Lee EAN-13, EAN-8, UPC-A, códigos internos y QR.', ' and scan a QR with your phone camera, or point this camera at a barcode. Reads EAN-13, EAN-8, UPC-A, internal codes and QR.')}</p>
     {unknown && <form className="inv-new" onSubmit={addProduct}>
      <strong>{t('Producto nuevo', 'New product')} · <code>{unknown}</code><small> · {codeKind(unknown)}</small></strong>
      <input autoFocus value={newName} placeholder={t('Nombre del producto', 'Product name')} onChange={e => setNewName(e.target.value)}/>
@@ -167,6 +197,11 @@ export default function Inventario({ lang }: { lang: 'es' | 'en' }) {
       {isOpen && <div className="inv-detail">
        <label>{t('Nombre', 'Name')}<input value={p.name} maxLength={40} onChange={e => setField(p.code, { name: e.target.value })}/></label>
        <p className="inv-kind">{codeKind(p.code)}</p>
+       <div className="inv-code-big">
+        <div className="inv-qr" role="img" aria-label={t(`QR de ${p.name}`, `QR for ${p.name}`)} dangerouslySetInnerHTML={{ __html: qrSvg(scanUrl(location.origin, p.code)) }}/>
+        {printable(p.code) && <div className="inv-bc" dangerouslySetInnerHTML={{ __html: labelSvg(p) }}/>}
+        <p>{t('Escanéalo con la cámara de tu celular: se abre este producto para venderlo o surtirlo.', 'Scan it with your phone camera: it opens this product to sell or restock it.')}</p>
+       </div>
        {hist.length ? <ol className="inv-log">{hist.map(m => <li key={m.at + m.code + m.delta}><span className={m.delta > 0 ? 'up' : m.delta < 0 ? 'down' : ''}>{m.mode === 'count' ? (m.delta ? `${m.delta > 0 ? '+' : ''}${m.delta}` : '✓') : m.delta > 0 ? '+1' : '−1'}</span>{m.mode === 'in' ? t('Entrada', 'In') : m.mode === 'out' ? t('Venta', 'Sale') : t('Ajuste por conteo', 'Count adjustment')}<time>{new Date(m.at).toLocaleString(es ? 'es-MX' : 'en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</time></li>)}</ol> : <p className="inv-empty">{t('Sin movimientos todavía.', 'No moves yet.')}</p>}
        <button className="inv-delete" onClick={() => remove(p)}><Trash size={16}/>{t('Borrar producto', 'Delete product')}</button>
       </div>}
@@ -179,14 +214,14 @@ export default function Inventario({ lang }: { lang: 'es' | 'en' }) {
      <button onClick={csv}><DownloadSimple size={17}/>CSV</button>
      <input ref={catalog} type="file" accept={TABLE_ACCEPT} hidden onChange={e => { void loadCatalog(e.target.files?.[0]); e.target.value = ''; }}/>
      <button onClick={() => catalog.current?.click()}><UploadSimple size={17}/>{t('Importar catálogo', 'Import catalog')}</button>
-     <button onClick={() => { setStore({ products: SAMPLE, moves: [] }); setUnknown(null); }}><ArrowCounterClockwise size={17}/>{t('Tienda de ejemplo', 'Sample store')}</button>
+     <button onClick={() => { setStore({ products: SAMPLE, moves: [] }); setUnknown(null); }}><ArrowCounterClockwise size={17}/>{t('Volver a empezar', 'Start over')}</button>
     </div>
    </section>
   </div>
 
   {labels && <section className="inv-labels" ref={sheet}>
-   <div className="inv-row"><strong>{t('Etiquetas con código · recórtalas y pégalas en el anaquel', 'Barcode labels · cut them out for the shelf')}</strong><button className="dw-primary" onClick={() => window.print()}><Printer size={17}/>{t('Imprimir', 'Print')}</button></div>
-   <div className="inv-sheet">{store.products.filter(p => printable(p.code)).map(p => <figure key={p.code} dangerouslySetInnerHTML={{ __html: labelSvg(p) }}/>)}</div>
+   <div className="inv-row"><strong>{t('Etiquetas · recórtalas y pégalas en el anaquel; el QR se escanea con cualquier celular', 'Labels · cut them out for the shelf; the QR scans with any phone')}</strong><button className="dw-primary" onClick={() => window.print()}><Printer size={17}/>{t('Imprimir', 'Print')}</button></div>
+   <div className="inv-sheet">{store.products.map(p => <figure key={p.code}>{printable(p.code) ? <div className="inv-bc" dangerouslySetInnerHTML={{ __html: labelSvg(p) }}/> : <figcaption><strong>{p.name}</strong><code>{p.code}</code></figcaption>}<div className="inv-qr" dangerouslySetInnerHTML={{ __html: qrSvg(scanUrl(location.origin, p.code)) }}/></figure>)}</div>
   </section>}
  </div>;
 }
