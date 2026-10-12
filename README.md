@@ -20,7 +20,7 @@ Cada proyecto tiene su propia página con su estilo, y la app se abre aparte, en
 
 | Proyecto | Para qué sirve | Pruébalo | Código | APK |
 |---|---|---|---|---|
-| **NFC para negocios** | Tarjeta de sellos en el celular: el cliente acerca su teléfono a un chip, suma un sello y vuelve por su premio. El mismo chip abre el menú. | [Probar](https://bruno-portfolio-azure.vercel.app/proyectos/club-nfc/app) | [nfc-negocios](https://github.com/Brunich/nfc-negocios) | Pronto |
+| **NFC para negocios** | Tarjeta de sellos en el celular: el cliente acerca su teléfono a un chip, suma un sello y vuelve por su premio. El mismo chip abre el menú. | [Probar](https://bruno-portfolio-azure.vercel.app/proyectos/club-nfc/app) | [nfc-negocios](https://github.com/Brunich/nfc-negocios) | [Descargar](https://github.com/Brunich/Chip-NFC-Para-Empresas-Y-Negocios/releases/latest/download/nfc-negocios.apk) |
 | **Analizador de CSV** | Limpia un reporte en un clic: duplicados, fechas mezcladas, valores mal escritos y reglas rotas. Lo grafica y responde consultas SQL. | [Probar](https://bruno-portfolio-azure.vercel.app/proyectos/analizador-csv/app) | [analizador-csv](https://github.com/Brunich/analizador-csv) | — |
 | **Planta: consolidador y OEE** | Cruza producción, calidad y paros; marca las incoherencias y calcula el OEE de cada línea. Saca el reporte en Excel. | [Probar](https://bruno-portfolio-azure.vercel.app/proyectos/planta/app) | [planta-oee](https://github.com/Brunich/planta-oee) | — |
 | **Gráficas de control (SPC)** | Dice si la máquina se está desajustando antes de que salga pieza mala, con Cp y Cpk. **App de escritorio para Windows.** | [Probar](https://bruno-portfolio-azure.vercel.app/proyectos/graficas-de-control/app) · [Descargar](https://github.com/Brunich/graficas-de-control/releases/latest) | [graficas-de-control](https://github.com/Brunich/graficas-de-control) | — |
@@ -32,7 +32,7 @@ Cada proyecto tiene su propia página con su estilo, y la app se abre aparte, en
 | Proyecto | Qué será |
 |---|---|
 | **IA personalizada local sin APIs** | Atiende clientes y consulta la base interna con un modelo abierto instalado en el negocio: sin pagar por mensaje y sin que los datos salgan. [Ver la demo](https://bruno-portfolio-azure.vercel.app/proyectos/asistente-ia-local). |
-| **Apps Android nativas** | Ya están en Android La Casa del Ángel y Punto U. En otros proyectos todavía faltan: NFC para negocios, Inventario y Entrega de turno van en camino, con el lector NFC, la cámara y las notificaciones del teléfono. |
+| **Apps Android nativas** | Ya están en Android La Casa del Ángel, Punto U y NFC para negocios (graba y lee los chips con el lector del teléfono). Todavía faltan Inventario y Entrega de turno, con la cámara y las notificaciones del teléfono. |
 
 ## Otros códigos
 
