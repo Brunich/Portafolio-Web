@@ -140,5 +140,5 @@ section{scroll-margin-top:96px}
 @keyframes vibe-drift{to{scale:1.05;translate:-1.5% 0}}
 html[data-motion=paused] :is(.phones img,.vibe-shot){animation-play-state:paused}
 @media (prefers-reduced-motion:reduce){:is(.phones img,.vibe-shot){animation:none}}
-.client-shot .cap-phone{width:23%;border-width:5px}
+.client-shot .cap-phone{border-width:5px}
 .portrait picture{display:block}
