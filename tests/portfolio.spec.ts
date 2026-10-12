@@ -17,19 +17,20 @@ test('portfolio has working bilingual navigation, project pages and CV', async (
   await expect(page).toHaveURL(/\/proyectos\/punto-u$/);
   await expect(page.getByRole('heading',{level:1})).toHaveText('Punto U');
   await expect(page.getByRole('heading',{name:'Cómo funciona'})).toBeVisible();
-  await expect(page.locator('.how li')).toHaveCount(3);
-  await expect(page.locator('.case-phone iframe')).toHaveAttribute('src','https://punto-u-app.vercel.app');
-  await page.locator('.case-next a').click();
-  await expect(page).toHaveURL(/\/proyectos\/club-nfc$/);
+  await expect(page.locator('.ps-how li')).toHaveCount(3);
+  await page.locator('.ps-next').click();
+  await expect(page).toHaveURL(/\/proyectos\/la-casa-del-angel$/);
   expect((await request.get('/cv/Bruno-Salas-ES.pdf')).status()).toBe(200);
   expect((await request.get('/og.png')).status()).toBe(200);
 });
 
 test('mobile and desktop have no horizontal overflow or serious accessibility errors', async ({ page }) => {
-  test.setTimeout(180000);
+  test.setTimeout(360000);
+  // Sin animaciones: el contraste se mide en el estado final, no a media transición.
+  await page.emulateMedia({reducedMotion:'reduce'});
   for (const width of [1440,390]) {
     await page.setViewportSize({width,height:900});
-    for (const path of ['/','/proyectos/club-nfc','/proyectos/analizador-csv','/proyectos/entrega-de-turno','/sobre-mi','/proyectos/planta','/proyectos/inventario','/menu','/nfc']) {
+    for (const path of ['/','/proyectos/club-nfc','/proyectos/club-nfc/app','/proyectos/analizador-csv','/proyectos/analizador-csv/app','/proyectos/entrega-de-turno','/proyectos/la-casa-del-angel','/proyectos/graficas-de-control','/proyectos/asistente-ia-local','/proyectos/vibemap','/proyectos/punto-u','/sobre-mi','/proyectos/planta','/proyectos/inventario','/menu','/nfc']) {
       await page.goto(path,{waitUntil:'networkidle'});
       await expect(page.getByRole('heading',{level:1})).toBeVisible();
       expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth), `${path} @${width}`).toBe(true);
@@ -56,12 +57,12 @@ test('landing stays a summary: heavy demos live on their own pages', async ({pag
  await page.locator('.hs-pos0 .ha-nav').getByRole('button',{name:'Completo'}).click();
  await expect(page.locator('.hs-pos0 .ha-csv-full')).toBeVisible();
  await page.locator('.hs-pos0 .ha-nav').getByRole('link',{name:'Abrir'}).click();
- await expect(page).toHaveURL(/\/proyectos\/analizador-csv#demo$/);
+ await expect(page).toHaveURL(/\/proyectos\/analizador-csv\/app$/);
  await expect(page.locator('#demo')).toBeInViewport();
 });
 
 test('shift handover: an incident cannot be closed without evidence, and the handover lists what is open', async ({page,request})=>{
- await page.goto('/proyectos/entrega-de-turno');
+ await page.goto('/proyectos/entrega-de-turno/app');
  const board=page.locator('.sh');
  await board.getByRole('button',{name:'Nueva incidencia'}).click();
  await board.getByLabel('Lote').fill('4480');
@@ -118,7 +119,7 @@ test('3D style comparison responds to keyboard and style pairs',async({page})=>{
 });
 
 test('csv analyzer page: mind map, automatic fixes and second sample',async({page})=>{
- await page.goto('/proyectos/analizador-csv');
+ await page.goto('/proyectos/analizador-csv/app');
  // Lo primero que se ve al entrar a la demo es lo encontrado, arriba de la tabla; el mapa vive en «Columnas».
  const found=await page.locator('.cf').boundingBox(), table=await page.locator('.dw-tablewrap').boundingBox();
  expect(found!.y).toBeLessThan(table!.y);
@@ -142,7 +143,7 @@ test('csv analyzer page: mind map, automatic fixes and second sample',async({pag
 });
 
 test('customer club demo joins, stamps once per day and sends each message',async({page})=>{
- await page.goto('/proyectos/club-nfc');
+ await page.goto('/proyectos/club-nfc/app');
  const club=page.locator('main');
  const chip=club.getByRole('button',{name:/Apoyar el celular en el chip/});
  await chip.click();

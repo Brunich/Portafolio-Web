@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 test.beforeEach(async ({ page }) => { await page.addInitScript(() => sessionStorage.setItem('bruno-intro', '1')); });
 
 test('csv analyzer: charts from suggestions and SQL queries that can be charted', async ({ page }) => {
- await page.goto('/proyectos/analizador-csv');
+ await page.goto('/proyectos/analizador-csv/app');
  await page.getByRole('tab', { name: 'Graficar' }).click();
  await expect(page.locator('.ch-ideas button')).toHaveCount(4);
  await page.getByRole('button', { name: 'Dona' }).click();
@@ -25,7 +25,7 @@ test('csv analyzer: charts from suggestions and SQL queries that can be charted'
 });
 
 test('csv analyzer opens what Excel in Spanish saves: accents, broken rows and .xlsx', async ({ page }) => {
- await page.goto('/proyectos/analizador-csv');
+ await page.goto('/proyectos/analizador-csv/app');
  const input = page.locator('.dw-workbench input[type=file]').first();
  await input.setInputFiles({ name: 'excel.csv', mimeType: 'text/csv', buffer: Buffer.from('Línea;Estación;Piezas\r\nL1;Carrocería;120\r\nL2;Pintura\r\n\r\n', 'latin1') });
  await expect(page.locator('.dw-workbench th', { hasText: 'Estación' })).toBeVisible();
@@ -38,7 +38,7 @@ test('csv analyzer opens what Excel in Spanish saves: accents, broken rows and .
 });
 
 test('plant: three reports cross-check into exceptions and OEE per line', async ({ page }) => {
- await page.goto('/proyectos/planta');
+ await page.goto('/proyectos/planta/app');
  await expect(page.locator('.pl-line')).toHaveCount(3);
  await expect(page.locator('.pl-kpis div').nth(1).locator('dd')).toHaveText('9');
  await expect(page.locator('.pl-ex')).toContainText('lote 4482');
@@ -49,7 +49,7 @@ test('plant: three reports cross-check into exceptions and OEE per line', async 
 });
 
 test('inventory: typed codes move stock, unknown codes get registered, and a label photo is read', async ({ page }) => {
- await page.goto('/proyectos/inventario');
+ await page.goto('/proyectos/inventario/app');
  const agua = page.locator('.inv-products li', { hasText: 'Agua natural' });
  await expect(agua.locator('.inv-stock b')).toHaveText('34');
  await page.getByLabel('Código de barras').fill('7501000000012');
@@ -104,23 +104,20 @@ test('stamp card with PIN: a wrong PIN does not redeem, the right one does', asy
  await expect(page.locator('.st-count')).toHaveText('0/3');
 });
 
-test('on a phone every project header is one column, the title fits and the floating button waits until you scroll up', async ({ page }) => {
+test('on a phone every project page is one column, the title fits and nothing overflows', async ({ page }) => {
+ test.setTimeout(90000);
  await page.setViewportSize({ width: 390, height: 844 });
- for (const slug of ['club-nfc', 'analizador-csv', 'planta', 'graficas-de-control', 'inventario', 'entrega-de-turno', 'asistente-ia-local', 'vibemap', 'punto-u']) {
+ for (const slug of ['club-nfc', 'analizador-csv', 'planta', 'graficas-de-control', 'inventario', 'entrega-de-turno', 'asistente-ia-local', 'vibemap', 'punto-u', 'la-casa-del-angel']) {
   await page.goto(`/proyectos/${slug}`);
-  const head = await page.locator('.case-head').evaluate(e => ({ cols: getComputedStyle(e).gridTemplateColumns.split(' ').length, h1: e.querySelector('h1')!.getBoundingClientRect().right, doc: document.documentElement.scrollWidth }));
+  const head = await page.locator('.ps-hero').evaluate(e => ({ cols: getComputedStyle(e).gridTemplateColumns.split(' ').length, h1: e.querySelector('h1')!.getBoundingClientRect().right, doc: document.documentElement.scrollWidth }));
   expect(head.cols, slug).toBe(1);
   expect(head.h1, slug).toBeLessThanOrEqual(390);
   expect(head.doc, slug).toBe(390);
  }
- await expect(page.locator('.zone-nav')).toHaveClass(/is-hidden/);
- await page.mouse.wheel(0, 1200); await page.waitForTimeout(300);
- await page.mouse.wheel(0, -400);
- await expect(page.locator('.zone-nav')).not.toHaveClass(/is-hidden/);
 });
 
 test('an Excel workbook with several sheets opens the one with data and lets you switch', async ({ page }) => {
- await page.goto('/proyectos/analizador-csv');
+ await page.goto('/proyectos/analizador-csv/app');
  const XLSX = await import('xlsx');
  const wb = XLSX.utils.book_new();
  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Reporte semanal']]), 'Portada');
@@ -137,7 +134,7 @@ test('an Excel workbook with several sheets opens the one with data and lets you
 });
 
 test('plant: a report with odd column names gets mapped by hand, and exceptions can be ticked off', async ({ page }) => {
- await page.goto('/proyectos/planta');
+ await page.goto('/proyectos/planta/app');
  const csv = 'Fecha de producción,Turno,Línea,No. de orden,Meta,Piezas OK,Tiempo disponible,Ciclo\n2026-03-09,Matutino,L1,4411,400,392,450,60\n2026-03-09,Matutino,L2,4412,330,318,450,72';
  await page.locator('.pl-file').first().locator('input[type=file]').setInputFiles({ name: 'mi_reporte.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
  const box = page.locator('.pl-file').first();
@@ -154,7 +151,7 @@ test('plant: a report with odd column names gets mapped by hand, and exceptions 
 });
 
 test('inventory: EAN-8 labels are read from a photo, internal codes keep letters, and search, delete and undo work', async ({ page }) => {
- await page.goto('/proyectos/inventario');
+ await page.goto('/proyectos/inventario/app');
  const add = async (code: string, name: string) => {
   await page.getByLabel('Código de barras').fill(code);
   await page.getByRole('button', { name: 'Aplicar' }).click();
@@ -191,7 +188,7 @@ test('shift handover on a touch phone: a card goes from open to closed with taps
  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
  const page = await ctx.newPage();
  await page.addInitScript(() => sessionStorage.setItem('bruno-intro', '1'));
- await page.goto('/proyectos/entrega-de-turno');
+ await page.goto('/proyectos/entrega-de-turno/app');
  const board = page.locator('.sh');
  // En celular se ve una columna a la vez.
  await expect(board.locator('.sh-col.c-doing')).toBeHidden();
@@ -215,7 +212,7 @@ test('shift handover with 60 incidents: filters by line and severity, and long c
   const items = Array.from({ length: 60 }, (_, n) => ({ id: `INC-${300 + n}`, line: `L${1 + n % 3}`, lot: String(4400 + n), defect: `Defecto ${n}`, sev: sev[Math.floor(n / 3) % 3], status: n % 4 === 0 ? 'closed' : n % 4 === 1 ? 'doing' : 'open', owner: n % 4 < 2 ? 'R. Garza' : '', action: '', photo: n % 4 === 0 ? 'demo' : '', at: now - (n % 20) * H / 4 }));
   localStorage.setItem('bruno-turno-v3', JSON.stringify({ items, log: [] }));
  });
- await page.goto('/proyectos/entrega-de-turno');
+ await page.goto('/proyectos/entrega-de-turno/app');
  const open = page.locator('.sh-col.c-open');
  await expect(open.locator('h3 span')).toHaveText('30');
  await expect(open.locator('.sh-card')).toHaveCount(6);
@@ -227,20 +224,23 @@ test('shift handover with 60 incidents: filters by line and severity, and long c
  await expect(open.locator('.sh-card')).toHaveCount(4);
 });
 
-test('a live demo whose server is down shows real screenshots and says why, instead of an empty app', async ({ page }) => {
- await page.route('**/*supabase.co/**', r => r.abort());
- await page.route('https://vibemap-brunich.vercel.app/**', r => r.abort());
- await page.goto('/proyectos/punto-u');
- await expect(page.locator('.live-note')).toContainText('no está respondiendo');
- await expect(page.locator('.live-shots img')).toHaveCount(2);
- await expect(page.locator('.demo-punto-copy h2')).toHaveText('Así se ve la app.');
- await page.goto('/proyectos/vibemap');
- await expect(page.locator('.live-shots img')).toHaveCount(1);
- await expect(page.locator('.case-browser iframe')).toHaveCount(0);
+test('projects with their own site open it directly, and the rest open their app on its own page', async ({ page }) => {
+ for (const [slug, url] of [['punto-u', 'https://punto-u-app.vercel.app'], ['vibemap', 'https://vibemap-brunich.vercel.app'], ['la-casa-del-angel', 'https://la-casa-del-angel.vercel.app']]) {
+  await page.goto(`/proyectos/${slug}`);
+  await expect(page.locator('.ps-hero .ps-btn')).toHaveAttribute('href', url);
+  await expect(page.locator('iframe')).toHaveCount(0);
+ }
+ await page.goto('/proyectos/planta');
+ await expect(page.locator('#demo')).toHaveCount(0);
+ await page.locator('.ps-hero .ps-btn').click();
+ await expect(page).toHaveURL(/\/proyectos\/planta\/app$/);
+ await expect(page.locator('#demo')).toBeVisible();
+ await page.getByRole('link', { name: 'Presentación' }).click();
+ await expect(page).toHaveURL(/\/proyectos\/planta$/);
 });
 
 test('csv analyzer compares two snapshots of the same report and lists what changed', async ({ page }) => {
- await page.goto('/proyectos/analizador-csv');
+ await page.goto('/proyectos/analizador-csv/app');
  const input = page.locator('.dw-workbench input[type=file]').first();
  await input.setInputFiles({ name: 'ayer.csv', mimeType: 'text/csv', buffer: Buffer.from('folio,estatus,piezas\nQ-1,Abierta,120\nQ-2,Abierta,98\nQ-3,Cerrada,80\nQ-4,Abierta,77') });
  await page.getByRole('tab', { name: 'Comparar' }).click();
@@ -256,7 +256,7 @@ test('csv analyzer compares two snapshots of the same report and lists what chan
 });
 
 test('control charts: the sample flags the tool wear, and a plain column of readings becomes an individuals chart', async ({ page }) => {
- await page.goto('/proyectos/graficas-de-control');
+ await page.goto('/proyectos/graficas-de-control/app');
  await expect(page.locator('.spc-verdict')).toHaveClass(/bad/);
  await expect(page.locator('.spc-verdict')).toContainText('Fuera de control');
  await expect(page.locator('.spc-signals')).toContainText('Regla 1');
@@ -272,7 +272,7 @@ test('control charts: the sample flags the tool wear, and a plain column of read
 });
 
 test('local AI assistant (in development): answers with a source, escalates the unknown, and the database is read-only', async ({ page }) => {
- await page.goto('/proyectos/asistente-ia-local');
+ await page.goto('/proyectos/asistente-ia-local/app');
  await expect(page.locator('.ag-dev')).toContainText('En desarrollo');
  await page.getByLabel('Mensaje').fill('¿Cuánto cuesta el rodamiento 6205?');
  await page.getByRole('button', { name: 'Enviar' }).click();

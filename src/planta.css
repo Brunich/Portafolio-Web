@@ -86,7 +86,7 @@
 @keyframes pl-in{from{transform:translateY(12px)}}
 @keyframes pl-grow{from{transform:scaleX(0)}}
 html[data-motion=paused] .pl *{animation:none!important}
-@media(max-width:900px){.pl-files,.pl-split{grid-template-columns:1fr}.pl-summary{grid-template-columns:1fr;justify-items:center}.pl-kpis{grid-template-columns:repeat(2,1fr);width:100%}}
+@media(max-width:900px){.pl-files,.pl-split{grid-template-columns:minmax(0,1fr)}.pl-summary{grid-template-columns:1fr;justify-items:center}.pl-kpis{grid-template-columns:repeat(2,1fr);width:100%}}
 
 /* Vista previa en la lista de proyectos: tres anillos de OEE */
 .plp{height:100%;display:grid;align-content:center;gap:18px;padding:clamp(20px,5%,44px);background:radial-gradient(ellipse 80% 70% at 50% 20%,#2a2440,#120e1d 72%)}

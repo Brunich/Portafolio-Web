@@ -4,9 +4,17 @@
 
 **En vivo: https://bruno-portfolio-azure.vercel.app**
 
-Estudiante de Ingeniería en Software en la UANL (2023–2028). Hago herramientas para negocios y manufactura: todas funcionan y se prueban en el portafolio, y cada una tiene su propio repositorio.
+Estudiante de Ingeniería en Software en la UANL (2023–2028). He dado soporte a sistemas, diseñado y puesto en soporte páginas web de pequeñas empresas y dado tutorías de programación a compañeros de la universidad.
+
+Cada proyecto tiene su propia página con su estilo, y la app se abre aparte, en su propia pantalla.
 
 ![Portada del portafolio](public/og.png)
+
+## Trabajos para clientes
+
+| Proyecto | Qué es | Enlaces |
+|---|---|---|
+| **La Casa del Ángel** | Residencia para adultos mayores en Celaya: su página, un portal de cuidados para el personal y las familias, y app para Android. La diseñé, la publiqué y le doy soporte. | [Sitio](https://la-casa-del-angel.vercel.app) · [Presentación](https://bruno-portfolio-azure.vercel.app/proyectos/la-casa-del-angel) |
 
 ## Proyectos para negocios y manufactura
 
@@ -23,9 +31,8 @@ Estudiante de Ingeniería en Software en la UANL (2023–2028). Hago herramienta
 
 | Proyecto | Qué será |
 |---|---|
-| **Asistente de IA local** | Atiende clientes y consulta la base interna con un modelo abierto instalado en el negocio: sin pagar por mensaje y sin que los datos salgan. [Ver la demo](https://bruno-portfolio-azure.vercel.app/proyectos/asistente-ia-local). |
-| **Portal de empleados** | Cada empleado con su cuenta y su foto: peticiones, documentos y avisos, con bloqueo por intentos fallidos, segundo paso y aviso de privacidad. |
-| **Apps Android nativas** | NFC para negocios, Inventario y Entrega de turno como apps de Android, con el lector NFC, la cámara y las notificaciones del teléfono. |
+| **IA personalizada local sin APIs** | Atiende clientes y consulta la base interna con un modelo abierto instalado en el negocio: sin pagar por mensaje y sin que los datos salgan. [Ver la demo](https://bruno-portfolio-azure.vercel.app/proyectos/asistente-ia-local). |
+| **Apps Android nativas** | Ya están en Android La Casa del Ángel y Punto U. En otros proyectos todavía faltan: NFC para negocios, Inventario y Entrega de turno van en camino, con el lector NFC, la cámara y las notificaciones del teléfono. |
 
 ## Otros códigos
 
@@ -47,3 +54,7 @@ npm test             # recorridos y accesibilidad con Playwright + axe
 ```
 
 Los datos de ejemplo son inventados y de empresas ficticias. La procedencia de cada imagen está en [`public/media/SOURCES.md`](public/media/SOURCES.md).
+
+## In English
+
+Portfolio of Bruno Salas, Software Engineering student at UANL. It includes client work (La Casa del Ángel, a senior residence website and care portal with an Android app) and tools for businesses and manufacturing. Each project has its own styled page, and its app opens on a separate screen.

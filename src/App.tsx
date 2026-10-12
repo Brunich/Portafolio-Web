@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { flushSync } from 'react-dom';
-import { ArrowUpRight, ArrowDown, ArrowLeft, ArrowRight, DownloadSimple, GithubLogo, EnvelopeSimple, LinkedinLogo, WhatsappLogo, Pause, Play, AndroidLogo, UserCircle, Globe, MusicNotes } from '@phosphor-icons/react';
+import { ArrowUpRight, ArrowDown, ArrowLeft, ArrowRight, DownloadSimple, GithubLogo, EnvelopeSimple, LinkedinLogo, WhatsappLogo, Pause, Play, AndroidLogo, MusicNotes } from '@phosphor-icons/react';
 import { copy, certificates } from './content';
 import type { Lang } from './content';
 import { professional } from './professional-content';
@@ -34,12 +34,16 @@ import { usePaging, glide, glideTo, zoneList } from './paging';
 import { StampPage, NfcSetup, Qr, bizLink, bizFrom } from './Stamp';
 import './brand.css';
 import './identity.css';
+import { ProjectSite, ProjectApp } from './ProjectSite';
+import type { Native } from './ProjectSite';
 
-const PROJECT_ORDER = ['club', 'csv', 'planta', 'spc', 'inventario', 'turno', 'agente', 'vibe', 'punto'];
+const PROJECT_ORDER = ['club', 'csv', 'planta', 'spc', 'inventario', 'turno', 'agente', 'vibe', 'punto', 'casa'];
 // En la portada van al frente los que resuelven un problema de negocio; el hackathon y la app de estudiantes, abajo.
 const OTHER = ['spc', 'vibe', 'punto'];
 // Lo que todavía no está listo va en su propio apartado, para que la lista principal sea sólo lo que ya funciona.
 const DEV = ['agente'];
+// Trabajos hechos para un cliente: van debajo del perfil, no entre las demos.
+const CLIENT = ['casa'];
 type Project = ReturnType<typeof professional>['projects'][number];
 const unfinished = (status: string) => /^(Funcional|Working|Publicad[oa]|Published)$/.test(status) ? null : <em>{status}</em>;
 const external = (url: string) => url.startsWith('http') ? { target: '_blank', rel: 'noreferrer' } : {};
@@ -51,8 +55,8 @@ function route() {
  if (path === '/nfc') return { page: 'nfc' as const };
  if (path === '/menu') return { page: 'menu' as const };
  if (path === '/sobre-mi') return { page: 'about' as const };
- const m = /^\/proyectos\/([a-z0-9-]+)$/.exec(path);
- return m ? { page: 'project' as const, slug: m[1] } : { page: 'home' as const };
+ const m = /^\/proyectos\/([a-z0-9-]+)(\/app)?$/.exec(path);
+ return m ? { page: 'project' as const, slug: m[1], app: !!m[2] } : { page: 'home' as const };
 }
 
 // Los enlaces internos no recargan: pasan por el telón y cambian la ruta con el historial.
@@ -95,6 +99,13 @@ export default function App() {
  const at = (id: string) => home ? `#${id}` : `/#${id}`;
  if (r.page === 'sello') return <StampPage lang={lang}/>;
  if (r.page === 'menu') return <Suspense fallback={null}><MenuPage lang={lang}/></Suspense>;
+ if (project) {
+  const next = projects[(projects.indexOf(project) + 1) % projects.length];
+  const own = HAS_APP.includes(project.id);
+  if (r.page === 'project' && r.app && own) return <ProjectApp lang={lang} setLang={setLang} project={project}><Suspense fallback={<p className="case-loading">{es ? 'Cargando…' : 'Loading…'}</p>}><Demo lang={lang} project={project}/></Suspense></ProjectApp>;
+  return <ProjectSite lang={lang} setLang={setLang} project={project} next={next} appHref={own ? `/proyectos/${project.slug}/app` : project.link} native={NATIVE[project.id]} repo={REPO[project.id]}
+   visual={project.id === 'club' ? <NfcTap lang={lang}/> : <Media lang={lang} project={project}/>}/>;
+ }
 
  return <>
   <a className="skip-link" href="#main">{c.skip}</a>
@@ -108,8 +119,8 @@ export default function App() {
     <a className="topbar-cta" href={at('contact')}>{c.contact}</a>
    </div>
   </div></header>
-  {r.page === 'about' ? <Hobbies lang={lang}/> : r.page === 'nfc' ? <NfcPage lang={lang}/> : project ? <ProjectPage lang={lang} project={project} projects={projects}/> : <Home lang={lang} paused={paused} projects={projects}/>}
-  <ZoneNav lang={lang} routeKey={`${r.page}:${project?.id ?? ''}`}/>
+  {r.page === 'about' ? <Hobbies lang={lang}/> : r.page === 'nfc' ? <NfcPage lang={lang}/> : <Home lang={lang} paused={paused} projects={projects}/>}
+  <ZoneNav lang={lang} routeKey={r.page}/>
   {pg.paged && <ZoneDots labels={pg.labels} current={pg.current}/>}
   <footer className="site-footer wrap" aria-label={es ? 'Pie del portafolio' : 'Portfolio footer'}>© {new Date().getFullYear()} Bruno Salas Rodríguez <span>{c.location}</span></footer>
  </>;
@@ -160,7 +171,7 @@ function HeroArt() {
 
 function Home({ lang, paused, projects }: { lang: Lang; paused: boolean; projects: Project[] }) {
  const c = copy[lang], p = professional(lang), es = lang === 'es';
- const featured = projects.filter(x => !OTHER.includes(x.id) && !DEV.includes(x.id)), others = projects.filter(x => OTHER.includes(x.id)), dev = projects.filter(x => DEV.includes(x.id));
+ const featured = projects.filter(x => !OTHER.includes(x.id) && !DEV.includes(x.id) && !CLIENT.includes(x.id)), others = projects.filter(x => OTHER.includes(x.id)), dev = projects.filter(x => DEV.includes(x.id)), works = projects.filter(x => CLIENT.includes(x.id));
  const cv = es ? '/cv/Bruno-Salas-ES.pdf' : '/cv/Bruno-Salas-EN.pdf';
  return <main id="main">
   <section id="home" className="hero wrap" data-zone={es ? 'Inicio' : 'Home'}><HeroArt/><div className="hero-copy"><h1>{p.title}<em>{p.accent}</em></h1><p>{p.intro}</p><div className="hero-actions"><a className="button primary" href="#projects">{c.view}<ArrowDown size={19}/></a><a className="button secondary" href={cv} download>{es ? 'Descargar CV' : 'Download CV'}<DownloadSimple size={19}/></a></div><p className="hero-facts">{es ? 'Monterrey, N. L. · UANL 2023–2028 · Español, inglés y portugués' : 'Monterrey, Mexico · UANL 2023–2028 · Spanish, English & Portuguese'}</p></div><div className="hero-workbench"><HeroShowcase lang={lang} paused={paused}/></div></section>
@@ -170,8 +181,7 @@ function Home({ lang, paused, projects }: { lang: Lang; paused: boolean; project
    <div className="others is-dev" data-zone={es ? 'En desarrollo' : 'In development'}>
     <div className="others-head"><span className="kicker">{es ? 'En desarrollo' : 'In development'}</span><p>{es ? 'Lo que estoy construyendo ahora.' : 'What I am building now.'}</p></div>
     <div className="others-grid">{dev.map(x => <a key={x.id} className={`other-card project-${x.id}`} data-c href={`/proyectos/${x.slug}`} data-title={x.title}><span className={`other-media media-${x.id}`}><Media lang={lang} project={x}/></span><span className="other-copy"><em>{x.kind}</em><strong>{x.title}</strong><span>{x.pitch}</span></span><ArrowUpRight size={20}/></a>)}
-     <div className="other-card other-plain project-portal"><span className="other-media other-icon" aria-hidden="true"><UserCircle size={72} weight="duotone"/><small>{es ? 'Cuentas · peticiones · documentos' : 'Accounts · requests · documents'}</small></span><span className="other-copy"><em>{es ? 'Web · RR. HH.' : 'Web · HR'}</em><strong>{es ? 'Portal de empleados' : 'Employee portal'}</strong><span>{es ? 'Cuenta y foto por empleado, peticiones y documentos, con acceso seguro.' : 'An account and photo per employee, requests and documents, with secure sign-in.'}</span></span></div>
-     <div className="other-card other-plain project-android"><span className="other-media other-icon" aria-hidden="true"><AndroidLogo size={72} weight="duotone"/><small>NFC · CameraX · Compose</small></span><span className="other-copy"><em>Android · Kotlin</em><strong>{es ? 'Apps Android nativas' : 'Native Android apps'}</strong><span>{es ? 'NFC, Inventario y Entrega de turno, con el lector NFC y la cámara del teléfono.' : 'NFC, Inventory and Shift handover, with the phone’s NFC reader and camera.'}</span></span></div></div>
+     <div className="other-card other-plain project-android"><span className="other-media other-icon" aria-hidden="true"><AndroidLogo size={72} weight="duotone"/><small>NFC · {es ? 'cámara · avisos' : 'camera · alerts'}</small></span><span className="other-copy"><em>Android</em><strong>{es ? 'Apps Android nativas' : 'Native Android apps'}</strong><span>{es ? 'Ya en Android: La Casa del Ángel y Punto U. En otros proyectos todavía faltan: NFC para negocios, Inventario y Entrega de turno van en camino.' : 'Already on Android: La Casa del Ángel and Punto U. Other projects still need theirs: NFC for businesses, Inventory and Shift handover are on the way.'}</span></span></div></div>
    </div>
    <div className="others" data-zone={es ? 'Otros códigos' : 'Other code'}>
     <div className="others-head"><span className="kicker">{es ? 'Otros códigos' : 'Other code'}</span><p>{es ? 'Extras: gráficas de control, un hackathon, una app para estudiantes y más en mi GitHub.' : 'Extras: control charts, a hackathon, a student app and more on my GitHub.'}</p></div>
@@ -182,9 +192,13 @@ function Home({ lang, paused, projects }: { lang: Lang; paused: boolean; project
   <section id="about" className="about-section section-space"><div className="wrap">
    <div className="about-grid" data-zone="CV">
     <figure className="portrait"><img src="/media/bruno-retrato.jpg" alt="Bruno Salas" width="560" height="700" loading="lazy"/><figcaption><strong>Bruno Salas</strong><span>Monterrey, N. L.</span></figcaption></figure>
-    <div className="about-copy"><span className="kicker">02 · CV</span><h2>{p.aboutTitle}</h2><p>{p.about}</p><p>{p.about2}</p><a className="inline-link" href={cv} download>{es ? 'Descargar CV' : 'Download CV'}<DownloadSimple size={20}/></a>
-     <dl className="profile-points">{p.profilePoints.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></div>
+    <div className="about-copy"><span className="kicker">02 · CV</span><h2>{p.aboutTitle}</h2><p>{p.about}</p><a className="inline-link" href={cv} download>{es ? 'Descargar CV' : 'Download CV'}<DownloadSimple size={20}/></a></div>
    </div>
+   <div className="client-works" data-zone={es ? 'Trabajos' : 'Client work'}><h3>{p.worksTitle}</h3>{works.map(x => <article key={x.id} className="client-work">
+    <a className="client-shot" href={x.link} {...external(x.link)} aria-label={`${x.title} — ${x.action}`}><img src="/media/casa-angel-web.jpg" width="1440" height="900" alt="" loading="lazy"/></a>
+    <div className="client-copy"><em>{x.kind}</em><strong>{x.title}</strong><p>{es ? 'Residencia para adultos mayores en Celaya: su página y su portal de cuidados, con app para Android.' : 'A senior residence in Celaya: its website and care portal, with an Android app.'}</p>
+     <div className="client-links"><a className="button primary" href={x.link} {...external(x.link)}>{x.action}<ArrowUpRight size={18}/></a><a className="inline-link" href={`/proyectos/${x.slug}`} data-title={x.title}>{es ? 'Ver presentación' : 'See overview'}<ArrowRight size={18}/></a></div></div>
+   </article>)}</div>
    <div className="experience-grid" data-zone={es ? 'Experiencia' : 'Experience'}><div><h3>{c.timelineTitle}</h3>{c.experience.map(e => <div className="experience-row" key={e.year}><span className="year">{e.year}</span><div><h4>{e.role}</h4><span className="org">{e.org}</span><p>{e.text}</p></div></div>)}</div><div><h3>{c.learning}</h3>{certificates.map(cert => <a className="certificate" key={cert.title} href={cert.url} {...external(cert.url)}><div><h4>{cert.title}</h4><p>{cert.org}</p><span>{cert.year}</span></div><ArrowUpRight size={22}/></a>)}</div></div>
    <div className="skills tools-block" data-zone={es ? 'Herramientas que sé manejar' : 'Tools I work with'}><h3>{p.techTitle}</h3><div className="skills-grid">{p.skills.map(s => <div key={s.name}><h4>{s.name}</h4><p>{s.desc}</p><div className="tags">{s.tools.map(tool => <span key={tool}>{tool}</span>)}</div></div>)}</div><p className="languages-line">{c.languages}</p></div>
   </div></section>
@@ -204,6 +218,7 @@ function Media({ lang, project }: { lang: Lang; project: Project }) {
   case 'inventario': return <InventarioPreview lang={lang}/>;
   case 'spc': return <SpcPreview lang={lang}/>;
   case 'agente': return <AgentePreview lang={lang}/>;
+  case 'casa': return <div className="ps-shots"><img src="/media/casa-angel-web.jpg" width="1440" height="900" alt={es ? 'Página de La Casa del Ángel en computadora' : 'La Casa del Ángel website on desktop'} loading="lazy"/><img className="is-phone" src="/media/casa-angel-movil.jpg" width="780" height="1688" alt={es ? 'La misma página en el celular' : 'The same page on a phone'} loading="lazy"/></div>;
   case 'vibemap': return <img className="vibe-shot" src="/media/vibemap-mapa.webp" alt={lang === 'es' ? 'Mapa mental de VibeMap sobre el código de este portafolio' : 'VibeMap mind map of this portfolio’s code'} width="1210" height="350" loading="lazy"/>;
   default: return <div className="phones"><img src="/media/punto-u-mapa.webp" width="780" height="2000" alt={es ? 'Punto U: mapa del campus con misiones' : 'Punto U: campus map with missions'} loading="lazy"/><img src="/media/punto-u.webp" width="600" height="1300" alt={es ? 'Punto U: crear perfil' : 'Punto U: create profile'} loading="lazy"/></div>;
  }
@@ -220,30 +235,10 @@ function ProjectRow({ lang, project, flip, n, of }: { lang: Lang; project: Proje
  </article>;
 }
 
-function ProjectPage({ lang, project, projects }: { lang: Lang; project: Project; projects: Project[] }) {
+// La demo de cada proyecto, en su propia pantalla (/proyectos/…/app).
+function Demo({ lang, project }: { lang: Lang; project: Project }) {
  const es = lang === 'es';
- const next = projects[(projects.indexOf(project) + 1) % projects.length];
- useEffect(() => { const d = location.hash && document.getElementById(location.hash.slice(1)); if (d) d.scrollIntoView(); else scrollTo(0, 0); }, [project.id]);
- return <main id="main" data-c className={`case case-${project.id} project-${project.id}`} aria-label={project.title}>
-  <div className="wrap">
-   <a className="case-back" href="/#projects" data-title={es ? 'Proyectos' : 'Projects'}><ArrowLeft size={18}/>{es ? 'Todos los proyectos' : 'All projects'}</a>
-   <header className="case-head" data-zone={project.title}>
-    <div><span className="project-kind">{project.kind}{unfinished(project.status)}</span><h1>{project.title}</h1><p className="pitch">{project.pitch}</p><p>{project.desc}</p>
-     {project.metrics.length > 0 && <dl className="project-metrics case-metrics">{project.metrics.map(([value, label]) => <div key={value + label}><dt>{value}</dt><dd>{label}</dd></div>)}</dl>}
-     <div className="tags">{project.tags.map(t => <span key={t}>{t}</span>)}</div>
-     {!OTHER.includes(project.id) || project.id === 'spc' ? <p className="web-note"><Globe size={17} aria-hidden="true"/>{es ? 'Versión web: adaptada para funcionar en el navegador.' : 'Web version: adapted to run in the browser.'}</p> : null}
-     {project.link.startsWith('http') && <a className="button primary case-action" href={project.link} {...external(project.link)}>{project.action}<ArrowUpRight size={18}/></a>}
-     {NATIVE[project.id] && (NATIVE[project.id].href
-      ? <a className="native-note" href={NATIVE[project.id].href} {...external('https://github.com')}><strong>{es ? NATIVE[project.id].es : NATIVE[project.id].en}</strong><span>{es ? 'Descargar' : 'Download'}<ArrowUpRight size={14}/></span></a>
-      : <p className="native-note is-dev"><strong>{es ? NATIVE[project.id].es : NATIVE[project.id].en}</strong><span>{es ? 'En desarrollo' : 'In development'}</span></p>)}
-     {REPO[project.id] && <a className="inline-link case-code" href={`https://github.com/Brunich/${REPO[project.id]}`} {...external('https://github.com')}><GithubLogo size={20}/>{es ? 'Código en GitHub' : 'Code on GitHub'}<ArrowUpRight size={16}/></a>}
-    </div>
-    <div className={`case-visual media-${project.id}`} aria-hidden="true">{project.id === 'club' ? <NfcTap lang={lang}/> : <Media lang={lang} project={project}/>}</div>
-   </header>
-   <section className="how" data-zone={es ? 'Cómo funciona' : 'How it works'} aria-label={es ? 'Cómo funciona' : 'How it works'}><h2>{es ? 'Cómo funciona' : 'How it works'}</h2><ol style={{ '--n': project.how.length } as React.CSSProperties}>{project.how.map(([title, text], i) => <li key={title}><span>{String(i + 1).padStart(2, '0')}</span><strong>{title}</strong><p>{text}</p></li>)}</ol></section>
-  </div>
-  <section id="demo" className="case-demo" data-zone={es ? 'Pruébalo' : 'Try it'} aria-label={es ? 'Pruébalo' : 'Try it'}><div className="wrap"><Suspense fallback={<p className="case-loading">{es ? 'Cargando…' : 'Loading…'}</p>}>
-   {project.id === 'punto' && <PuntoDemo lang={lang} link={project.link}/>}
+ return <>
    {project.id === 'club' && <><div className="case-demo-head"><h2>{es ? 'Así se ve en el restaurante.' : 'This is how it looks at the restaurant.'}</h2><p>{es ? 'Acerca el celular al chip y adelanta el tiempo.' : 'Tap the phone on the chip and fast-forward.'}</p></div><LoyaltyDemo lang={lang}/><ClubReal lang={lang}/></>}
    {project.id === 'turno' && <ShiftHandover lang={lang}/>}
    {project.id === 'planta' && <><div className="case-demo-head"><h2>{es ? 'Súbele tus reportes del turno.' : 'Upload your shift reports.'}</h2><p>{es ? 'Ya vienen tres de ejemplo; cambia cualquiera por tu Excel o CSV.' : 'Three samples are loaded; swap any for your Excel or CSV.'}</p></div><Planta lang={lang}/><div className="monitor-live"><div className="case-demo-head"><h2>{es ? 'Y mientras pasa el turno: Monitor de planta.' : 'And while the shift runs: Plant monitor.'}</h2><p>{es ? 'Una app aparte, en tiempo real y con estilo Windows 98: OEE en vivo, lotes que se liberan o retienen y detenciones que tú provocas.' : 'A separate app, real time and Windows 98 style: live OEE, batches released or held and stops you trigger.'}</p></div><div className="monitor-shots"><img src="/media/monitor-planta.webp" width={1006} height={705} loading="lazy" alt={es ? 'Monitor de planta con tres líneas, OEE en vivo y cola de lotes' : 'Plant monitor with three lines, live OEE and batch queue'}/><img src="/media/monitor-planta-detencion.webp" width={1006} height={705} loading="lazy" alt={es ? 'Diálogo para registrar la causa de una detención' : 'Dialog to log a stop cause'}/></div><p className="demo-vibe-links"><a className="inline-link" href="https://monitor-de-planta.vercel.app" {...external('https://monitor-de-planta.vercel.app')}>{es ? 'Abrir el monitor' : 'Open the monitor'}<ArrowUpRight size={18}/></a><a className="inline-link" href="https://github.com/Brunich/Monitor-De-Planta" {...external('https://github.com/Brunich/Monitor-De-Planta')}>{es ? 'Ver el código' : 'View the code'}<ArrowUpRight size={18}/></a></p></div></>}
@@ -251,11 +246,7 @@ function ProjectPage({ lang, project, projects }: { lang: Lang; project: Project
    {project.id === 'spc' && <><div className="case-demo-head"><h2>{es ? 'Súbele las mediciones de una pieza.' : 'Upload a part’s measurements.'}</h2><p>{es ? 'Ejemplo: el diámetro de un buje, con la herramienta desgastándose al final. Cambia la tolerancia o sube tu Excel.' : 'Sample: a bushing diameter, with the tool wearing out at the end. Change the tolerance or upload your Excel.'}</p></div><Spc lang={lang}/></>}
    {project.id === 'inventario' && <><div className="case-demo-head"><h2>{es ? 'Ábrelo en tu celular y escanea algo.' : 'Open it on your phone and scan something.'}</h2><p>{es ? 'Con la cámara, una foto del código o escribiéndolo.' : 'With the camera, a photo of the code or by typing it.'}</p></div><Inventario lang={lang}/></>}
    {project.id === 'csv' && <><div className="case-demo-head"><h2>{es ? 'Pruébalo con tu reporte.' : 'Try it with your report.'}</h2><p>{es ? 'CSV o Excel. Todo pasa en tu navegador.' : 'CSV or Excel. It all runs in your browser.'}</p></div><DataWorkbench lang={lang}/></>}
-   {project.id === 'vibe' && <div className="demo-vibe"><div className="case-demo-head"><h2>{es ? 'Pruébalo aquí mismo.' : 'Try it right here.'}</h2><p>{es ? 'Toca «Un RPG en Godot» o suelta la carpeta de tu proyecto. Todo corre en tu navegador.' : 'Tap “Un RPG en Godot” or drop your own project folder. Everything runs in your browser.'}</p></div><LiveOrShots probe={project.link} lang={lang} shots={[['/media/vibemap-mapa.webp', 1210, 350, es ? 'Mapa mental de VibeMap' : 'VibeMap mind map']]}><div className="case-browser"><span className="case-browser-bar"><i/><i/><i/><b>vibemap-brunich.vercel.app</b></span><iframe src={project.link} title={es ? 'VibeMap en vivo' : 'VibeMap live'} loading="lazy"/></div></LiveOrShots><p className="demo-vibe-links"><a className="inline-link" href={project.link} {...external(project.link)}>{es ? 'Abrir en otra pestaña' : 'Open in a new tab'}<ArrowUpRight size={18}/></a><a className="inline-link" href="https://github.com/Brunich/VibeMap" {...external('https://github.com/Brunich/VibeMap')}>{es ? 'Ver el código' : 'View the code'}<ArrowUpRight size={18}/></a></p></div>}
-  </Suspense></div></section>
-  {!OTHER.includes(project.id) && <aside className={`case-cta wrap project-${project.id}`} aria-label={es ? 'Contacto' : 'Contact'}><div><strong>{es ? '¿Te sirve para tu negocio?' : 'Useful for your business?'}</strong><span>{es ? 'Lo adapto a tus datos y te lo dejo funcionando.' : 'I adapt it to your data and leave it running.'}</span></div><a className="button primary" href={`mailto:${personal.email}?subject=${encodeURIComponent(project.title)}`}>{es ? 'Escríbeme' : 'Write to me'}<ArrowUpRight size={18}/></a></aside>}
-  <nav data-c data-zone={es ? 'Siguiente' : 'Next'} className={`case-next wrap project-${next.id}`} aria-label={es ? 'Siguiente proyecto' : 'Next project'}><a href={`/proyectos/${next.slug}`} data-title={next.title}><span>{es ? 'Siguiente proyecto' : 'Next project'}</span><strong>{next.title}</strong><ArrowRight size={26}/></a></nav>
- </main>;
+ </>;
 }
 
 // La tarjeta real: un QR que abre la misma página que abriría el chip, y el armador para tu negocio.
@@ -314,46 +305,18 @@ function NfcGuide({ lang }: { lang: Lang }) {
  </section>;
 }
 
-// Una demo en vivo depende de otro servidor: si no contesta, se enseñan capturas y se dice por qué, en vez de una app vacía.
-const PUNTO_API = 'https://wugsixqhygqvamgywymn.supabase.co/rest/v1/';
-function useLive(probe: string) {
- const [live, setLive] = useState<boolean | null>(null);
- useEffect(() => {
-  const stop = new AbortController(), timer = setTimeout(() => stop.abort(), 6000);
-  fetch(probe, { mode: 'no-cors', signal: stop.signal, cache: 'no-store' }).then(() => setLive(true), () => setLive(false)).finally(() => clearTimeout(timer));
-  return () => { clearTimeout(timer); stop.abort(); };
- }, [probe]);
- return live;
-}
-function LiveOrShots({ probe, shots, lang, children, live: given }: { probe: string; shots: [string, number, number, string][]; lang: Lang; children: React.ReactNode; live?: boolean | null }) {
- const es = lang === 'es';
- const probed = useLive(probe), live = given === undefined ? probed : given;
- if (live !== false) return <>{children}</>;
- return <div className="live-off">
-  <p className="live-note" role="status">{es ? 'El servidor de esta demo no está respondiendo ahora mismo, así que te enseño capturas de la app real.' : 'This demo’s server is not responding right now, so here are screenshots of the real app.'}</p>
-  <div className={`live-shots n${shots.length}`}>{shots.map(([src, w, h, alt]) => <figure key={src}><img src={src} width={w} height={h} alt={alt} loading="lazy"/><figcaption>{alt}</figcaption></figure>)}</div>
- </div>;
-}
-
-function PuntoDemo({ lang, link }: { lang: Lang; link: string }) {
- const es = lang === 'es', live = useLive(PUNTO_API);
- return <div className="demo-punto">
-  <LiveOrShots probe={PUNTO_API} live={live} lang={lang} shots={[['/media/punto-u-mapa.webp', 780, 2000, es ? 'Mapa del campus con misiones' : 'Campus map with missions'], ['/media/punto-u.webp', 600, 1300, es ? 'Crear perfil' : 'Create a profile']]}><div className="case-phone"><iframe src={link} title={es ? 'Punto U en vivo' : 'Punto U live'}/></div></LiveOrShots>
-  <div className="demo-punto-copy">{live === false
-   ? <><h2>{es ? 'Así se ve la app.' : 'This is the app.'}</h2><p>{es ? 'El mapa del campus con las misiones abiertas y el registro con matrícula y facultad. La versión en vivo vuelve cuando su servidor esté arriba.' : 'The campus map with open missions and sign-up with student ID and school. The live version returns once its server is back up.'}</p></>
-   : <><h2>{es ? 'Pruébala aquí mismo.' : 'Try it right here.'}</h2><p>{es ? 'La app real, en vivo: crea tu perfil y publica una misión.' : 'The real app, live: create your profile and post a mission.'}</p><a className="inline-link" href={link} target="_blank" rel="noreferrer">{es ? 'Abrir en otra pestaña' : 'Open in a new tab'}<ArrowUpRight size={18}/></a></>}</div>
- </div>;
-}
-
 // Cada proyecto tiene su propio repo, con pruebas y README.
 // La versión nativa de cada herramienta: la de escritorio ya se descarga; las de Android van en camino, con plan.
-const NATIVE: Record<string, { es: string; en: string; href?: string }> = {
+const NATIVE: Record<string, Native> = {
  spc: { es: 'También como app de escritorio para Windows', en: 'Also as a Windows desktop app', href: 'https://github.com/Brunich/graficas-de-control/releases/latest' },
+ casa: { es: 'App para Android, ya en uso', en: 'Android app, already in use', href: 'https://la-casa-del-angel.vercel.app/instalar', android: true },
  club: { es: 'App Android nativa con lector NFC', en: 'Native Android app with NFC reader' },
  inventario: { es: 'App Android nativa con escáner de cámara', en: 'Native Android app with camera scanner' },
  turno: { es: 'App Android nativa con cámara y avisos', en: 'Native Android app with camera and alerts' },
 };
-const REPO: Record<string, string> = { club: 'nfc-negocios', csv: 'analizador-csv', planta: 'planta-oee', inventario: 'inventario-camara', spc: 'graficas-de-control', turno: 'entrega-de-turno', vibe: 'VibeMap', punto: 'Punto-U-app' };
+const REPO: Record<string, string> = { club: 'nfc-negocios', csv: 'analizador-csv', planta: 'planta-oee', inventario: 'inventario-camara', spc: 'graficas-de-control', turno: 'entrega-de-turno', vibe: 'VibeMap', punto: 'Punto-U-app', casa: 'la-casa-del-angel' };
+// Los que tienen demo dentro del portafolio; los demás abren su propio sitio.
+const HAS_APP = ['club', 'csv', 'planta', 'spc', 'inventario', 'turno', 'agente'];
 
 // Videos de motion design: hoy el reel del portafolio; el espacio está listo para los que sigan.
 function Motion({ lang }: { lang: Lang }) {
