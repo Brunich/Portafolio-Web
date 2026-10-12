@@ -66,7 +66,7 @@ test('inventory: typed codes move stock, unknown codes get registered, and a lab
  await expect(page.locator('.inv-products')).toContainText('Galletas de avena');
  await page.getByRole('radio', { name: /Entrada/ }).click();
  await page.getByRole('button', { name: /Etiquetas con código/ }).click();
- const svg = await page.locator('.inv-sheet figure').first().innerHTML();
+ const svg = await page.locator('.inv-sheet figure .inv-bc').first().innerHTML();
  const png = await page.evaluate(async s => {
   const img = new Image(); img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(s))); await img.decode();
   const c = document.createElement('canvas'); c.width = img.width * 2; c.height = img.height * 2;
@@ -150,6 +150,32 @@ test('plant: a report with odd column names gets mapped by hand, and exceptions 
  await expect(page.locator('.pl-progress')).toContainText('1 de');
 });
 
+test('inventory: a label QR opens the product ready to sell or restock, and every product shows its QR', async ({ page }) => {
+ await page.goto('/proyectos/inventario/app?c=GR-TORTILLA');
+ const card = page.locator('.inv-picked');
+ await expect(card).toContainText('Tortilla de maíz (kg)');
+ await expect(card).toContainText('Quedan 12');
+ await expect(page).toHaveURL(/\/proyectos\/inventario\/app$/); // al recargar no se repite
+ await card.getByRole('button', { name: 'Vendí 1' }).click();
+ await expect(card).toContainText('Quedan 11');
+ await card.getByRole('button', { name: 'Llegó 1' }).click();
+ await card.getByRole('button', { name: 'Llegó 1' }).click();
+ await expect(card).toContainText('Quedan 13');
+ // La cámara de la app también entiende el QR completo, no sólo el número.
+ await card.getByRole('button', { name: 'Cerrar' }).click();
+ await page.getByLabel('Código de barras').fill('https://bruno-portfolio-azure.vercel.app/proyectos/inventario/app?c=GR-TORTILLA');
+ await page.getByRole('button', { name: 'Aplicar' }).click();
+ await expect(page.locator('.inv-products > li', { hasText: 'Tortilla' }).locator('.inv-stock b')).toHaveText('14');
+ await page.locator('.inv-name', { hasText: 'Jitomate' }).click();
+ await expect(page.locator('.inv-detail .inv-qr svg')).toBeVisible();
+ await page.getByRole('button', { name: 'abre las etiquetas' }).click();
+ await expect(page.locator('.inv-sheet figure')).toHaveCount(27);
+ await expect(page.locator('.inv-sheet figure .inv-qr svg')).toHaveCount(27);
+ // Un QR con un código que la tienda no tiene pide darlo de alta.
+ await page.goto('/proyectos/inventario/app?c=GR-NUEVO');
+ await expect(page.locator('.inv-new')).toContainText('GR-NUEVO');
+});
+
 test('inventory: EAN-8 labels are read from a photo, internal codes keep letters, and search, delete and undo work', async ({ page }) => {
  await page.goto('/proyectos/inventario/app');
  const add = async (code: string, name: string) => {
@@ -163,7 +189,7 @@ test('inventory: EAN-8 labels are read from a photo, internal codes keep letters
  await expect(page.locator('.inv-products')).toContainText('ABC-123');
  // La etiqueta EAN-8 que genera la página se fotografía y se lee: entra una pieza más.
  await page.getByRole('button', { name: /Etiquetas con código/ }).click();
- const fig = page.locator('.inv-sheet figure', { hasText: '96385074' });
+ const fig = page.locator('.inv-sheet figure', { hasText: '96385074' }).locator('.inv-bc');
  const png = await fig.evaluate(async el => {
   const s = el.innerHTML, img = new Image(); img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(s))); await img.decode();
   const c = document.createElement('canvas'); c.width = img.width * 3; c.height = img.height * 3;

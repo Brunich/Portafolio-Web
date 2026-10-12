@@ -117,3 +117,28 @@ html[data-motion=paused] .ivp *{animation-play-state:paused!important}
 .inv-detail .inv-log li{grid-template-columns:36px minmax(0,1fr) auto;padding:4px 0;background:none;border:0;animation:none}
 .inv-import{display:flex;align-items:center;gap:6px;margin:10px 0 0;font-size:14px;color:#a9dcc0}
 .inv-kpis dt svg{vertical-align:-2px;margin-right:4px}
+
+/* Lo que se escaneó con el QR va arriba, con botones grandes para el pulgar */
+.inv-picked{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px 20px;padding:18px 20px;border-radius:20px;background:color-mix(in srgb,var(--k-1,#a894f0) 14%,var(--surface,#181b23));border:1.5px solid var(--k-1,#a894f0);animation:inv-in .3s ease-out}
+.inv-picked-name{display:grid;gap:2px;min-width:0}
+.inv-picked-name small{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.inv-picked-name strong{font:700 clamp(20px,3vw,26px)/1.15 var(--display);overflow-wrap:anywhere}
+.inv-picked-name span{color:var(--muted);font-size:14px}
+.inv-picked-actions{display:flex;gap:8px;flex-wrap:wrap}
+.inv-picked-actions button{display:inline-flex;align-items:center;gap:8px;min-height:52px;padding:0 20px;border-radius:14px;border:1.5px solid var(--k);background:color-mix(in srgb,var(--k) 18%,transparent);color:var(--text);font:700 16px 'DM Sans Variable',sans-serif;cursor:pointer}
+.inv-picked{position:relative}
+.inv-picked-actions .inv-picked-close{--k:transparent;position:absolute;top:8px;right:8px;min-height:40px;padding:0 10px;background:transparent;color:var(--muted)}
+.inv-picked-name{padding-right:36px}
+.inv-how{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.inv-how li{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:14px;background:var(--surface,#181b23);border:1px solid var(--line,#ffffff14);font-size:13.5px;line-height:1.45;color:var(--muted)}
+.inv-how b{flex:none;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--k-1,#a894f0);color:var(--k-ink,#150f22);font-size:12px}
+/* El QR del producto, para escanearlo desde otro celular */
+.inv-code-big{display:grid;grid-template-columns:140px minmax(0,1fr);gap:12px;align-items:center}
+.inv-code-big .inv-qr{grid-row:span 2;background:#fff;border-radius:12px;padding:4px}
+.inv-code-big .inv-bc{background:#fff;border-radius:10px;padding:6px;max-width:240px}
+.inv-code-big p{margin:0;font-size:13px;color:var(--muted)}
+.inv-qr svg,.inv-bc svg{display:block;width:100%;height:auto}
+.inv-sheet figure{grid-template-columns:minmax(0,1fr) 84px;gap:8px;align-items:center;place-items:initial}
+.inv-sheet figcaption{display:grid;gap:4px;color:#111;font:600 13px/1.25 'DM Sans Variable',sans-serif}
+.inv-sheet figcaption code{font:500 11px ui-monospace,Consolas,monospace;color:#444}
+@media(max-width:700px){.inv-how{grid-template-columns:1fr}.inv-picked-actions{width:100%}.inv-picked-actions button:not(.inv-picked-close){flex:1;justify-content:center}.inv-code-big{grid-template-columns:110px minmax(0,1fr)}}

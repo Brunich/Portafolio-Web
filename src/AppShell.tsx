@@ -6,13 +6,14 @@ import type { Lang } from './content';
 import './app-shell.css';
 
 // Cada demo se abre como si fuera su propio producto: nombre, colores y pestaña propios, sin el portafolio alrededor.
-type Brand = { name: string; es: string; en: string; icon: Icon; color: string };
+// `real`: la app se usa tal cual con lo que registras; no lleva aviso de datos de ejemplo.
+type Brand = { name: string; es: string; en: string; icon: Icon; color: string; real?: boolean };
 export const BRANDS: Record<string, Brand> = {
  club: { name: 'Sellito', es: 'Tarjeta de sellos y menú con NFC', en: 'NFC stamp card and menu', icon: Stamp, color: '#e3a26f' },
  csv: { name: 'Cuadro', es: 'Analizador de CSV y Excel', en: 'CSV and Excel analyzer', icon: Table, color: '#5b8cff' },
  planta: { name: 'Línea', es: 'Consolidador de reportes y OEE', en: 'Report consolidator and OEE', icon: Factory, color: '#ff7a3d' },
  spc: { name: 'Tolerancia', es: 'Gráficas de control SPC', en: 'SPC control charts', icon: ChartLineUp, color: '#58c98b' },
- inventario: { name: 'Estante', es: 'Inventario con la cámara', en: 'Camera inventory', icon: Barcode, color: '#2fd4b5' },
+ inventario: { name: 'Estante', es: 'Inventario con la cámara', en: 'Camera inventory', icon: Barcode, color: '#2fd4b5', real: true },
  turno: { name: 'Relevo', es: 'Entrega de turno de calidad', en: 'Quality shift handover', icon: ClipboardText, color: '#ffb020' },
  agente: { name: 'Casero', es: 'Asistente de IA que corre en tu equipo', en: 'AI assistant that runs on your machine', icon: ChatCircleDots, color: '#a8c79a' },
 };
@@ -36,13 +37,13 @@ export default function AppShell({ id, lang, setLang, children }: { id: string; 
   <header className="ax-bar"><div className="ax-wrap ax-bar-in">
    <span className="ax-logo" aria-hidden="true"><Logo size={22} weight="bold"/></span>
    <div className="ax-name"><strong>{b.name}</strong><small>{es ? b.es : b.en}</small></div>
-   <span className="ax-badge">{es ? 'Datos de ejemplo' : 'Sample data'}</span>
+   {!b.real && <span className="ax-badge">{es ? 'Datos de ejemplo' : 'Sample data'}</span>}
    <div className="ax-lang" aria-label={es ? 'Idioma' : 'Language'}>{(['es', 'en'] as const).map(l => <button key={l} aria-pressed={lang === l} aria-label={l === 'es' ? 'Cambiar a español' : 'Switch to English'} onClick={() => setLang(l)}>{l.toUpperCase()}</button>)}</div>
   </div></header>
   <main id="main" className="ax-main" aria-label={b.name}>
    <h1 className="ax-title">{b.name}<span>{es ? b.es : b.en}</span></h1>
    <section id="demo" className="case-demo ax-stage"><div className="wrap">{children}</div></section>
   </main>
-  <footer className="ax-foot"><div className="ax-wrap">{b.name} · {es ? 'Versión de prueba con datos de ejemplo.' : 'Trial version with sample data.'}<span>© {new Date().getFullYear()} Bruno Salas</span></div></footer>
+  <footer className="ax-foot"><div className="ax-wrap">{b.name} · {b.real ? (es ? 'Lo que registras se guarda en este dispositivo.' : 'What you log is saved on this device.') : (es ? 'Versión de prueba con datos de ejemplo.' : 'Trial version with sample data.')}<span>© {new Date().getFullYear()} Bruno Salas</span></div></footer>
  </div>;
 }
