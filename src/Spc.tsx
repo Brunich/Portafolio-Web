@@ -1,22 +1,34 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { CheckCircle, WarningOctagon, UploadSimple, Copy } from '@phosphor-icons/react';
+import { CheckCircle, WarningOctagon, UploadSimple, Copy, Printer, FloppyDisk, Trash, Info } from '@phosphor-icons/react';
 import { parseCsv } from './csv';
 import { readTable, TABLE_ACCEPT } from './read-file';
 import { toNumber } from './quality';
-import { buildChart, capability, verdict, sampleCsv, SAMPLE_SPEC, RULES, MEANING } from './spc-logic';
+import { buildChart, capability, verdict, sampleCsv, findHeader, readMeasures, SAMPLE_SPEC, RULES, MEANING } from './spc-logic';
 import type { Chart, Rule } from './spc-logic';
+import { esc, printDoc } from './print-doc';
 import './spc.css';
 
 // Gráficas de control: sube las mediciones de una pieza, elige la columna y la tolerancia,
 // y dice si el proceso está bajo control, qué puntos avisan y si alcanza la tolerancia.
 type Grid = { headers: string[]; rows: string[][] };
+type Spec = { lsl: string; usl: string };
+// Un estudio guardado: lo que se reporta a calidad o al cliente (PPAP) y sirve para ver si el Cpk mejora.
+type Study = { id: string; at: number; file: string; feature: string; n: number; mean: number; sigma: number; cp: number | null; cpk: number | null; ppk: number | null; control: boolean; signals: number; lsl: string; usl: string };
+const KEY = 'bruno-tolerancia-v1';
+const loadSaved = (): { specs: Record<string, Spec>; studies: Study[] } => { try { const v = JSON.parse(localStorage.getItem(KEY) ?? ''); return { specs: v.specs ?? {}, studies: Array.isArray(v.studies) ? v.studies : [] }; } catch { return { specs: {}, studies: [] }; } };
 const fold = (s: string) => s.toLocaleLowerCase('es').normalize('NFD').replace(/[̀-ͯ]/g, '');
+const SAMPLE_NAME = 'buje_diametro.csv';
+const sampleData = () => ({ grid: parseCsv(sampleCsv()), name: SAMPLE_NAME, sample: true, titleRows: 0 });
+// Una cota con uno que otro «N/A» sigue siendo cota; se avisa qué celdas no se usaron.
+const isMeasure = (g: Grid, i: number) => { const m = readMeasures(g.rows.map(r => r[i] ?? '')), ok = m.nums.filter(Number.isFinite).length; return ok >= 5 && m.bad.length <= ok * 0.1; };
+const orNull = (n: number | undefined) => n !== undefined && Number.isFinite(n) ? n : null;
 
 function guess(g: Grid) {
- const numeric = g.headers.map((_, i) => g.rows.length > 0 && g.rows.filter(r => (r[i] ?? '').trim()).every(r => Number.isFinite(toNumber(r[i]))));
+ const group = g.headers.findIndex(h => /^(muestra|subgrupo|grupo|sample|subgroup|lote|hora)/.test(fold(h)));
+ const numeric = g.headers.map((_, i) => i !== group && isMeasure(g, i));
  const measure = numeric.lastIndexOf(true);
- const group = g.headers.findIndex((h, i) => i !== measure && /^(muestra|subgrupo|grupo|sample|subgroup|lote|hora)/.test(fold(h)) && new Set(g.rows.map(r => r[i])).size < g.rows.length);
- return { measure, group };
+ const gi = group >= 0 && group !== measure && new Set(g.rows.map(r => r[group])).size < g.rows.length ? group : -1;
+ return { measure, group: gi };
 }
 const fmt = (n: number, d = 3) => Number.isFinite(n) ? n.toLocaleString('es-MX', { minimumFractionDigits: d, maximumFractionDigits: d }) : '—';
 
@@ -61,35 +73,78 @@ function Histogram({ values, lsl, usl, mean, es }: { values: number[]; lsl?: num
 
 export default function Spc({ lang }: { lang: 'es' | 'en' }) {
  const es = lang === 'es', L = es ? 0 : 1, t = (a: string, b: string) => (es ? a : b);
- const [data, setData] = useState<{ grid: Grid; name: string; sample: boolean }>(() => ({ grid: parseCsv(sampleCsv()), name: 'buje_diametro.csv', sample: true }));
+ const [data, setData] = useState<{ grid: Grid; name: string; sample: boolean; titleRows: number }>(sampleData);
  const first = useMemo(() => guess(data.grid), [data]);
  const [measure, setMeasure] = useState<number | null>(null);
  const [group, setGroup] = useState<number | null>(null);
- const [lsl, setLsl] = useState(String(SAMPLE_SPEC.lsl)), [usl, setUsl] = useState(String(SAMPLE_SPEC.usl));
+ // Tolerancias por característica (por nombre de columna): se recuerdan para la siguiente vez que suba el mismo archivo.
+ const [saved] = useState(loadSaved);
+ const [specs, setSpecs] = useState<Record<string, Spec>>(() => ({ [`${SAMPLE_NAME}|diametro_mm`]: { lsl: String(SAMPLE_SPEC.lsl), usl: String(SAMPLE_SPEC.usl) }, ...saved.specs }));
+ const [studies, setStudies] = useState<Study[]>(saved.studies);
  const [base, setBase] = useState(SAMPLE_SPEC.base);
  const [err, setErr] = useState(''), [note, setNote] = useState('');
  const input = useRef<HTMLInputElement>(null), charts = useRef<HTMLDivElement>(null);
  const mi = measure ?? first.measure, gi = group ?? first.group;
- const groups = useMemo(() => {
-  const g = data.grid, order: string[] = [], map = new Map<string, number[]>();
-  g.rows.forEach((r, i) => { const k = gi >= 0 ? (r[gi] ?? '').trim() : String(i + 1); if (!map.has(k)) { map.set(k, []); order.push(k); } const v = toNumber(r[mi] ?? ''); if (Number.isFinite(v)) map.get(k)!.push(v); });
+ const feature = data.grid.headers[mi] ?? '';
+ // La tolerancia del ejemplo no debe colarse en un archivo propio que tenga una columna con el mismo nombre.
+ const keyOf = (h: string) => data.sample ? `${SAMPLE_NAME}|${h}` : h;
+ const lsl = specs[keyOf(feature)]?.lsl ?? '', usl = specs[keyOf(feature)]?.usl ?? '';
+ const setSpec = (k: keyof Spec, v: string) => setSpecs(s => ({ ...s, [keyOf(feature)]: { lsl, usl, [k]: v } }));
+ useEffect(() => { try { localStorage.setItem(KEY, JSON.stringify({ specs, studies })); } catch { /* sin espacio: sigue en memoria */ } }, [specs, studies]);
+ const groupsOf = useMemo(() => (col: number) => {
+  const g = data.grid, order: string[] = [], map = new Map<string, number[]>(), nums = readMeasures(g.rows.map(r => r[col] ?? '')).nums;
+  g.rows.forEach((r, i) => { const k = gi >= 0 ? (r[gi] ?? '').trim() : String(i + 1); if (!map.has(k)) { map.set(k, []); order.push(k); } if (Number.isFinite(nums[i])) map.get(k)!.push(nums[i]); });
   return order.map(k => ({ label: k, values: map.get(k)! }));
- }, [data, mi, gi]);
+ }, [data, gi]);
+ const groups = useMemo(() => mi >= 0 ? groupsOf(mi) : [], [groupsOf, mi]);
+ const reading = useMemo(() => mi >= 0 ? readMeasures(data.grid.rows.map(r => r[mi] ?? '')) : null, [data, mi]);
  const all = groups.flatMap(g => g.values);
  const c = useMemo(() => mi >= 0 ? buildChart(groups, base || undefined) : null, [groups, base, mi]);
- const L1 = Number.isFinite(toNumber(lsl)) ? toNumber(lsl) : undefined, U1 = Number.isFinite(toNumber(usl)) ? toNumber(usl) : undefined;
+ const num = (s: string) => { const n = toNumber(s.replace(/^(-?\d+),(\d+)$/, '$1.$2')); return Number.isFinite(n) ? n : undefined; };
+ const L1 = num(lsl), U1 = num(usl);
  const cap = c ? capability(c, all, L1, U1) : null;
  const v = c ? verdict(c, cap, es) : null;
  const byRule = useMemo(() => { const m = new Map<Rule, string[]>(); c?.points.forEach(p => p.rules.forEach(r => m.set(r, [...(m.get(r) ?? []), p.label]))); return [...m].sort((a, b) => a[0] - b[0]); }, [c]);
+ // Un archivo de la máquina de medición trae varias cotas: el resumen las pone todas juntas para ver cuál preocupa.
+ const features = useMemo(() => data.grid.headers.map((h, i) => ({ h, i })).filter(({ i }) => i !== gi && isMeasure(data.grid, i)).map(({ h, i }) => {
+  const ch = buildChart(groupsOf(i), base || undefined), vals = groupsOf(i).flatMap(g => g.values), sp = specs[keyOf(h)];
+  const k = ch ? capability(ch, vals, sp ? num(sp.lsl) : undefined, sp ? num(sp.usl) : undefined) : null;
+  return { h, i, ch, k, vd: ch ? verdict(ch, k, es) : null };
+ }), [data, gi, groupsOf, base, specs, es]); // eslint-disable-line react-hooks/exhaustive-deps
 
  // En celular la gráfica se desliza: abre en lo más reciente, que es lo que se vigila.
  useEffect(() => { charts.current?.querySelectorAll('figure').forEach(f => { f.scrollLeft = f.scrollWidth; }); }, [c]);
  async function load(f: File | undefined) {
   if (!f) return;
-  try { const g = await readTable(f); setData({ grid: { headers: g.headers, rows: g.rows }, name: f.name, sample: false }); setMeasure(null); setGroup(null); setLsl(''); setUsl(''); setBase(0); setErr(''); setNote(''); }
+  try {
+   const g = await readTable(f), rows = [g.headers, ...g.rows], h = findHeader(rows);
+   setData({ grid: { headers: rows[h].map((x, j) => x.trim() || `${t('Columna', 'Column')} ${j + 1}`), rows: rows.slice(h + 1).filter(r => r.some(x => x.trim())) }, name: f.name, sample: false, titleRows: h });
+   setMeasure(null); setGroup(null); setBase(0); setErr(''); setNote('');
+  }
   catch { setErr(t(`No pude leer ${f.name}. Usa CSV o Excel.`, `Could not read ${f.name}. Use CSV or Excel.`)); }
  }
- function sample() { setData({ grid: parseCsv(sampleCsv()), name: 'buje_diametro.csv', sample: true }); setMeasure(null); setGroup(null); setLsl(String(SAMPLE_SPEC.lsl)); setUsl(String(SAMPLE_SPEC.usl)); setBase(SAMPLE_SPEC.base); setErr(''); setNote(''); }
+ function sample() { setData(sampleData()); setMeasure(null); setGroup(null); setBase(SAMPLE_SPEC.base); setErr(''); setNote(''); }
+ function saveStudy() {
+  if (!c || !v) return;
+  const s: Study = { id: `${data.name}|${feature}|${all.length}|${c.mean.toFixed(6)}`, at: Date.now(), file: data.name, feature, n: all.length, mean: c.mean, sigma: c.sigma, cp: orNull(cap?.cp), cpk: orNull(cap?.cpk), ppk: orNull(cap?.ppk), control: v.control, signals: v.signals, lsl, usl };
+  setStudies(x => [s, ...x.filter(y => y.id !== s.id)].slice(0, 60)); setNote(t('Estudio guardado.', 'Study saved.'));
+ }
+ // Reporte de capacidad para entregar: veredicto, gráficas, señales y la tolerancia contra la que se midió.
+ function printReport() {
+  if (!c || !v) return;
+  const svgs = [...(charts.current?.querySelectorAll('svg.spc-chart') ?? [])].map(s => `<figure>${s.outerHTML}</figure>`).join('');
+  const css = `<style>.spc-chart text{font:10px system-ui;fill:#444}.spc-x{text-anchor:middle}.spc-z2{fill:#f4f5f7}.spc-z1{fill:#eaecf0}.spc-lim line{stroke:#b4232f;stroke-dasharray:5 4}.spc-cl line{stroke:#16181d}[class^=spc-spec] line{stroke:#9a6200;stroke-dasharray:2 3}.spc-line{fill:none;stroke:#2b5fd9;stroke-width:1.5}circle{fill:#2b5fd9}circle.bad{fill:#b4232f}.spc-base rect{fill:#2b5fd912}.spc-base text{fill:#666}</style>`;
+  const f2 = (n: number | null | undefined) => n === null || n === undefined || !Number.isFinite(n) ? '—' : fmt(n, 2);
+  printDoc(t('Estudio de capacidad', 'Capability study'), `${css}
+<header><div><h1>${esc(feature)}</h1><p>${t('Estudio de control y capacidad', 'Control and capability study')} · ${esc(data.name)}</p></div><small>${t('Impreso', 'Printed')} ${esc(new Date().toLocaleString(es ? 'es-MX' : 'en-US', { dateStyle: 'medium', timeStyle: 'short' }))}</small></header>
+<p class="${v.control ? 'ok' : 'bad'}">${esc(v.text)}</p>
+<dl class="kpis"><div><dt>${t('Mediciones', 'Measurements')}</dt><dd>${all.length}</dd></div><div><dt>${t('Promedio', 'Mean')}</dt><dd>${fmt(c.mean)}</dd></div><div><dt>Cpk</dt><dd class="${cap ? cap.cpk >= 1.33 ? 'ok' : cap.cpk >= 1 ? 'warn' : 'bad' : ''}">${f2(cap?.cpk)}</dd></div><div><dt>Ppk</dt><dd>${f2(cap?.ppk)}</dd></div></dl>
+<p class="note">${c.mode === 'I-MR' ? t('Individuales y rango móvil', 'Individuals and moving range') : t(`X̄-R, subgrupos de ${c.n}`, `X̄-R, subgroups of ${c.n}`)} · ${t('Centro', 'Center')} ${fmt(c.cl)} · ${t('LSC', 'UCL')} ${fmt(c.ucl)} · ${t('LIC', 'LCL')} ${fmt(c.lcl)} · σ ${fmt(c.sigma, 4)} · ${t('Tolerancia', 'Tolerance')} ${esc(lsl || '—')} a ${esc(usl || '—')}${cap ? ` · ${t('fuera de tolerancia', 'out of spec')}: ${cap.outside}` : ''}</p>
+<h2>${t('Gráficas', 'Charts')}</h2>${svgs}
+<h2>${t('Señales', 'Signals')}</h2>${byRule.length || c.rangeOut.length ? `<table><thead><tr><th>${t('Regla', 'Rule')}</th><th>${t('Muestras', 'Samples')}</th><th>${t('Qué revisar', 'What to check')}</th></tr></thead><tbody>${byRule.map(([r, pts]) => `<tr><td>${r} · ${esc(RULES[r][L])}</td><td>${esc(pts.join(', '))}</td><td>${esc(MEANING[r][L])}</td></tr>`).join('')}${c.rangeOut.length ? `<tr><td>R</td><td>${esc(c.rangeOut.map(i => c.points[i].label).join(', '))}</td><td>${t('Variación dentro de la muestra fuera de límite.', 'Within-sample variation beyond its limit.')}</td></tr>` : ''}</tbody></table>` : `<p class="ok">${t('Ningún punto rompe las reglas.', 'No point breaks the rules.')}</p>`}
+${features.length > 1 ? `<h2>${t('Todas las características del archivo', 'Every feature in the file')}</h2><table><thead><tr><th>${t('Característica', 'Feature')}</th><th class="n">${t('Promedio', 'Mean')}</th><th class="n">σ</th><th>${t('Estado', 'State')}</th><th class="n">Cpk</th></tr></thead><tbody>${features.map(x => `<tr><td>${esc(x.h)}</td><td class="n">${x.ch ? fmt(x.ch.mean) : '—'}</td><td class="n">${x.ch ? fmt(x.ch.sigma, 4) : '—'}</td><td class="${x.vd?.control ? 'ok' : 'bad'}">${x.vd ? esc(x.vd.title) : '—'}</td><td class="n">${f2(x.k?.cpk)}</td></tr>`).join('')}</tbody></table>` : ''}
+<div class="sign"><div>${t('Elaboró', 'Prepared by')}</div><div>${t('Revisó (Calidad)', 'Reviewed (Quality)')}</div></div>`, lang);
+ }
  async function copy() {
   if (!c || !v) return;
   const lines = [`${data.grid.headers[mi]} · ${c.mode === 'I-MR' ? t('individuales', 'individuals') : t(`subgrupos de ${c.n}`, `subgroups of ${c.n}`)}`, v.text,
@@ -108,10 +163,15 @@ export default function Spc({ lang }: { lang: 'es' | 'en' }) {
   <div className="spc-setup">
    <label>{t('Medición', 'Measurement')}<select value={mi} onChange={e => setMeasure(+e.target.value)}>{data.grid.headers.map((h, i) => <option key={i} value={i}>{h}</option>)}</select></label>
    <label>{t('Agrupar por', 'Group by')}<select value={gi} onChange={e => setGroup(+e.target.value)}><option value={-1}>{t('Cada fila es un punto', 'Each row is a point')}</option>{data.grid.headers.map((h, i) => i !== mi && <option key={i} value={i}>{h}</option>)}</select></label>
-   <label>{t('Tolerancia mínima (LIE)', 'Lower spec (LSL)')}<input inputMode="decimal" value={lsl} placeholder="—" onChange={e => setLsl(e.target.value)}/></label>
-   <label>{t('Tolerancia máxima (LSE)', 'Upper spec (USL)')}<input inputMode="decimal" value={usl} placeholder="—" onChange={e => setUsl(e.target.value)}/></label>
+   <label>{t('Tolerancia mínima (LIE)', 'Lower spec (LSL)')}<input inputMode="decimal" value={lsl} placeholder="—" onChange={e => setSpec('lsl', e.target.value)}/></label>
+   <label>{t('Tolerancia máxima (LSE)', 'Upper spec (USL)')}<input inputMode="decimal" value={usl} placeholder="—" onChange={e => setSpec('usl', e.target.value)}/></label>
    <label>{t('Límites con', 'Limits from')}<select value={base} onChange={e => setBase(+e.target.value)}><option value={0}>{t('todos los puntos', 'all points')}</option>{[10, 15, 20, 25].filter(n => n < groups.length).map(n => <option key={n} value={n}>{t(`los primeros ${n}`, `the first ${n}`)}</option>)}</select></label>
   </div>
+  {reading && (data.titleRows > 0 || reading.decimalComma || reading.bad.length > 0) && <ul className="spc-read" aria-label={t('Cómo se leyó el archivo', 'How the file was read')}>
+   {data.titleRows > 0 && <li><Info size={15} aria-hidden="true"/>{t(`Los encabezados están en la fila ${data.titleRows + 1}; lo de arriba era el título del reporte.`, `Headers are on row ${data.titleRows + 1}; the rows above were the report title.`)}</li>}
+   {reading.decimalComma && <li><Info size={15} aria-hidden="true"/>{t('Los números traen coma decimal (25,012): se leyeron como 25.012.', 'Numbers use a decimal comma (25,012): read as 25.012.')}</li>}
+   {reading.bad.length > 0 && <li className="warn"><WarningOctagon size={15} aria-hidden="true"/>{t(`${reading.bad.length} ${reading.bad.length === 1 ? 'celda no es número y no se usó' : 'celdas no son números y no se usaron'}: `, `${reading.bad.length} cell${reading.bad.length === 1 ? ' is' : 's are'} not numbers and were skipped: `)}{reading.bad.slice(0, 6).map(i => t(`fila ${i + data.titleRows + 2} («${data.grid.rows[i][mi]}»)`, `row ${i + data.titleRows + 2} ("${data.grid.rows[i][mi]}")`)).join(', ')}{reading.bad.length > 6 ? '…' : ''}</li>}
+  </ul>}
   {!c && <p className="spc-err">{t('Hacen falta al menos 5 mediciones numéricas en la columna elegida.', 'At least 5 numeric measurements are needed in the chosen column.')}</p>}
   {c && v && <>
    <section className={`spc-verdict ${v.control ? 'ok' : 'bad'}`}>
@@ -140,9 +200,36 @@ export default function Spc({ lang }: { lang: 'es' | 'en' }) {
      <h3>{t('Contra la tolerancia', 'Against the tolerance')}</h3>
      <Histogram values={all} lsl={L1} usl={U1} mean={c.mean} es={es}/>
      <p>{cap ? (cap.cpk >= 1.33 ? t('El proceso cabe en la tolerancia con margen (Cpk ≥ 1.33).', 'The process fits the tolerance with room (Cpk ≥ 1.33).') : cap.cpk >= 1 ? t('Cabe, pero justo: un corrimiento pequeño ya saca piezas (1 ≤ Cpk < 1.33).', 'It fits, barely: a small shift already produces bad parts (1 ≤ Cpk < 1.33).') : t('No cabe: aunque esté bajo control, saldrán piezas fuera de tolerancia (Cpk < 1).', 'It does not fit: even in control, parts will fall out of tolerance (Cpk < 1).')) : t('Escribe la tolerancia para saber si el proceso la alcanza.', 'Enter the tolerance to see if the process can hold it.')}</p>
-     <button onClick={() => void copy()}><Copy size={16}/>{t('Copiar resumen', 'Copy summary')}</button>{note && <span className="spc-note" role="status">{note}</span>}
+     <div className="spc-do">
+      <button className="dw-primary" onClick={printReport}><Printer size={16}/>{t('Imprimir o PDF', 'Print or PDF')}</button>
+      <button onClick={saveStudy}><FloppyDisk size={16}/>{t('Guardar estudio', 'Save study')}</button>
+      <button onClick={() => void copy()}><Copy size={16}/>{t('Copiar resumen', 'Copy summary')}</button>
+     </div>
+     {note && <span className="spc-note" role="status">{note}</span>}
     </section>
    </div>
+   {features.length > 1 && <section className="spc-features">
+    <h3>{t('Todas las cotas del archivo', 'Every dimension in the file')}<span>{t('Toca una para verla en la gráfica. La tolerancia de cada una se recuerda.', 'Tap one to chart it. Each tolerance is remembered.')}</span></h3>
+    <div className="spc-scroll"><table>
+     <thead><tr><th scope="col">{t('Característica', 'Feature')}</th><th scope="col">{t('Promedio', 'Mean')}</th><th scope="col">σ</th><th scope="col">{t('Estado', 'State')}</th><th scope="col">Cpk</th></tr></thead>
+     <tbody>{features.map(x => <tr key={x.i} className={x.i === mi ? 'is-on' : ''}>
+      <th scope="row"><button aria-pressed={x.i === mi} onClick={() => setMeasure(x.i)}>{x.h}</button></th>
+      <td>{x.ch ? fmt(x.ch.mean) : '—'}</td><td>{x.ch ? fmt(x.ch.sigma, 4) : '—'}</td>
+      <td className={x.vd ? x.vd.control ? 'ok' : 'bad' : ''}>{x.vd ? x.vd.title : '—'}</td>
+      <td className={x.k ? x.k.cpk >= 1.33 ? 'ok' : x.k.cpk >= 1 ? 'mid' : 'bad' : ''}>{x.k ? fmt(x.k.cpk, 2) : t('sin tolerancia', 'no tolerance')}</td></tr>)}</tbody>
+    </table></div>
+   </section>}
   </>}
+  {studies.length > 0 && <section className="spc-studies">
+   <h3>{t('Estudios guardados', 'Saved studies')}<span>{t('Para ver si el Cpk mejora después de un ajuste.', 'To see whether Cpk improves after an adjustment.')}</span></h3>
+   <div className="spc-scroll"><table>
+    <thead><tr><th scope="col">{t('Fecha', 'Date')}</th><th scope="col">{t('Característica', 'Feature')}</th><th scope="col">n</th><th scope="col">{t('Promedio', 'Mean')}</th><th scope="col">Cpk</th><th scope="col">{t('Estado', 'State')}</th><th scope="col"><span className="spc-sr">{t('Borrar', 'Delete')}</span></th></tr></thead>
+    <tbody>{studies.map((s, i) => { const prev = studies.slice(i + 1).find(o => o.feature === s.feature), d = prev && s.cpk !== null && prev.cpk !== null ? s.cpk - prev.cpk : null;
+     return <tr key={s.id}><td>{new Date(s.at).toLocaleDateString(es ? 'es-MX' : 'en-US', { day: 'numeric', month: 'short' })}</td><th scope="row">{s.feature}<small>{s.file}</small></th><td>{s.n}</td><td>{fmt(s.mean)}</td>
+      <td className={s.cpk === null ? '' : s.cpk >= 1.33 ? 'ok' : s.cpk >= 1 ? 'mid' : 'bad'}>{s.cpk === null ? '—' : fmt(s.cpk, 2)}{d !== null && Math.abs(d) >= .005 && <em className={d > 0 ? 'up' : 'down'}>{d > 0 ? '▲' : '▼'} {fmt(Math.abs(d), 2)}</em>}</td>
+      <td className={s.control ? 'ok' : 'bad'}>{s.control ? t('Bajo control', 'In control') : t(`${s.signals} señales`, `${s.signals} signals`)}</td>
+      <td><button className="spc-icon" aria-label={t(`Borrar estudio de ${s.feature}`, `Delete ${s.feature} study`)} onClick={() => setStudies(x => x.filter(y => y.id !== s.id))}><Trash size={16}/></button></td></tr>; })}</tbody>
+   </table></div>
+  </section>}
  </div>;
 }

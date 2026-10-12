@@ -81,3 +81,27 @@ html[data-motion=paused] .spcp .ln{animation:none;stroke-dashoffset:0}
 .spc-swipe{display:none;margin:0;font-size:12.5px;color:var(--muted,oklch(from #b7aec4 l calc(c * var(--k-chroma,1)) calc(h + var(--k-hue,0))))}
 @media(max-width:700px){.spc-swipe{display:block}}
 .spc-state .spc-detail{display:block;margin-top:2px;font-size:15px;color:var(--text,#eee)}
+/* Cómo se leyó un archivo real: título arriba, coma decimal, celdas que no son número */
+.spc-read{list-style:none;margin:0;padding:10px 14px;display:grid;gap:6px;border-radius:12px;background:var(--k-ink,#150f22);border:1px solid #ffffff12;font-size:13px;color:var(--muted,#b8b0c7)}
+.spc-read li{display:flex;gap:8px;align-items:flex-start}.spc-read svg{flex:none;margin-top:2px;color:var(--k-1,#a894f0)}
+.spc-read .warn{color:var(--k-warn,#d9c08a)}.spc-read .warn svg{color:var(--k-warn,#d9c08a)}
+.spc-do{display:flex;flex-wrap:wrap;gap:8px}
+/* Todas las cotas y estudios guardados */
+.spc-features,.spc-studies{display:grid;gap:10px;padding:16px;border-radius:18px;background:var(--k-ink,#150f22);border:1px solid #ffffff12}
+.spc-features h3,.spc-studies h3{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin:0;font:700 18px var(--display,'Manrope'),sans-serif}
+.spc-features h3 span,.spc-studies h3 span{font:400 13.5px 'DM Sans Variable',sans-serif;color:var(--muted,#b8b0c7)}
+.spc-scroll{overflow-x:auto;position:relative}
+.spc-features table,.spc-studies table{width:100%;border-collapse:collapse;font-size:13.5px}
+.spc-features th,.spc-features td,.spc-studies th,.spc-studies td{padding:8px;border-bottom:1px solid #ffffff10;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.spc-features thead th,.spc-studies thead th{font:600 11px 'DM Sans Variable',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted,#b8b0c7)}
+.spc-features th[scope=row],.spc-studies th[scope=row],.spc-features thead th:first-child,.spc-studies thead th:nth-child(2){text-align:left}
+.spc-studies th[scope=row] small{display:block;font-weight:400;font-size:11.5px;color:var(--muted,#b8b0c7)}
+.spc .spc-features th button{min-height:36px;padding:4px 10px;font:600 13.5px ui-monospace,Consolas,monospace}
+.spc-features tr.is-on th button{border-color:var(--k-1,#a894f0);background:color-mix(in srgb,var(--k-1,#a894f0) 18%,transparent)}
+.spc-features .ok,.spc-studies .ok{color:var(--k-ok,#9fd0bf);font-weight:700}.spc-features .mid,.spc-studies .mid{color:var(--k-warn,#d9c08a);font-weight:700}.spc-features .bad,.spc-studies .bad{color:var(--k-bad,#e58fa0);font-weight:700}
+.spc-studies em{margin-left:6px;font-style:normal;font-size:12px}.spc-studies em.up{color:var(--k-ok,#9fd0bf)}.spc-studies em.down{color:var(--k-bad,#e58fa0)}
+.spc .spc-icon{min-height:36px;min-width:36px;padding:0;justify-content:center;background:transparent;border-color:transparent;color:var(--muted,#b8b0c7)}
+.spc .spc-icon:hover{color:var(--k-bad,#e58fa0);border-color:#ffffff2e}
+.spc-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* En celular las tablas se deslizan dentro de su tarjeta, sin ensanchar la página */
+.spc,.spc-features,.spc-studies{grid-template-columns:minmax(0,1fr)}

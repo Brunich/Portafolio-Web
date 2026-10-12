@@ -52,3 +52,18 @@ test('el ejemplo del buje detecta el desgaste de la herramienta al final', () =>
  // Con todas las muestras en el cálculo, el desgaste mueve el centro y ensucia el principio: por eso el periodo base.
  assert.ok(buildChart(groups)!.points.slice(0, 15).some(p => p.rules.length));
 });
+
+test('archivo de la máquina de medición: encabezado abajo del título y coma decimal', async () => {
+ const { findHeader, readMeasures } = await import('../src/spc-logic.ts');
+ const rows = [['Reporte CMM', ''], ['Pieza:', 'B-21'], ['Lote:', '4411'], ['muestra', 'diametro'], ['1', '25,012'], ['1', '25,004'], ['2', '24,998']];
+ assert.equal(findHeader(rows), 3);
+ assert.equal(findHeader([['a', 'b'], ['1', '2']]), 0);
+ const m = readMeasures(['25,012', '25,004', '', '24,998', 'N/A']);
+ assert.equal(m.decimalComma, true);
+ assert.deepEqual(m.nums.slice(0, 2), [25.012, 25.004]);
+ assert.deepEqual(m.bad, [4]);
+ // Con punto decimal y miles con coma, la coma es de miles.
+ const k = readMeasures(['1,250', '1,310.5', '980']);
+ assert.equal(k.decimalComma, false);
+ assert.deepEqual(k.nums, [1250, 1310.5, 980]);
+});

@@ -220,3 +220,33 @@ html[data-motion=paused] .shp *{animation-play-state:paused!important}
 .shp-card{background:#14262f;border-color:color-mix(in srgb,var(--k-2,#62c6d9) 14.9%,transparent)}
 .shp-log{background:#061015;border-color:color-mix(in srgb,var(--k-2,#62c6d9) 14.9%,transparent)}
 .sh .sh-card-head{justify-content:stretch;align-content:start}
+/* Líneas y personas de la planta */
+.sh .sh-gear[aria-expanded=true]{border-color:var(--teal);color:var(--teal)}
+.sh-setup{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:14px;border-radius:16px;border:1px solid #ffffff1a;background:#ffffff06;animation:sh-in .35s cubic-bezier(.16,1,.3,1) both}
+.sh-setup p{grid-column:1/-1;margin:0;font-size:12.5px;color:var(--muted)}
+.sh-chipedit{margin:0;padding:0;border:0;display:grid;gap:8px;min-width:0}
+.sh-chipedit legend{padding:0;margin-bottom:8px;font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.sh-chipedit ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.sh-chipedit li{display:inline-flex;align-items:center;gap:4px;padding:4px 4px 4px 10px;border-radius:99px;background:#ffffff0f;font-size:13px}
+.sh .sh-chipedit li button{min-height:28px;min-width:28px;padding:0;justify-content:center;border-radius:50%;border:0;background:transparent;color:var(--muted)}
+.sh .sh-chipedit li button:hover{color:var(--open);background:#ffffff12}
+.sh-chipedit div{display:flex;gap:6px}
+.sh-chipedit input{flex:1;min-width:0;min-height:44px;padding:0 12px;border-radius:10px;border:1px solid #ffffff24;background:#0006;color:var(--text);font:inherit}
+/* Defectos que vuelven: piden causa raíz */
+.sh-repeat{display:grid;gap:8px;padding:14px 16px;border-radius:16px;border:1px solid color-mix(in srgb,var(--doing) 40%,transparent);background:color-mix(in srgb,var(--doing) 8%,transparent)}
+.sh-repeat h3,.sh-history h3{display:flex;align-items:center;gap:8px;margin:0;font:700 15px var(--display,'DM Sans Variable'),sans-serif;color:var(--doing)}
+.sh-repeat ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.sh-repeat li{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font-size:14px}
+.sh-repeat li span{font:500 12.5px var(--mono);color:var(--muted)}
+.sh-repeat p{margin:0;font-size:13px;color:var(--muted)}
+/* Entregas anteriores */
+.sh-history{display:grid;gap:8px}
+.sh-history h3{color:var(--text)}
+.sh-history ol{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.sh-history details{border-radius:12px;border:1px solid #ffffff14;background:#ffffff05}
+.sh-history summary{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;padding:10px 14px;min-height:44px;cursor:pointer;font-size:13.5px}
+.sh-history summary time{font:600 12.5px var(--mono);color:var(--teal)}
+.sh-history summary span,.sh-history summary small{color:var(--muted)}
+.sh-history summary em{font-style:normal;color:var(--open)}
+.sh-history pre{margin:0;padding:0 14px 12px;white-space:pre-wrap;font:12.5px/1.5 var(--mono);color:#cfe0e4}
+@media(max-width:700px){.sh-setup{grid-template-columns:1fr}}

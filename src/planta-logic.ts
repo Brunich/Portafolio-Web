@@ -35,6 +35,18 @@ export function mapColumns(kind: FileKind, headers: string[], over: ColumnMap = 
  return { map, missing: NEEDS[kind].filter(f => map[f] === undefined) };
 }
 
+// Los Excel de planta casi nunca empiezan en la fila 1: traen el título, la fecha de impresión
+// y al final una fila de totales. Se busca el encabezado de verdad y se quitan los totales para no contarlos dos veces.
+export type Fit = { grid: Grid; titleRows: number; totalRows: number };
+const isTotal = (r: string[]) => /^(gran\s+)?(sub)?totale?s?\b|^suma\b|^total\b/i.test((r.find(v => v.trim()) ?? '').trim());
+export function fitGrid(kind: FileKind, g: Grid): Fit {
+ const all = [g.headers, ...g.rows];
+ let best = 0, score = -1;
+ all.slice(0, 15).forEach((r, i) => { const n = NEEDS[kind].length - mapColumns(kind, r).missing.length; if (n > score) { score = n; best = i; } });
+ const headers = all[best].map((h, j) => h.trim() || `Columna ${j + 1}`), body = all.slice(best + 1), rows = body.filter(r => !isTotal(r));
+ return { grid: { headers, rows }, titleRows: best, totalRows: body.length - rows.length };
+}
+
 const num = (v: string | undefined) => { const n = Number(String(v ?? '').trim().replace(/,(?=\d{3}\b)/g, '')); return Number.isFinite(n) ? n : NaN; };
 const iso = (v: string) => parseDate(v)?.iso ?? v.trim().slice(0, 10);
 // El turno nocturno cruza la medianoche: calidad puede anotar el lote con el día siguiente.
@@ -101,6 +113,9 @@ export function consolidate(prod: Grid, qual: Grid, stops: Grid | null, rejectLi
 
  const ex: Exception[] = [];
  const at = (l: { fecha: string; turno: string; linea: string; lote: string }) => `${l.linea} · ${l.fecha} · ${l.turno} · lote ${l.lote}`;
+ // Un lote capturado dos veces infla la producción; se avisa una vez por lote.
+ const twice = new Set<string>();
+ lots.forEach((l, i) => { if (!twice.has(l.key) && lots.findIndex(o => o.key === l.key) !== i) { twice.add(l.key); ex.push({ rule: 'duplicado', severity: 'media', text: ['El mismo lote aparece dos veces en producción', 'The same batch appears twice in production'], where: at(l) }); } });
  lots.forEach(l => {
   if (l.rev === undefined) ex.push({ rule: 'sin-inspeccion', severity: 'alta', text: ['Lote producido sin inspección de calidad', 'Batch produced without quality inspection'], where: at(l) });
   else {
@@ -125,7 +140,17 @@ export function consolidate(prod: Grid, qual: Grid, stops: Grid | null, rejectLi
  return { shifts, lots, orphans, stops: stopList, exceptions: ex.sort((a, b) => (a.severity === 'alta' ? 0 : 1) - (b.severity === 'alta' ? 0 : 1)), lines, total: { A, R, Q, oee: A * R * Q }, pareto: [...causes].sort((a, b) => b[1] - a[1]) };
 }
 
-// Resumen para mandar por WhatsApp o pegar en un correo.
+// Lo que se guarda de cada reporte para compararlo después: periodo, OEE y cuántas cosas no cuadraron.
+export type Snapshot = { id: string; at: number; from: string; to: string; lots: number; oee: number; A: number; R: number; Q: number; lines: { linea: string; oee: number }[]; exceptions: number; stopMin: number };
+export function snapshot(r: Result, at = Date.now()): Snapshot {
+ const days = r.lots.map(l => l.fecha).filter(Boolean).sort(), from = days[0] ?? '', to = days[days.length - 1] ?? '';
+ return { id: `${from}|${to}|${r.lots.length}`, at, from, to, lots: r.lots.length, ...r.total, lines: r.lines.map(l => ({ linea: l.linea, oee: l.oee })), exceptions: r.exceptions.length, stopMin: r.stops.reduce((s, x) => s + x.min, 0) };
+}
+// Si el mismo periodo se vuelve a guardar (porque se corrigió un archivo), reemplaza al anterior; lo más reciente primero.
+export function addSnapshot(list: Snapshot[], s: Snapshot, max = 40): Snapshot[] {
+ return [s, ...list.filter(x => x.id !== s.id)].sort((a, b) => b.to.localeCompare(a.to) || b.at - a.at).slice(0, max);
+}
+
 // Rechazos por defecto (Pareto de calidad): cuántas piezas malas deja cada defecto, de mayor a menor.
 export function defectPareto(r: Result): [string, number][] {
  const m = new Map<string, number>();
