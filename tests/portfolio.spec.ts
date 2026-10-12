@@ -17,8 +17,8 @@ test('portfolio has working bilingual navigation, project pages and CV', async (
   await expect(page).toHaveURL(/\/proyectos\/punto-u$/);
   await expect(page.getByRole('heading',{level:1})).toHaveText('Punto U');
   await expect(page.getByRole('heading',{name:'Cómo funciona'})).toBeVisible();
-  await expect(page.locator('.ps-how li')).toHaveCount(3);
-  await page.locator('.ps-next').click();
+  await expect(page.locator('.how li')).toHaveCount(3);
+  await page.locator('.case-next a').click();
   await expect(page).toHaveURL(/\/proyectos\/la-casa-del-angel$/);
   expect((await request.get('/cv/Bruno-Salas-ES.pdf')).status()).toBe(200);
   expect((await request.get('/og.png')).status()).toBe(200);
@@ -56,9 +56,10 @@ test('landing stays a summary: heavy demos live on their own pages', async ({pag
  await page.locator('.hs-tabs button').nth(1).click();
  await page.locator('.hs-pos0 .ha-nav').getByRole('button',{name:'Completo'}).click();
  await expect(page.locator('.hs-pos0 .ha-csv-full')).toBeVisible();
- await page.locator('.hs-pos0 .ha-nav').getByRole('link',{name:'Abrir'}).click();
- await expect(page).toHaveURL(/\/proyectos\/analizador-csv\/app$/);
- await expect(page.locator('#demo')).toBeInViewport();
+ // La app se abre en otra pestaña, como sitio aparte
+ const [app] = await Promise.all([page.waitForEvent('popup'), page.locator('.hs-pos0 .ha-nav').getByRole('link',{name:'Abrir'}).click()]);
+ await expect(app).toHaveURL(/\/proyectos\/analizador-csv\/app$/);
+ await expect(app.locator('#demo')).toBeInViewport();
 });
 
 test('shift handover: an incident cannot be closed without evidence, and the handover lists what is open', async ({page,request})=>{

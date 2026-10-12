@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { flushSync } from 'react-dom';
-import { ArrowUpRight, ArrowDown, ArrowLeft, ArrowRight, DownloadSimple, GithubLogo, EnvelopeSimple, LinkedinLogo, WhatsappLogo, Pause, Play, AndroidLogo, MusicNotes } from '@phosphor-icons/react';
+import { ArrowUpRight, ArrowDown, ArrowLeft, ArrowRight, DownloadSimple, GithubLogo, EnvelopeSimple, LinkedinLogo, WhatsappLogo, Pause, Play, AndroidLogo, Globe, MusicNotes } from '@phosphor-icons/react';
 import { copy, certificates } from './content';
 import type { Lang } from './content';
 import { professional } from './professional-content';
@@ -35,8 +35,9 @@ import { usePaging, glide, glideTo, zoneList } from './paging';
 import { StampPage, NfcSetup, Qr, bizLink, bizFrom } from './Stamp';
 import './brand.css';
 import './identity.css';
-import { ProjectSite, ProjectApp } from './ProjectSite';
-import type { Native } from './ProjectSite';
+import AppShell, { BRANDS } from './AppShell';
+
+type Native = { es: string; en: string; href?: string; android?: boolean };
 
 const PROJECT_ORDER = ['club', 'csv', 'planta', 'spc', 'inventario', 'turno', 'agente', 'vibe', 'punto', 'casa'];
 // En la portada van al frente los que resuelven un problema de negocio; el hackathon y la app de estudiantes, abajo.
@@ -67,7 +68,8 @@ function useNavigation() {
   const render = () => flushSync(() => setTick(n => n + 1));
   const land = (hash: string) => { if (hash) document.getElementById(hash.slice(1))?.scrollIntoView(); else scrollTo(0, 0); };
   const onClick = (e: MouseEvent) => {
-   if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+   if (document.documentElement.classList.contains('is-app')) return;
+  if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
    const a = (e.target as Element).closest?.('a');
    if (!a || a.target || a.hasAttribute('download')) return;
    const url = new URL(a.href, location.href);
@@ -96,17 +98,11 @@ export default function App() {
  useEffect(() => { document.documentElement.lang = lang; try { localStorage.setItem('bruno-language', lang); } catch { /* Preferencia opcional. */ } }, [lang]);
  useEffect(() => { document.documentElement.dataset.motion = paused ? 'paused' : 'active'; }, [paused]);
  useEffect(() => { const pref = matchMedia('(prefers-reduced-motion: reduce)'); const change = () => setPaused(pref.matches); pref.addEventListener('change', change); return () => pref.removeEventListener('change', change); }, []);
- useEffect(() => { if (r.page === 'sello' || r.page === 'menu') return; document.title = r.page === 'about' ? (es ? 'Sobre mí — Bruno Salas' : 'About me — Bruno Salas') : r.page === 'nfc' ? (es ? 'Arma tu tarjeta NFC — Bruno Salas' : 'Build your NFC card — Bruno Salas') : project ? `${project.title} — Bruno Salas` : (es ? 'Bruno Salas — Web, datos y automatización' : 'Bruno Salas — Web, data & automation'); }, [project, es, r.page]);
+ useEffect(() => { if (r.page === 'sello' || r.page === 'menu' || (r.page === 'project' && r.app)) return; document.title = r.page === 'about' ? (es ? 'Sobre mí — Bruno Salas' : 'About me — Bruno Salas') : r.page === 'nfc' ? (es ? 'Arma tu tarjeta NFC — Bruno Salas' : 'Build your NFC card — Bruno Salas') : project ? `${project.title} — Bruno Salas` : (es ? 'Bruno Salas — Web, datos y automatización' : 'Bruno Salas — Web, data & automation'); }, [project, es, r.page]);
  const at = (id: string) => home ? `#${id}` : `/#${id}`;
  if (r.page === 'sello') return <StampPage lang={lang}/>;
  if (r.page === 'menu') return <Suspense fallback={null}><MenuPage lang={lang}/></Suspense>;
- if (project) {
-  const next = projects[(projects.indexOf(project) + 1) % projects.length];
-  const own = HAS_APP.includes(project.id);
-  if (r.page === 'project' && r.app && own) return <ProjectApp lang={lang} setLang={setLang} project={project}><Suspense fallback={<p className="case-loading">{es ? 'Cargando…' : 'Loading…'}</p>}><Demo lang={lang} project={project}/></Suspense></ProjectApp>;
-  return <ProjectSite lang={lang} setLang={setLang} project={project} next={next} appHref={own ? `/proyectos/${project.slug}/app` : project.link} native={NATIVE[project.id]} repo={REPO[project.id]}
-   visual={project.id === 'club' ? <NfcTap lang={lang}/> : <Media lang={lang} project={project}/>}/>;
- }
+ if (project && r.app && HAS_APP.includes(project.id)) return <AppShell id={project.id} lang={lang} setLang={setLang}><Suspense fallback={<p className="case-loading">{es ? 'Cargando…' : 'Loading…'}</p>}><Demo lang={lang} project={project}/></Suspense></AppShell>;
 
  return <>
   <a className="skip-link" href="#main">{c.skip}</a>
@@ -120,8 +116,8 @@ export default function App() {
     <a className="topbar-cta" href={at('contact')}>{c.contact}</a>
    </div>
   </div></header>
-  {r.page === 'about' ? <Hobbies lang={lang}/> : r.page === 'nfc' ? <NfcPage lang={lang}/> : <Home lang={lang} paused={paused} projects={projects}/>}
-  <ZoneNav lang={lang} routeKey={r.page}/>
+  {r.page === 'about' ? <Hobbies lang={lang}/> : r.page === 'nfc' ? <NfcPage lang={lang}/> : project ? <ProjectPage lang={lang} project={project} projects={projects}/> : <Home lang={lang} paused={paused} projects={projects}/>}
+  <ZoneNav lang={lang} routeKey={`${r.page}:${project?.id ?? ''}`}/>
   {pg.paged && <ZoneDots labels={pg.labels} current={pg.current}/>}
   <footer className="site-footer wrap" aria-label={es ? 'Pie del portafolio' : 'Portfolio footer'}>© {new Date().getFullYear()} Bruno Salas Rodríguez <span>{c.location}</span></footer>
  </>;
@@ -197,7 +193,7 @@ function Home({ lang, paused, projects }: { lang: Lang; paused: boolean; project
    </div>
    <div className="client-works" data-zone={es ? 'Trabajos' : 'Client work'}><h3>{p.worksTitle}</h3>{works.map(x => <article key={x.id} className="client-work">
     <a className="client-shot" href={x.link} {...external(x.link)} aria-label={`${x.title} — ${x.action}`}><CasaPreview lang={lang}/></a>
-    <div className="client-copy"><em>{x.kind}</em><strong>{x.title}</strong><p>{es ? 'Residencia para adultos mayores en Celaya: su página y su portal de cuidados, con app para Android.' : 'A senior residence in Celaya: its website and care portal, with an Android app.'}</p>
+    <div className="client-copy"><em>{x.kind}</em><strong>{x.title}</strong><p>{es ? 'Residencia para adultos mayores en Celaya, con tres casas y enfermería las 24 horas. Su página, donde las familias conocen los espacios y agendan una visita, y su portal de cuidados con app para Android: el personal registra el día de cada residente y cada familia ve el de los suyos.' : 'A senior residence in Celaya with three houses and round-the-clock nursing. Its website, where families see the spaces and book a visit, and its care portal with an Android app: staff log each resident’s day and every family sees their own.'}</p>
      <div className="client-links"><a className="button primary" href={x.link} {...external(x.link)}>{x.action}<ArrowUpRight size={18}/></a><a className="inline-link" href={`/proyectos/${x.slug}`} data-title={x.title}>{es ? 'Ver presentación' : 'See overview'}<ArrowRight size={18}/></a></div></div>
    </article>)}</div>
    <div className="experience-grid" data-zone={es ? 'Experiencia' : 'Experience'}><div><h3>{c.timelineTitle}</h3>{c.experience.map(e => <div className="experience-row" key={e.year}><span className="year">{e.year}</span><div><h4>{e.role}</h4><span className="org">{e.org}</span><p>{e.text}</p></div></div>)}</div><div><h3>{c.learning}</h3>{certificates.map(cert => <a className="certificate" key={cert.title} href={cert.url} {...external(cert.url)}><div><h4>{cert.title}</h4><p>{cert.org}</p><span>{cert.year}</span></div><ArrowUpRight size={22}/></a>)}</div></div>
@@ -250,6 +246,73 @@ function Demo({ lang, project }: { lang: Lang; project: Project }) {
  </>;
 }
 
+function ProjectPage({ lang, project, projects }: { lang: Lang; project: Project; projects: Project[] }) {
+ const es = lang === 'es';
+ const next = projects[(projects.indexOf(project) + 1) % projects.length];
+ useEffect(() => { const d = location.hash && document.getElementById(location.hash.slice(1)); if (d) d.scrollIntoView(); else scrollTo(0, 0); }, [project.id]);
+ return <main id="main" data-c className={`case case-${project.id} project-${project.id}`} aria-label={project.title}>
+  <div className="wrap">
+   <a className="case-back" href="/#projects" data-title={es ? 'Proyectos' : 'Projects'}><ArrowLeft size={18}/>{es ? 'Todos los proyectos' : 'All projects'}</a>
+   <header className="case-head" data-zone={project.title}>
+    <div><span className="project-kind">{project.kind}{unfinished(project.status)}</span><h1>{project.title}</h1><p className="pitch">{project.pitch}</p><p>{project.desc}</p>
+     {project.metrics.length > 0 && <dl className="project-metrics case-metrics">{project.metrics.map(([value, label]) => <div key={value + label}><dt>{value}</dt><dd>{label}</dd></div>)}</dl>}
+     <div className="tags">{project.tags.map(t => <span key={t}>{t}</span>)}</div>
+     {(!OTHER.includes(project.id) || project.id === 'spc') && !CLIENT.includes(project.id) ? <p className="web-note"><Globe size={17} aria-hidden="true"/>{es ? 'Versión web: adaptada para funcionar en el navegador.' : 'Web version: adapted to run in the browser.'}</p> : null}
+     {HAS_APP.includes(project.id) ? <a className="button primary case-action" href={`/proyectos/${project.slug}/app`} target="_blank" rel="noopener">{es ? 'Abrir la app' : 'Open the app'}<ArrowUpRight size={18}/></a> : project.link.startsWith('http') && <a className="button primary case-action" href={project.link} {...external(project.link)}>{project.action}<ArrowUpRight size={18}/></a>}
+     {NATIVE[project.id] && (NATIVE[project.id].href
+      ? <a className="native-note" href={NATIVE[project.id].href} {...external('https://github.com')}><strong>{es ? NATIVE[project.id].es : NATIVE[project.id].en}</strong><span>{es ? 'Descargar' : 'Download'}<ArrowUpRight size={14}/></span></a>
+      : <p className="native-note is-dev"><strong>{es ? NATIVE[project.id].es : NATIVE[project.id].en}</strong><span>{es ? 'En desarrollo' : 'In development'}</span></p>)}
+     {REPO[project.id] && <a className="inline-link case-code" href={`https://github.com/Brunich/${REPO[project.id]}`} {...external('https://github.com')}><GithubLogo size={20}/>{es ? 'Código en GitHub' : 'Code on GitHub'}<ArrowUpRight size={16}/></a>}
+    </div>
+    <div className={`case-visual media-${project.id}`} aria-hidden="true">{project.id === 'club' ? <NfcTap lang={lang}/> : <Media lang={lang} project={project}/>}</div>
+   </header>
+   <section className="how" data-zone={es ? 'Cómo funciona' : 'How it works'} aria-label={es ? 'Cómo funciona' : 'How it works'}><h2>{es ? 'Cómo funciona' : 'How it works'}</h2><ol style={{ '--n': project.how.length } as React.CSSProperties}>{project.how.map(([title, text], i) => <li key={title}><span>{String(i + 1).padStart(2, '0')}</span><strong>{title}</strong><p>{text}</p></li>)}</ol></section>
+  </div>
+  {HAS_APP.includes(project.id) && <section id="demo" className="case-launch wrap" data-zone={es ? 'Pruébalo' : 'Try it'} aria-label={es ? 'Pruébalo' : 'Try it'}>
+   <div><h2>{es ? 'Pruébalo' : 'Try it'}</h2><p>{es ? `Se abre en otra pestaña como ${BRANDS[project.id].name}, la app por su cuenta, con datos de ejemplo.` : `It opens in a new tab as ${BRANDS[project.id].name}, the app on its own, with sample data.`}</p></div>
+   <a className="button primary" href={`/proyectos/${project.slug}/app`} target="_blank" rel="noopener">{es ? 'Abrir la app' : 'Open the app'}<ArrowUpRight size={18}/></a>
+  </section>}
+  {(project.id === 'punto' || project.id === 'vibe') && <section id="demo" className="case-demo" data-zone={es ? 'Pruébalo' : 'Try it'} aria-label={es ? 'Pruébalo' : 'Try it'}><div className="wrap">
+   {project.id === 'punto' && <PuntoDemo lang={lang} link={project.link}/>}
+   {project.id === 'vibe' && <div className="demo-vibe"><div className="case-demo-head"><h2>{es ? 'Pruébalo aquí mismo.' : 'Try it right here.'}</h2><p>{es ? 'Toca «Un RPG en Godot» o suelta la carpeta de tu proyecto. Todo corre en tu navegador.' : 'Tap “Un RPG en Godot” or drop your own project folder. Everything runs in your browser.'}</p></div><LiveOrShots probe={project.link} lang={lang} shots={[['/media/vibemap-mapa.webp', 1210, 350, es ? 'Mapa mental de VibeMap' : 'VibeMap mind map']]}><div className="case-browser"><span className="case-browser-bar"><i/><i/><i/><b>vibemap-brunich.vercel.app</b></span><iframe src={project.link} title={es ? 'VibeMap en vivo' : 'VibeMap live'} loading="lazy"/></div></LiveOrShots><p className="demo-vibe-links"><a className="inline-link" href={project.link} {...external(project.link)}>{es ? 'Abrir en otra pestaña' : 'Open in a new tab'}<ArrowUpRight size={18}/></a><a className="inline-link" href="https://github.com/Brunich/VibeMap" {...external('https://github.com/Brunich/VibeMap')}>{es ? 'Ver el código' : 'View the code'}<ArrowUpRight size={18}/></a></p></div>}
+  </div></section>}
+  {!OTHER.includes(project.id) && <aside className={`case-cta wrap project-${project.id}`} aria-label={es ? 'Contacto' : 'Contact'}><div><strong>{es ? '¿Te sirve para tu negocio?' : 'Useful for your business?'}</strong><span>{es ? 'Lo adapto a tus datos y te lo dejo funcionando.' : 'I adapt it to your data and leave it running.'}</span></div><a className="button primary" href={`mailto:${personal.email}?subject=${encodeURIComponent(project.title)}`}>{es ? 'Escríbeme' : 'Write to me'}<ArrowUpRight size={18}/></a></aside>}
+  <nav data-c data-zone={es ? 'Siguiente' : 'Next'} className={`case-next wrap project-${next.id}`} aria-label={es ? 'Siguiente proyecto' : 'Next project'}><a href={`/proyectos/${next.slug}`} data-title={next.title}><span>{es ? 'Siguiente proyecto' : 'Next project'}</span><strong>{next.title}</strong><ArrowRight size={26}/></a></nav>
+ </main>;
+}
+
+
+// Una demo en vivo depende de otro servidor: si no contesta, se enseñan capturas y se dice por qué, en vez de una app vacía.
+const PUNTO_API = 'https://wugsixqhygqvamgywymn.supabase.co/rest/v1/';
+function useLive(probe: string) {
+ const [live, setLive] = useState<boolean | null>(null);
+ useEffect(() => {
+  const stop = new AbortController(), timer = setTimeout(() => stop.abort(), 6000);
+  fetch(probe, { mode: 'no-cors', signal: stop.signal, cache: 'no-store' }).then(() => setLive(true), () => setLive(false)).finally(() => clearTimeout(timer));
+  return () => { clearTimeout(timer); stop.abort(); };
+ }, [probe]);
+ return live;
+}
+function LiveOrShots({ probe, shots, lang, children, live: given }: { probe: string; shots: [string, number, number, string][]; lang: Lang; children: React.ReactNode; live?: boolean | null }) {
+ const es = lang === 'es';
+ const probed = useLive(probe), live = given === undefined ? probed : given;
+ if (live !== false) return <>{children}</>;
+ return <div className="live-off">
+  <p className="live-note" role="status">{es ? 'El servidor de esta demo no está respondiendo ahora mismo, así que te enseño capturas de la app real.' : 'This demo’s server is not responding right now, so here are screenshots of the real app.'}</p>
+  <div className={`live-shots n${shots.length}`}>{shots.map(([src, w, h, alt]) => <figure key={src}><img src={src} width={w} height={h} alt={alt} loading="lazy"/><figcaption>{alt}</figcaption></figure>)}</div>
+ </div>;
+}
+
+function PuntoDemo({ lang, link }: { lang: Lang; link: string }) {
+ const es = lang === 'es', live = useLive(PUNTO_API);
+ return <div className="demo-punto">
+  <LiveOrShots probe={PUNTO_API} live={live} lang={lang} shots={[['/media/punto-u-mapa.webp', 780, 2000, es ? 'Mapa del campus con misiones' : 'Campus map with missions'], ['/media/punto-u.webp', 600, 1300, es ? 'Crear perfil' : 'Create a profile']]}><div className="case-phone"><iframe src={link} title={es ? 'Punto U en vivo' : 'Punto U live'}/></div></LiveOrShots>
+  <div className="demo-punto-copy">{live === false
+   ? <><h2>{es ? 'Así se ve la app.' : 'This is the app.'}</h2><p>{es ? 'El mapa del campus con las misiones abiertas y el registro con matrícula y facultad. La versión en vivo vuelve cuando su servidor esté arriba.' : 'The campus map with open missions and sign-up with student ID and school. The live version returns once its server is back up.'}</p></>
+   : <><h2>{es ? 'Pruébala aquí mismo.' : 'Try it right here.'}</h2><p>{es ? 'La app real, en vivo: crea tu perfil y publica una misión.' : 'The real app, live: create your profile and post a mission.'}</p><a className="inline-link" href={link} target="_blank" rel="noreferrer">{es ? 'Abrir en otra pestaña' : 'Open in a new tab'}<ArrowUpRight size={18}/></a></>}</div>
+ </div>;
+}
+
 // La tarjeta real: un QR que abre la misma página que abriría el chip, y el armador para tu negocio.
 function ClubReal({ lang }: { lang: Lang }) {
  const es = lang === 'es';
@@ -259,13 +322,13 @@ function ClubReal({ lang }: { lang: Lang }) {
   <Qr text={demo} label={es ? 'QR para abrir la tarjeta de sellos' : 'QR to open the stamp card'}/>
   <div><span className="kicker">{es ? 'Pruébalo con tu celular' : 'Try it on your phone'}</span><h3>{es ? 'Escanéalo: es lo mismo que tocar el chip.' : 'Scan it: same as tapping the chip.'}</h3>
    <p>{es ? 'Se abre la tarjeta de sellos real con el sello de hoy. Vuelve mañana y suma otro; al llenarla, el premio.' : 'The real stamp card opens with today’s stamp. Come back tomorrow for another; fill it for the reward.'}</p>
-   <div className="club-real-links"><a className="button primary" href="/nfc" data-title={es ? 'Tu tarjeta NFC' : 'Your NFC card'}>{es ? 'Arma la de tu negocio' : 'Build one for your business'}<ArrowRight size={18}/></a><a className="inline-link" href={demo} target="_blank" rel="noreferrer">{es ? 'Abrirla aquí' : 'Open it here'}<ArrowUpRight size={18}/></a></div></div>
+   <div className="club-real-links"><a className="button primary" href="/nfc" target="_blank" rel="noopener">{es ? 'Arma la de tu negocio' : 'Build one for your business'}<ArrowRight size={18}/></a><a className="inline-link" href={demo} target="_blank" rel="noreferrer">{es ? 'Abrirla aquí' : 'Open it here'}<ArrowUpRight size={18}/></a></div></div>
  </div>
  <div className="club-real club-menu">
   <Qr text={menuDemo} label={es ? 'QR para abrir el menú de ejemplo' : 'QR to open the sample menu'}/>
   <div><span className="kicker">{es ? 'El mismo chip, el menú' : 'Same chip, the menu'}</span><h3>{es ? 'La carta en el celular y el pedido por WhatsApp.' : 'The menu on the phone, the order via WhatsApp.'}</h3>
    <p>{es ? 'El cliente ve platillos, precios y alérgenos, arma su pedido y lo manda con el número de mesa. El negocio arma su menú en un minuto y no paga servidor.' : 'The customer sees dishes, prices and allergens, builds an order and sends it with the table number. The business builds its menu in a minute, with no server to pay for.'}</p>
-   <div className="club-real-links"><a className="button primary" href="/nfc#menu" data-title={es ? 'Tu menú' : 'Your menu'}>{es ? 'Arma tu menú' : 'Build your menu'}<ArrowRight size={18}/></a><a className="inline-link" href={menuDemo} target="_blank" rel="noreferrer">{es ? 'Ver el menú de ejemplo' : 'See the sample menu'}<ArrowUpRight size={18}/></a></div></div>
+   <div className="club-real-links"><a className="button primary" href="/nfc#menu" target="_blank" rel="noopener">{es ? 'Arma tu menú' : 'Build your menu'}<ArrowRight size={18}/></a><a className="inline-link" href={menuDemo} target="_blank" rel="noreferrer">{es ? 'Ver el menú de ejemplo' : 'See the sample menu'}<ArrowUpRight size={18}/></a></div></div>
  </div></>;
 }
 
