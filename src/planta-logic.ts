@@ -192,7 +192,7 @@ const QUAL: [string, string, string, string, number, number, string][] = [
 export const SAMPLE_QUAL = ['fecha,turno,linea,lote,piezas_revisadas,piezas_rechazadas,defecto_principal', ...QUAL.map(r => r.join(','))].join('\n');
 export const SAMPLE_STOPS = ['fecha,turno,linea,inicio,minutos,causa', ...[
  ['2026-03-09', 'Matutino', 'L2', '08:40', 18, 'Cambio de modelo'], ['2026-03-09', 'Vespertino', 'L2', '16:10', 64, 'Falla en robot de soldadura'], ['2026-03-09', 'Vespertino', 'L1', '19:05', 22, 'Falta de material'],
- ['2026-03-09', 'Nocturno', 'L3', '01:30', 41, ''], ['2026-03-09', 'Nocturno', 'L3', '04:15', 15, 'Ajuste de herramental'], ['2026-03-10', 'Matutino', 'L3', '09:20', 20, 'Cambio de modelo'],
+ ['2026-03-09', 'Nocturno', 'L3', '01:30', 41, ''], ['2026-03-09', 'Nocturno', 'L3', '04:15', 15, 'Ajuste de herramental'], ['2026-03-10', 'Matutino', 'L1', '07:40', 25, 'Llave de torque descalibrada (INC-232)'], ['2026-03-10', 'Matutino', 'L3', '09:20', 20, 'Cambio de modelo'],
  ['2026-03-10', 'Vespertino', 'L1', '15:40', 48, 'Falla en robot de soldadura'], ['2026-03-10', 'Vespertino', 'L2', '18:30', 12, 'Falta de material'], ['2026-03-10', 'Nocturno', 'L2', '02:00', 16, 'Ajuste de herramental'],
  ['2026-03-10', 'Nocturno', 'L1', '23:50', 10, 'Falta de material'],
 ].map(r => r.join(','))].join('\n');

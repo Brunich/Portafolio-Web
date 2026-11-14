@@ -7,9 +7,9 @@ import type { Move, Mode, Product } from './inventario-logic';
 import './inventario.css';
 
 // Inventario con la cámara del celular: cada código escaneado suma, resta o se cuenta.
-// Todo se guarda en este navegador; la lista de compras sale sola de lo que está bajo el mínimo.
-// v2: la tiendita trae más productos y lo de granel; lo guardado con la lista corta se reinicia.
-const KEY = 'bruno-inventario-v2';
+// Todo se guarda en este navegador; la lista de reposición sale sola de lo que está bajo el mínimo.
+// v3: el almacén de consumibles reemplazó a la tiendita; lo guardado con los productos viejos se reinicia.
+const KEY = 'bruno-inventario-v3';
 type Store = { products: Product[]; moves: Move[] };
 const load = (): Store => { try { const s = JSON.parse(localStorage.getItem(KEY) ?? ''); if (Array.isArray(s.products)) { const known = new Map(SAMPLE.map(p => [p.code, p.price])); return { ...s, products: s.products.map((p: Product) => p.price === undefined && known.has(p.code) ? { ...p, price: known.get(p.code) } : p) }; } } catch { /* tienda de ejemplo */ } return { products: SAMPLE, moves: [] }; };
 
@@ -33,7 +33,7 @@ export default function Inventario({ lang }: { lang: 'es' | 'en' }) {
  const [open, setOpen] = useState<string | null>(null);
  const [removed, setRemoved] = useState<{ p: Product; at: number } | null>(null);
  const sheet = useRef<HTMLElement>(null);
- // Llegaste por el QR de una etiqueta: el producto queda arriba, listo para vender o surtir.
+ // Llegaste por el QR de una etiqueta: el producto queda arriba, listo para dar salida o surtir.
  const [picked, setPicked] = useState<string | null>(fromLink);
  const pickRef = useRef<HTMLElement>(null);
  const video = useRef<HTMLVideoElement>(null);
@@ -111,7 +111,7 @@ export default function Inventario({ lang }: { lang: 'es' | 'en' }) {
  }
  const setField = (code: string, p: Partial<Product>) => setStore(s => ({ ...s, products: s.products.map(x => x.code === code ? { ...x, ...p } : x) }));
  function closeCount() { setStore(s => ({ products: s.products.map(p => p.counted === undefined ? p : { ...p, stock: p.counted, counted: undefined }), moves: [...s.products.filter(p => p.counted !== undefined && p.counted !== p.stock).map(p => ({ at: Date.now(), code: p.code, name: p.name, delta: p.counted! - p.stock, mode: 'count' as Mode })), ...s.moves].slice(0, 300) })); setView('all'); }
- const list = t('Lista de compras', 'Shopping list') + '\n' + low.map(p => `• ${p.name}: ${p.order}`).join('\n');
+ const list = t('Lista de reposición', 'Reorder list') + '\n' + low.map(p => `• ${p.name}: ${p.order}`).join('\n');
  const csv = () => { const url = URL.createObjectURL(new Blob(['﻿' + ['codigo,producto,existencias,minimo,precio', ...store.products.map(p => `${p.code},"${p.name.replace(/"/g, '""')}",${p.stock},${p.min},${p.price ?? ''}`)].join('\r\n')], { type: 'text/csv;charset=utf-8' })); const a = document.createElement('a'); a.href = url; a.download = 'inventario.csv'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); };
  const q = find.trim().toLocaleLowerCase('es').normalize('NFD').replace(/[̀-ͯ]/g, '');
  const matchFind = (p: Product) => !q || p.code.toLowerCase().includes(q) || p.name.toLocaleLowerCase('es').normalize('NFD').replace(/[̀-ͯ]/g, '').includes(q);
@@ -127,28 +127,28 @@ export default function Inventario({ lang }: { lang: 'es' | 'en' }) {
   {pickedP && <section className="inv-picked" ref={pickRef} aria-label={t('Producto escaneado', 'Scanned product')}>
    <div className="inv-picked-name"><small>{t('Escaneaste', 'You scanned')}</small><strong>{pickedP.name}</strong><span>{t(`Quedan ${pickedP.stock}`, `${pickedP.stock} left`)}{pickedP.price ? ` · ${money(pickedP.price)}` : ''}</span></div>
    <div className="inv-picked-actions">
-    <button className="m-out" onClick={() => quick('out')}><Minus size={18} weight="bold"/>{t('Vendí 1', 'Sold 1')}</button>
+    <button className="m-out" onClick={() => quick('out')}><Minus size={18} weight="bold"/>{t('Salió 1', 'Issued 1')}</button>
     <button className="m-in" onClick={() => quick('in')}><Plus size={18} weight="bold"/>{t('Llegó 1', 'Got 1 in')}</button>
     <button className="inv-picked-close" aria-label={t('Cerrar', 'Close')} onClick={() => setPicked(null)}><X size={18}/></button>
    </div>
   </section>}
-  <ol className="inv-how" aria-label={t('Cómo se usa en la tienda', 'How the store uses it')}>
-   <li><b>1</b>{t('Imprime las etiquetas y pégalas en el anaquel. Lo de granel lleva su QR en el bote o junto a la báscula.', 'Print the labels for the shelf. Loose goods get their QR on the jar or next to the scale.')}</li>
-   <li><b>2</b>{t('Cuando llega el proveedor, modo Entrada y escaneas. Al cobrar, Venta. Con el QR basta la cámara normal del celular.', 'When the supplier arrives, Stock in and scan. When you charge, Sale. With the QR any phone camera works.')}</li>
+  <ol className="inv-how" aria-label={t('Cómo se usa en el almacén', 'How the stockroom uses it')}>
+   <li><b>1</b>{t('Imprime las etiquetas y pégalas en el anaquel. Lo que se surte suelto lleva su QR en el bote o en la repisa.', 'Print the labels for the shelf. Loose items get their QR on the container or the shelf edge.')}</li>
+   <li><b>2</b>{t('Cuando llega el proveedor, modo Entrada y escaneas. Al entregar material a una línea, Salida. Con el QR basta la cámara normal del celular.', 'When the supplier delivers, Stock in and scan. When material goes out to a line, Issue. With the QR any phone camera works.')}</li>
    <li><b>3</b>{t('En Resurtir sale lo que falta y se lo mandas al proveedor por WhatsApp.', 'Restock lists what is missing and sends it to the supplier on WhatsApp.')}</li>
   </ol>
   <dl className="inv-kpis">
    <div><dt>{t('Productos', 'Products')}</dt><dd>{store.products.length}</dd></div>
-   <div><dt>{t('Piezas en tienda', 'Units in store')}</dt><dd>{units}</dd></div>
+   <div><dt>{t('Piezas en almacén', 'Units in stock')}</dt><dd>{units}</dd></div>
    <div className={low.length ? 'warn' : ''}><dt>{low.length > 0 && <WarningCircle size={14} weight="fill" aria-hidden="true"/>}{t('Bajo el mínimo', 'Below minimum')}</dt><dd>{low.length}</dd></div>
-   <div><dt>{t('Valor en tienda', 'Stock value')}</dt><dd>{money(stockValue(store.products))}</dd></div>
-   <div><dt>{t('Vendido hoy', 'Sold today')}</dt><dd>{money(soldToday(store.products, store.moves))}</dd></div>
+   <div><dt>{t('Valor en almacén', 'Stock value')}</dt><dd>{money(stockValue(store.products))}</dd></div>
+   <div><dt>{t('Salidas de hoy', 'Issued today')}</dt><dd>{money(soldToday(store.products, store.moves))}</dd></div>
   </dl>
 
   <div className="inv-main">
    <section className="inv-scan">
     <div className="inv-modes" role="radiogroup" aria-label={t('Qué hace cada escaneo', 'What each scan does')}>
-     {([['in', t('Entrada', 'Stock in'), <Plus key="i" size={16} weight="bold"/>], ['out', t('Venta / salida', 'Sale / out'), <Minus key="o" size={16} weight="bold"/>], ['count', t('Conteo físico', 'Stock count'), <ListChecks key="c" size={16}/>]] as const).map(([k, label, icon]) => <button key={k} role="radio" aria-checked={mode === k} className={`m-${k}`} onClick={() => { setMode(k); if (k === 'count') setView('count'); }}>{icon}{label}</button>)}
+     {([['in', t('Entrada', 'Stock in'), <Plus key="i" size={16} weight="bold"/>], ['out', t('Salida', 'Issue'), <Minus key="o" size={16} weight="bold"/>], ['count', t('Conteo físico', 'Stock count'), <ListChecks key="c" size={16}/>]] as const).map(([k, label, icon]) => <button key={k} role="radio" aria-checked={mode === k} className={`m-${k}`} onClick={() => { setMode(k); if (k === 'count') setView('count'); }}>{icon}{label}</button>)}
     </div>
     <div className={`inv-video${camera ? ' on' : ''}`}>
      <video ref={video} muted playsInline/>
@@ -200,9 +200,9 @@ export default function Inventario({ lang }: { lang: 'es' | 'en' }) {
        <div className="inv-code-big">
         <div className="inv-qr" role="img" aria-label={t(`QR de ${p.name}`, `QR for ${p.name}`)} dangerouslySetInnerHTML={{ __html: qrSvg(scanUrl(location.origin, p.code)) }}/>
         {printable(p.code) && <div className="inv-bc" dangerouslySetInnerHTML={{ __html: labelSvg(p) }}/>}
-        <p>{t('Escanéalo con la cámara de tu celular: se abre este producto para venderlo o surtirlo.', 'Scan it with your phone camera: it opens this product to sell or restock it.')}</p>
+        <p>{t('Escanéalo con la cámara de tu celular: se abre este producto para dar salida o surtirlo.', 'Scan it with your phone camera: it opens this product to issue or restock it.')}</p>
        </div>
-       {hist.length ? <ol className="inv-log">{hist.map(m => <li key={m.at + m.code + m.delta}><span className={m.delta > 0 ? 'up' : m.delta < 0 ? 'down' : ''}>{m.mode === 'count' ? (m.delta ? `${m.delta > 0 ? '+' : ''}${m.delta}` : '✓') : m.delta > 0 ? '+1' : '−1'}</span>{m.mode === 'in' ? t('Entrada', 'In') : m.mode === 'out' ? t('Venta', 'Sale') : t('Ajuste por conteo', 'Count adjustment')}<time>{new Date(m.at).toLocaleString(es ? 'es-MX' : 'en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</time></li>)}</ol> : <p className="inv-empty">{t('Sin movimientos todavía.', 'No moves yet.')}</p>}
+       {hist.length ? <ol className="inv-log">{hist.map(m => <li key={m.at + m.code + m.delta}><span className={m.delta > 0 ? 'up' : m.delta < 0 ? 'down' : ''}>{m.mode === 'count' ? (m.delta ? `${m.delta > 0 ? '+' : ''}${m.delta}` : '✓') : m.delta > 0 ? '+1' : '−1'}</span>{m.mode === 'in' ? t('Entrada', 'In') : m.mode === 'out' ? t('Salida', 'Issue') : t('Ajuste por conteo', 'Count adjustment')}<time>{new Date(m.at).toLocaleString(es ? 'es-MX' : 'en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</time></li>)}</ol> : <p className="inv-empty">{t('Sin movimientos todavía.', 'No moves yet.')}</p>}
        <button className="inv-delete" onClick={() => remove(p)}><Trash size={16}/>{t('Borrar producto', 'Delete product')}</button>
       </div>}
      </li>; })}</ul>

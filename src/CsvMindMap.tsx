@@ -1,6 +1,7 @@
 import type { ColumnKind, ColumnProfile } from './csv';
 
-const KIND_COLOR: Record<ColumnKind, string> = { number: '#f2c98f', date: '#c9b3ff', category: '#9ddbc9', text: '#c4cfe4' };
+// El tipo de columna se distingue por el rótulo; los trazos usan solo la tinta del sitio (número y categoría en tinta fuerte, fecha y texto en gris).
+const KIND_COLOR: Record<ColumnKind, string> = { number: 'var(--text,#1c1d1a)', date: 'var(--muted,#5d5f58)', category: 'var(--text,#1c1d1a)', text: 'var(--muted,#5d5f58)' };
 const W = 960, H = 470, CX = W / 2, CY = H / 2;
 const cut = (s: string, n: number) => s.length > n ? `${s.slice(0, n - 1)}…` : s;
 const textWidth = (s: string, size: number) => s.length * size * 0.56 + 26;
@@ -27,8 +28,6 @@ export default function CsvMindMap({ lang, file, rows, columns, hover, onHover, 
  let delay = 0;
  return <div className="dw-mindmap" key={runKey}>
   <svg viewBox={`0 0 ${W} ${H}`} role="group" aria-label={es ? `Mapa mental de ${rootLabel}: ${shown.map(c => `${c.name}, ${kindLabel[c.kind]}`).join('; ')}` : `Mind map of ${rootLabel}: ${shown.map(c => `${c.name}, ${kindLabel[c.kind]}`).join('; ')}`}>
-   <defs><radialGradient id="mm-glow"><stop offset="0" stopColor="#5a5f75" stopOpacity=".55"/><stop offset="1" stopColor="#21232c" stopOpacity="0"/></radialGradient></defs>
-   <circle cx={CX} cy={CY} r="190" fill="url(#mm-glow)"/>
    {shown.map((c, i) => {
     const left = i < leftCount;
     const k = left ? i : i - leftCount;
@@ -53,7 +52,7 @@ export default function CsvMindMap({ lang, file, rows, columns, hover, onHover, 
       </g>;
      })}
      <g className="mm-node">
-      <rect x={nx} y={y - 19} width={w} height={38} rx={10} stroke={color}/>
+      <rect x={nx} y={y - 19} width={w} height={38} rx={3} stroke={color}/>
       <circle cx={left ? nx + w - 14 : nx + 14} cy={y} r={4} fill={color}/>
       <text x={left ? nx + w - 26 : nx + 26} y={y - 1} textAnchor={left ? 'end' : 'start'} className="mm-name">{label}</text>
       <text x={left ? nx + w - 26 : nx + 26} y={y + 12} textAnchor={left ? 'end' : 'start'} className="mm-kind" fill={color}>{kindLabel[c.kind]}</text>
@@ -61,7 +60,7 @@ export default function CsvMindMap({ lang, file, rows, columns, hover, onHover, 
     </g>;
    })}
    <g className="mm-root">
-    <rect x={CX - rootW / 2} y={CY - 34} width={rootW} height={68} rx={16}/>
+    <rect x={CX - rootW / 2} y={CY - 34} width={rootW} height={68} rx={3}/>
     <text x={CX} y={CY - 6} textAnchor="middle" className="mm-root-name">{rootLabel}</text>
     <text x={CX} y={CY + 17} textAnchor="middle" className="mm-root-meta">{rows} {es ? 'filas' : 'rows'} · {columns.length} {es ? 'columnas' : 'columns'}</text>
    </g>

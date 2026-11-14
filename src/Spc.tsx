@@ -133,7 +133,8 @@ export default function Spc({ lang }: { lang: 'es' | 'en' }) {
  function printReport() {
   if (!c || !v) return;
   const svgs = [...(charts.current?.querySelectorAll('svg.spc-chart') ?? [])].map(s => `<figure>${s.outerHTML}</figure>`).join('');
-  const css = `<style>.spc-chart text{font:10px system-ui;fill:#444}.spc-x{text-anchor:middle}.spc-z2{fill:#f4f5f7}.spc-z1{fill:#eaecf0}.spc-lim line{stroke:#b4232f;stroke-dasharray:5 4}.spc-cl line{stroke:#16181d}[class^=spc-spec] line{stroke:#9a6200;stroke-dasharray:2 3}.spc-line{fill:none;stroke:#2b5fd9;stroke-width:1.5}circle{fill:#2b5fd9}circle.bad{fill:#b4232f}.spc-base rect{fill:#2b5fd912}.spc-base text{fill:#666}</style>`;
+  // Papel: tinta negra, límites en trazo discontinuo y rojo solo para los puntos fuera de control, como en la pantalla.
+  const css = `<style>.spc-chart text{font:10px system-ui;fill:#444}.spc-x{text-anchor:middle}.spc-z2{fill:#f4f5f7}.spc-z1{fill:#eaecf0}.spc-lim line{stroke:#16181d;stroke-dasharray:5 4}.spc-cl line{stroke:#666}[class^=spc-spec] line{stroke:#16181d;stroke-dasharray:1 4}.spc-line{fill:none;stroke:#16181d;stroke-width:1.5}circle{fill:#16181d}circle.bad{fill:#b4232f}.spc-base rect{fill:#16181d12}.spc-base text{fill:#666}</style>`;
   const f2 = (n: number | null | undefined) => n === null || n === undefined || !Number.isFinite(n) ? '—' : fmt(n, 2);
   printDoc(t('Estudio de capacidad', 'Capability study'), `${css}
 <header><div><h1>${esc(feature)}</h1><p>${t('Estudio de control y capacidad', 'Control and capability study')} · ${esc(data.name)}</p></div><small>${t('Impreso', 'Printed')} ${esc(new Date().toLocaleString(es ? 'es-MX' : 'en-US', { dateStyle: 'medium', timeStyle: 'short' }))}</small></header>

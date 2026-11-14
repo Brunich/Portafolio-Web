@@ -50,20 +50,20 @@ test('plant: three reports cross-check into exceptions and OEE per line', async 
 
 test('inventory: typed codes move stock, unknown codes get registered, and a label photo is read', async ({ page }) => {
  await page.goto('/proyectos/inventario/app');
- const agua = page.locator('.inv-products li', { hasText: 'Agua natural' });
+ const agua = page.locator('.inv-products li', { hasText: 'Sellador de parabrisas' });
  await expect(agua.locator('.inv-stock b')).toHaveText('34');
  await page.getByLabel('Código de barras').fill('7501000000012');
  await page.getByRole('button', { name: 'Aplicar' }).click();
  await expect(agua.locator('.inv-stock b')).toHaveText('35');
- await page.getByRole('radio', { name: /Venta/ }).click();
+ await page.getByRole('radio', { name: /Salida/ }).click();
  await page.getByLabel('Código de barras').fill('7501000000012');
  await page.getByRole('button', { name: 'Aplicar' }).click();
  await expect(agua.locator('.inv-stock b')).toHaveText('34');
  await page.getByLabel('Código de barras').fill('7509999999991');
  await page.getByRole('button', { name: 'Aplicar' }).click();
- await page.getByPlaceholder('Nombre del producto').fill('Galletas de avena');
+ await page.getByPlaceholder('Nombre del producto').fill('Cinta de aluminio');
  await page.getByRole('button', { name: 'Guardar' }).click();
- await expect(page.locator('.inv-products')).toContainText('Galletas de avena');
+ await expect(page.locator('.inv-products')).toContainText('Cinta de aluminio');
  await page.getByRole('radio', { name: /Entrada/ }).click();
  await page.getByRole('button', { name: /Etiquetas con código/ }).click();
  const svg = await page.locator('.inv-sheet figure .inv-bc').first().innerHTML();
@@ -150,28 +150,28 @@ test('plant: a report with odd column names gets mapped by hand, and exceptions 
  await expect(page.locator('.pl-progress')).toContainText('1 de');
 });
 
-test('inventory: a label QR opens the product ready to sell or restock, and every product shows its QR', async ({ page }) => {
- await page.goto('/proyectos/inventario/app?c=GR-TORTILLA');
+test('inventory: a label QR opens the product ready to issue or restock, and every product shows its QR', async ({ page }) => {
+ await page.goto('/proyectos/inventario/app?c=GR-SOLDADURA');
  const card = page.locator('.inv-picked');
- await expect(card).toContainText('Tortilla de maíz (kg)');
+ await expect(card).toContainText('Soldadura MIG (kg)');
  await expect(card).toContainText('Quedan 12');
  await expect(page).toHaveURL(/\/proyectos\/inventario\/app$/); // al recargar no se repite
- await card.getByRole('button', { name: 'Vendí 1' }).click();
+ await card.getByRole('button', { name: 'Salió 1' }).click();
  await expect(card).toContainText('Quedan 11');
  await card.getByRole('button', { name: 'Llegó 1' }).click();
  await card.getByRole('button', { name: 'Llegó 1' }).click();
  await expect(card).toContainText('Quedan 13');
  // La cámara de la app también entiende el QR completo, no sólo el número.
  await card.getByRole('button', { name: 'Cerrar' }).click();
- await page.getByLabel('Código de barras').fill('https://bruno-portfolio-azure.vercel.app/proyectos/inventario/app?c=GR-TORTILLA');
+ await page.getByLabel('Código de barras').fill('https://bruno-portfolio-azure.vercel.app/proyectos/inventario/app?c=GR-SOLDADURA');
  await page.getByRole('button', { name: 'Aplicar' }).click();
- await expect(page.locator('.inv-products > li', { hasText: 'Tortilla' }).locator('.inv-stock b')).toHaveText('14');
- await page.locator('.inv-name', { hasText: 'Jitomate' }).click();
+ await expect(page.locator('.inv-products > li', { hasText: 'Soldadura' }).locator('.inv-stock b')).toHaveText('14');
+ await page.locator('.inv-name', { hasText: 'Grasa para rodamiento' }).click();
  await expect(page.locator('.inv-detail .inv-qr svg')).toBeVisible();
  await page.getByRole('button', { name: 'abre las etiquetas' }).click();
  await expect(page.locator('.inv-sheet figure')).toHaveCount(27);
  await expect(page.locator('.inv-sheet figure .inv-qr svg')).toHaveCount(27);
- // Un QR con un código que la tienda no tiene pide darlo de alta.
+ // Un QR con un código que el almacén no tiene pide darlo de alta.
  await page.goto('/proyectos/inventario/app?c=GR-NUEVO');
  await expect(page.locator('.inv-new')).toContainText('GR-NUEVO');
 });
@@ -200,7 +200,7 @@ test('inventory: EAN-8 labels are read from a photo, internal codes keep letters
  const chicle = page.locator('.inv-products > li', { hasText: 'Chicle de menta' });
  await expect(chicle.locator('.inv-stock b')).toHaveText('2');
  // Buscar, abrir, borrar y deshacer.
- await page.getByLabel('Buscar producto').fill('tornillo');
+ await page.getByLabel('Buscar producto').fill('tornillo interno');
  await expect(page.locator('.inv-products > li')).toHaveCount(1);
  await page.locator('.inv-name', { hasText: 'Tornillo interno' }).click();
  await expect(page.locator('.inv-kind')).toHaveText('Code 128');
@@ -250,7 +250,7 @@ test('shift handover with 60 incidents: filters by line and severity, and long c
  await expect(open.locator('.sh-card')).toHaveCount(4);
 });
 
-test('projects with their own site open it directly, and the rest open their app as a separate site in a new tab', async ({ page }) => {
+test('projects with their own site open it directly, and the rest open their app in the same tab, with a way back to the project page', async ({ page }) => {
  for (const [slug, url] of [['punto-u', 'https://punto-u-app.vercel.app'], ['vibemap', 'https://vibemap-brunich.vercel.app'], ['la-casa-del-angel', 'https://la-casa-del-angel.vercel.app']]) {
   await page.goto(`/proyectos/${slug}`);
   await expect(page.locator('.case-head .case-action')).toHaveAttribute('href', url);
@@ -259,15 +259,20 @@ test('projects with their own site open it directly, and the rest open their app
  await expect(page.locator('.topbar')).toBeVisible();
  await expect(page.getByRole('heading', { name: 'Cómo funciona' })).toBeVisible();
  const launch = page.locator('.case-launch a');
- await expect(launch).toHaveAttribute('target', '_blank');
- const [app] = await Promise.all([page.waitForEvent('popup'), launch.click()]);
+ await expect(launch).not.toHaveAttribute('target', /.+/);
+ await launch.click();
+ const app = page;
  await expect(app).toHaveURL(/\/proyectos\/planta\/app$/);
  await expect(app.locator('#demo')).toBeVisible();
  await expect(app).toHaveTitle(/^Línea/);
  await expect(app.locator('html')).toHaveClass(/is-app/);
- // Sin nada del portafolio: ni su barra ni un enlace de regreso
+ // Sin nada del portafolio (ni su barra ni el inicio); sólo el regreso a la ficha, en la misma pestaña
  await expect(app.locator('.topbar, a[href="/"], a[href="/#projects"]')).toHaveCount(0);
  await expect(app.getByRole('link', { name: /Presentación|Bruno Salas/ })).toHaveCount(0);
+ await expect(app.locator('a.ax-back')).toHaveAttribute('href', '/proyectos/planta');
+ await expect(app.locator('a.ax-back')).not.toHaveAttribute('target', /.+/);
+ await app.locator('a.ax-back').click();
+ await expect(app).toHaveURL(/\/proyectos\/planta$/);
 });
 
 test('csv analyzer compares two snapshots of the same report and lists what changed', async ({ page }) => {

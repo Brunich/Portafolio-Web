@@ -28,7 +28,7 @@ function useFlip(dep: unknown) {
   nodes.current.forEach((el, id) => {
    const r = el.getBoundingClientRect(); next.set(id, r);
    const p = last.current.get(id);
-   if (p && !still && (Math.abs(p.left - r.left) > 40)) el.animate([{ transform: `translate(${p.left - r.left}px, ${p.top - r.top}px) rotate(${p.left > r.left ? -3 : 3}deg)`, boxShadow: '0 30px 60px #000a' }, { transform: 'none' }], { duration: 650, easing: 'cubic-bezier(.16,1,.3,1)' });
+   if (p && !still && (Math.abs(p.left - r.left) > 40)) el.animate([{ transform: `translate(${p.left - r.left}px, ${p.top - r.top}px) rotate(${p.left > r.left ? -1 : 1}deg)` }, { transform: 'none' }], { duration: 650, easing: 'cubic-bezier(.16,1,.3,1)' });
   });
   last.current = next;
  }, [dep]);
