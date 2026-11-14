@@ -42,7 +42,7 @@ export function MenuPage({ lang }: { lang: Lang }) {
    <button className="mn-cart-sum" onClick={() => setOpen(o => !o)}>{t(`${count} en tu pedido`, `${count} in your order`)} · <b>{money(total)}</b></button>
    {menu.w ? <a className="mn-send" href={`https://wa.me/${menu.w}?text=${encodeURIComponent(text)}`} target="_blank" rel="noreferrer"><WhatsappLogo size={19} weight="fill"/>{t('Pedir', 'Order')}</a> : <span className="mn-send off">{t('Menú de ejemplo', 'Sample menu')}</span>}
   </div>}
-  <footer className="st-foot"><a href="/proyectos/club-nfc">{t('Hecho por Bruno Salas', 'Made by Bruno Salas')}</a></footer>
+  <footer className="st-foot"><a href="/proyectos/club-nfc" data-title={t('NFC para negocios', 'NFC for businesses')}>{t('Hecho por Bruno Salas', 'Made by Bruno Salas')}</a></footer>
  </main>;
 }
 

@@ -57,21 +57,21 @@ export function labelSvg(p: Product, module = 2) {
  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h + 16 * module}" width="${w}" height="${h + 16 * module}"><rect width="100%" height="100%" fill="#fff"/><g fill="#000">${bars}</g><text x="${w / 2}" y="${62 * module}" font-family="monospace" font-size="${7 * module}" text-anchor="middle" letter-spacing="${module}">${p.code}</text><text x="${w / 2}" y="${75 * module}" font-family="Arial, sans-serif" font-size="${6.5 * module}" font-weight="700" text-anchor="middle">${esc(p.name.slice(0, 26))}</text></svg>`;
 }
 
-// La tiendita: abarrotes con código de barras y, al final, lo que se vende suelto y no trae código.
+// Almacén de consumibles de la planta: con código de barras y, al final, lo que se surte suelto y no trae código.
 export const SAMPLE: Product[] = [
- ['750100000001', 'Agua natural 1 L', 34, 24, 14], ['750100000002', 'Refresco de cola 600 ml', 12, 24, 19], ['750100000003', 'Leche entera 1 L', 18, 12, 29],
- ['750100000004', 'Pan de caja grande', 6, 8, 52], ['750100000005', 'Huevo blanco 12 pzas', 9, 6, 48], ['750100000006', 'Frijol negro 1 kg', 15, 6, 38],
- ['750100000007', 'Arroz blanco 1 kg', 4, 6, 31], ['750100000008', 'Aceite vegetal 1 L', 11, 5, 45], ['750100000009', 'Café soluble 120 g', 3, 4, 89],
- ['750100000010', 'Papel higiénico 4 rollos', 20, 10, 42], ['750100000011', 'Azúcar estándar 1 kg', 10, 6, 32], ['750100000012', 'Sal de mesa 1 kg', 8, 4, 14],
- ['750100000013', 'Atún en agua 140 g', 14, 10, 24], ['750100000014', 'Sopa de pasta 200 g', 25, 12, 9], ['750100000015', 'Galletas marías 170 g', 9, 8, 19],
- ['750100000016', 'Jabón de barra 150 g', 7, 6, 15], ['750100000017', 'Detergente en polvo 1 kg', 5, 6, 39], ['750100000018', 'Cloro 1 L', 6, 6, 18],
- ['750100000019', 'Papas fritas 45 g', 22, 12, 18], ['750100000020', 'Chiles en vinagre 220 g', 4, 5, 21], ['750100000021', 'Mayonesa 390 g', 3, 4, 46],
- ['750100000022', 'Jugo de naranja 1 L', 8, 6, 30], ['750100000023', 'Pilas AA 4 pzas', 2, 3, 58],
+ ['750100000001', 'Sellador de parabrisas 310 ml', 34, 24, 14], ['750100000002', 'Guantes de nitrilo (caja)', 12, 24, 19], ['750100000003', 'Thinner para pistola 1 L', 18, 12, 29],
+ ['750100000004', 'Lija P400 (paquete)', 6, 8, 52], ['750100000005', 'Lentes de seguridad (caja)', 9, 6, 48], ['750100000006', 'Pasta de pulido 1 kg', 15, 6, 38],
+ ['750100000007', 'Tapones auditivos (caja)', 4, 6, 31], ['750100000008', 'Aceite para llave de torque 1 L', 11, 5, 45], ['750100000009', 'Punta de torque T40', 3, 4, 89],
+ ['750100000010', 'Trapo industrial (paquete)', 20, 10, 42], ['750100000011', 'Cinta masking 48 mm', 10, 6, 32], ['750100000012', 'Cople de manguera 1/4 in', 8, 4, 14],
+ ['750100000013', 'Tornillo M8 x 25 (bolsa)', 14, 10, 24], ['750100000014', 'Arandela M8 (bolsa)', 25, 12, 9], ['750100000015', 'Clip de fascia (bolsa)', 9, 8, 19],
+ ['750100000016', 'Brocha de sellador', 7, 6, 15], ['750100000017', 'Desengrasante 1 L', 5, 6, 39], ['750100000018', 'Aceite hidráulico 1 L', 6, 6, 18],
+ ['750100000019', 'Sello de puerta trasera', 22, 12, 18], ['750100000020', 'Fusible 15 A (caja)', 4, 5, 21], ['750100000021', 'Terminal de arnés (bolsa)', 3, 4, 46],
+ ['750100000022', 'Líquido lavaparabrisas 1 L', 8, 6, 30], ['750100000023', 'Pilas AA (4 pzas)', 2, 3, 58],
 ].map(([twelve, name, stock, min, price]) => ({ code: makeEan(twelve as string), name: name as string, stock: stock as number, min: min as number, price: price as number }) as Product).concat(
- { code: makeEan8('7501234'), name: 'Paleta de dulce', stock: 40, min: 20, price: 3 },
- // A granel: sin código de fábrica, se les pega una etiqueta con QR en el bote o junto a la báscula.
- { code: 'GR-TORTILLA', name: 'Tortilla de maíz (kg)', stock: 12, min: 10, price: 24 }, { code: 'GR-JITOMATE', name: 'Jitomate (kg)', stock: 6, min: 5, price: 32 },
- { code: 'GR-HUEVO', name: 'Huevo suelto (pieza)', stock: 30, min: 24, price: 3 },
+ { code: makeEan8('7501234'), name: 'Etiqueta de lote (rollo)', stock: 40, min: 20, price: 3 },
+ // Surtido suelto: sin código de fábrica, se les pega una etiqueta con QR en el bote o en la repisa.
+ { code: 'GR-SOLDADURA', name: 'Soldadura MIG (kg)', stock: 12, min: 10, price: 24 }, { code: 'GR-GRASA', name: 'Grasa para rodamiento (kg)', stock: 6, min: 5, price: 32 },
+ { code: 'GR-REMACHE', name: 'Remache pop (pieza)', stock: 30, min: 24, price: 3 },
 );
 
 // El QR de cada etiqueta abre la app en ese producto: sirve la cámara normal del celular, sin instalar nada.
@@ -84,7 +84,7 @@ export function codeFromScan(raw: string) {
 }
 
 // Catálogo del proveedor (Excel o CSV): reconoce columnas por nombre y actualiza lo que ya existe.
-// Las existencias sólo cambian si el archivo trae esa columna; si no, se respeta lo contado en la tienda.
+// Las existencias sólo cambian si el archivo trae esa columna; si no, se respeta lo contado en el almacén.
 const plain = (h: string) => h.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
 const pick = (headers: string[], words: string[]) => headers.findIndex(h => words.some(w => plain(h).includes(w)));
 const num = (v: string | undefined) => { const n = Number((v ?? '').replace(/[$,\s]/g, '')); return Number.isFinite(n) ? n : NaN; };
@@ -105,7 +105,7 @@ export function importCatalog(products: Product[], headers: string[], rows: stri
  return { products: out, added, updated, skipped, missing: [] as string[] };
 }
 
-// Valor del inventario (a precio de venta) y lo vendido hoy.
+// Valor del inventario (a costo) y lo que salió hoy.
 export const stockValue = (ps: Product[]) => ps.reduce((s, p) => s + p.stock * (p.price ?? 0), 0);
 export function soldToday(ps: Product[], moves: Move[], now = Date.now()) {
  const start = new Date(now); start.setHours(0, 0, 0, 0);

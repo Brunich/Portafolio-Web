@@ -13,13 +13,13 @@ test('portfolio has working bilingual navigation, project pages and CV', async (
   await expect(page.locator('html')).toHaveAttribute('lang','en');
   await expect(page.getByRole('link', {name:'View projects',exact:true})).toBeVisible();
   await page.getByRole('button', { name:'Cambiar a español' }).click();
-  await page.locator('.other-card.project-punto').click(); // Punto U va en «Otros proyectos»
+  await page.locator('.ol-list a[href="/proyectos/punto-u"]').click(); // Punto U va en la lista de «Otros trabajos»
   await expect(page).toHaveURL(/\/proyectos\/punto-u$/);
   await expect(page.getByRole('heading',{level:1})).toHaveText('Punto U');
   await expect(page.getByRole('heading',{name:'Cómo funciona'})).toBeVisible();
   await expect(page.locator('.how li')).toHaveCount(3);
   await page.locator('.case-next a').click();
-  await expect(page).toHaveURL(/\/proyectos\/la-casa-del-angel$/);
+  await expect(page).toHaveURL(/\/proyectos\/asistente-ia-local$/);
   expect((await request.get('/cv/Bruno-Salas-ES.pdf')).status()).toBe(200);
   expect((await request.get('/og.png')).status()).toBe(200);
 });
@@ -30,7 +30,7 @@ test('mobile and desktop have no horizontal overflow or serious accessibility er
   await page.emulateMedia({reducedMotion:'reduce'});
   for (const width of [1440,390]) {
     await page.setViewportSize({width,height:900});
-    for (const path of ['/','/proyectos/club-nfc','/proyectos/club-nfc/app','/proyectos/analizador-csv','/proyectos/analizador-csv/app','/proyectos/entrega-de-turno','/proyectos/la-casa-del-angel','/proyectos/graficas-de-control','/proyectos/asistente-ia-local','/proyectos/vibemap','/proyectos/punto-u','/sobre-mi','/proyectos/planta','/proyectos/inventario','/menu','/nfc']) {
+    for (const path of ['/','/proyectos/club-nfc','/proyectos/club-nfc/app','/proyectos/analizador-csv','/proyectos/analizador-csv/app','/proyectos/entrega-de-turno','/proyectos/la-casa-del-angel','/proyectos/graficas-de-control','/proyectos/asistente-ia-local','/proyectos/vibemap','/proyectos/punto-u','/proyectos/ia-rogue','/sobre-mi','/proyectos/planta','/proyectos/inventario','/menu','/nfc']) {
       await page.goto(path,{waitUntil:'networkidle'});
       await expect(page.getByRole('heading',{level:1})).toBeVisible();
       expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth), `${path} @${width}`).toBe(true);
@@ -45,21 +45,53 @@ test('landing stays a summary: heavy demos live on their own pages', async ({pag
  await expect(page.locator('.dw-workbench')).toHaveCount(0);
  await expect(page.locator('.ld-stage')).toHaveCount(0);
  await expect(page.locator('.sh')).toHaveCount(0);
- // «En desarrollo» sólo en su apartado (y la fila del asistente): ningún proyecto de la lista principal debe parecer a medias.
- const withDev = await page.evaluate(()=>[...document.querySelectorAll('body *')]
+ // Cuatro bloques en orden: planta (A), negocio pequeño (B), juego (C) y la lista corta (D).
+ await expect(page.locator('#projects .group-head .kicker')).toHaveText(['A · Turno en planta','B · Negocio pequeño']);
+ const order = await page.locator('#projects .row').evaluateAll(rows=>rows.map(r=>r.id));
+ expect(order).toEqual(['p-turno','p-csv','p-planta','p-spc','p-inventario','p-casa','p-club']);
+ await expect(page.locator('#projects .group-head').first()).toContainText('INC-232');
+ await expect(page.locator('.ol-list li')).toHaveCount(5);
+ await expect(page.locator('.ol-list .other-card, .ol-list img')).toHaveCount(0); // lista de texto, sin tarjetas
+ // Sin cifras de vitrina ni lemas de folleto.
+ await expect(page.locator('.project-metrics')).toHaveCount(0);
+ for (const old of ['Que vuelvan, sin quitarles tiempo.','Útiles para el mercado.','Todas se pueden probar.','Hobby profesional','Hablemos de tu proyecto','Tráiler de IA Rogue']) await expect(page.locator('main')).not.toContainText(old);
+ // «En desarrollo» sólo donde es cierto: la lista corta, el juego y la versión Android en los datos de cada fila.
+ const withDev = await page.evaluate(()=>[...document.querySelectorAll('main *')]
   .filter(el=>el.children.length===0 && /en desarrollo|in development/i.test(el.textContent ?? ''))
-  .map(el=>el.closest('.project-agente, .others.is-dev, .zone-dots') ? 'project-agente' : (el.parentElement?.className ?? el.tagName)));
+  .map(el=>el.closest('.ol-list, #graphics, .facts') ? 'ok' : (el.parentElement?.className ?? el.tagName)));
  expect(withDev.length).toBeGreaterThan(0);
- for (const c of withDev) expect(c).toContain('project-agente');
- // Siete proyectos, cada uno en su pantalla: el límite cuida que no vuelvan los apartados largos.
- expect(await page.evaluate(()=>document.documentElement.scrollHeight)).toBeLessThan(14000);
+ for (const c of withDev) expect(c).toBe('ok');
+ // El límite cuida que no vuelvan los apartados largos.
+ expect(await page.evaluate(()=>document.documentElement.scrollHeight)).toBeLessThan(15000);
  await page.locator('.hs-tabs button').nth(1).click();
  await page.locator('.hs-pos0 .ha-nav').getByRole('button',{name:'Completo'}).click();
  await expect(page.locator('.hs-pos0 .ha-csv-full')).toBeVisible();
- // La app se abre en otra pestaña, como sitio aparte
- const [app] = await Promise.all([page.waitForEvent('popup'), page.locator('.hs-pos0 .ha-nav').getByRole('link',{name:'Abrir'}).click()]);
- await expect(app).toHaveURL(/\/proyectos\/analizador-csv\/app$/);
- await expect(app.locator('#demo')).toBeInViewport();
+ // Lo interno abre en la misma pestaña con el telón; la app trae su «volver» a la ficha.
+ await page.locator('.hs-pos0 .ha-nav').getByRole('link',{name:'Abrir'}).click();
+ await expect(page).toHaveURL(/\/proyectos\/analizador-csv\/app$/);
+ await expect(page.locator('#demo')).toBeInViewport();
+ await page.locator('.ax-back').click();
+ await expect(page).toHaveURL(/\/proyectos\/analizador-csv$/);
+ await expect(page.locator('html')).not.toHaveClass(/is-app/);
+});
+
+test('internal links stay in the tab; external ones open a new one and say so', async ({page})=>{
+ await page.goto('/proyectos/planta');
+ await page.locator('.case-action').click();
+ await expect(page).toHaveURL(/\/proyectos\/planta\/app$/);
+ await expect(page.locator('.ax-back')).toBeVisible();
+ await page.locator('.ax-back').click();
+ await expect(page).toHaveURL(/\/proyectos\/planta$/);
+ await expect(page.getByRole('heading',{level:1})).toBeVisible();
+ for (const path of ['/','/proyectos/planta','/proyectos/vibemap','/proyectos/club-nfc']) {
+  await page.goto(path);
+  const bad = await page.evaluate(()=>[...document.querySelectorAll<HTMLAnchorElement>('main a[href], footer a[href]')].filter(a=>{
+   const out = new URL(a.href).origin !== location.origin && a.protocol.startsWith('http');
+   // El «Abrir» del visor de la portada aún trae target; la navegación lo ignora (lo prueba la prueba anterior).
+   return out ? a.target !== '_blank' || !/noopener/.test(a.rel) || !/noreferrer/.test(a.rel) || !a.querySelector('.sr-only') : a.target === '_blank' && a.pathname.startsWith('/proyectos/') && !a.closest('.ha-nav');
+  }).map(a=>a.href));
+  expect(bad, path).toEqual([]);
+ }
 });
 
 test('shift handover: an incident cannot be closed without evidence, and the handover lists what is open', async ({page,request})=>{
@@ -91,22 +123,29 @@ test('shift handover: an incident cannot be closed without evidence, and the han
  expect((await request.get('/cv/Bruno-Salas-EN.pdf')).status()).toBe(200);
 });
 
-test('game scenes gallery: cameras, and the temple toggles its pixel art', async ({page})=>{
+test('game block: cover, three thumbnails, pixel toggle and the IA Rogue page', async ({page})=>{
  await page.goto('/');
- const thumbs=page.locator('.pano-thumbs button');
- await thumbs.first().scrollIntoViewIfNeeded();
- await expect(thumbs).toHaveCount(4);
- await thumbs.nth(0).click();
- const stage=page.locator('.pano-stage img.on');
- await expect(stage).toHaveAttribute('src','/media/escenas/templo-noche-pixel.webp');
- await page.getByRole('button',{name:'Pixel art',exact:true}).click();
- await expect(stage).toHaveAttribute('src','/media/escenas/templo-noche-suave.webp');
- await thumbs.nth(2).click();
- await expect(page.getByRole('button',{name:'Pixel art',exact:true})).toHaveCount(0);
- await page.locator('.pano-stage').click();
- await expect(page.locator('.pano-dialog')).toBeVisible();
- await page.keyboard.press('Escape');
- await expect(page.locator('.pano-dialog')).toBeHidden();
+ const block=page.locator('#graphics');
+ await expect(block.locator('.group-head .kicker')).toHaveText('C · Juego');
+ await expect(block.locator('.gd-thumbs a')).toHaveCount(3);
+ const pixel=block.locator('.gd-pixel img');
+ await pixel.scrollIntoViewIfNeeded();
+ await expect(pixel).toHaveAttribute('src','/media/escenas/templo-noche-pixel.webp');
+ await block.getByRole('button',{name:'Pixel art',exact:true}).click();
+ await expect(pixel).toHaveAttribute('src','/media/escenas/templo-noche-suave.webp');
+ await block.getByRole('link',{name:'Ver la ficha de IA Rogue'}).click();
+ await expect(page).toHaveURL(/\/proyectos\/ia-rogue$/);
+ await expect(page.getByRole('heading',{level:1})).toHaveText('IA Rogue');
+ await expect(page.locator('#lugares figure')).toHaveCount(5);
+ await expect(page.locator('#agua figure')).toHaveCount(3);
+ // Fotos 16:9 con tamaño, alt real y carga diferida; el pie dice lugar / cámara / hora.
+ for (const img of await page.locator('#lugares img, #agua img').all()) {
+  await expect(img).toHaveAttribute('loading','lazy');
+  await expect(img).toHaveAttribute('width','1600');
+  await expect(img).toHaveAttribute('height','900');
+  expect((await img.getAttribute('alt'))!.length).toBeGreaterThan(20);
+ }
+ await expect(page.locator('#agua .rg-cap').first().locator('span')).toHaveCount(3);
 });
 
 test('3D style comparison responds to keyboard and style pairs',async({page})=>{
@@ -199,25 +238,32 @@ test('on desktop each wheel step moves one zone, and the index jumps to a projec
  await expect(page.locator('html')).toHaveClass(/paged/);
  await page.mouse.move(700,400);
  await page.mouse.wheel(0,120);
- await expect(page.locator('.zone-dots .on')).toContainText('Proyectos');
+ await expect(page.locator('main [data-zone].zone-in')).toHaveAttribute('data-zone','Proyectos');
  await page.waitForTimeout(400);
  await page.mouse.wheel(0,120);
- await expect(page.locator('.zone-dots .on')).toContainText('NFC para negocios');
- await page.locator('.zone-dots').getByRole('button',{name:'Proyectos',exact:true}).click();
- await page.locator('.project-index button',{hasText:'Entrega de turno'}).click();
- await expect(page.locator('.zone-dots .on')).toContainText('Entrega de turno');
+ await expect(page.locator('main [data-zone].zone-in')).toHaveAttribute('data-zone','Entrega de turno');
+ await page.locator('.topnav').getByRole('link',{name:'Proyectos',exact:true}).click();
+ await page.locator('.project-index button',{hasText:'Inventario con la cámara'}).click();
+ await expect(page.locator('main [data-zone].zone-in')).toHaveAttribute('data-zone','Inventario con la cámara');
+ // Los enlaces de la barra siguen llevando a secciones que existen tras el reordenamiento.
+ for (const id of ['projects','about','graphics','motion','contact']) await expect(page.locator(`#${id}`)).toHaveCount(1);
 });
 
 test('the three-styles character fits whole in one wheel stop, even on a small laptop',async({page})=>{
  await page.setViewportSize({width:1366,height:768});
  await page.goto('/');
  await expect(page.locator('html')).toHaveClass(/paged/);
- await page.locator('.zone-dots').getByRole('button',{name:'Game dev',exact:true}).click();
- await expect(page.locator('.zone-dots .on')).toContainText('Game dev');
+ await page.locator('.topnav').getByRole('link',{name:'Game dev',exact:true}).click();
+ await expect(page.locator('main [data-zone].zone-in')).toHaveAttribute('data-zone','Game dev');
  await page.waitForTimeout(1200);
  await page.mouse.move(700,400);
- await page.mouse.wheel(0,120);
- await expect(page.locator('.zone-dots .on')).toContainText('Tres estilos');
+ // La parada de Game dev ahora es más alta: se avanza hasta llegar a la del personaje
+ for(let i=0;i<4;i++){
+  if(await page.locator('main [data-zone].zone-in').getAttribute('data-zone')==='Tres estilos')break;
+  await page.mouse.wheel(0,120);
+  await page.waitForTimeout(1700);
+ }
+ await expect(page.locator('main [data-zone].zone-in')).toHaveAttribute('data-zone','Tres estilos');
  await page.waitForTimeout(1200);
  const box=await page.locator('.model-lab').evaluate(e=>{const r=e.getBoundingClientRect();return {top:r.top,bottom:r.bottom};});
  expect(box.top).toBeGreaterThan(74);

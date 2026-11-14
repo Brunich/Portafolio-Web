@@ -11,11 +11,11 @@ test('dígito verificador y barras de un EAN-13', () => {
  assert.ok(bits.startsWith('101') && bits.endsWith('101') && bits.slice(45, 50) === '01010');
 });
 
-test('la lista de compras lleva cada producto bajo mínimo al doble del mínimo', () => {
+test('la lista de reposición lleva cada producto bajo mínimo al doble del mínimo', () => {
  const list = shopping(SAMPLE);
  assert.ok(list.every(p => p.stock < p.min));
- const pan = list.find(p => p.name.startsWith('Pan'))!;
- assert.equal(pan.order, pan.min * 2 - pan.stock);
+ const first = list[0];
+ assert.equal(first.order, first.min * 2 - first.stock);
 });
 
 test('EAN-8, UPC-A y códigos internos quedan en una sola forma por producto', async () => {
@@ -38,7 +38,7 @@ test('catálogo del proveedor: agrega los nuevos, actualiza los que ya están y 
  const { importCatalog, SAMPLE } = await import('../src/inventario-logic.ts');
  const agua = SAMPLE[0];
  const r = importCatalog(SAMPLE, ['Código de barras', 'Descripción', 'Precio', 'Mínimo'], [
-  [agua.code, 'Agua natural 1 L', '$15.50', '30'],
+  [agua.code, 'Sellador de parabrisas 310 ml', '$15.50', '30'],
   ['7501000000119', 'Galletas surtidas', '27', ''],
   ['', 'Sin código', '10', '1'],
  ]);
@@ -49,7 +49,7 @@ test('catálogo del proveedor: agrega los nuevos, actualiza los que ya están y 
  assert.deepEqual(importCatalog(SAMPLE, ['precio'], [['1']]).missing, ['código', 'producto']);
 });
 
-test('valor en tienda y vendido hoy, a precio de venta', async () => {
+test('valor en almacén y salidas de hoy, a costo', async () => {
  const { stockValue, soldToday } = await import('../src/inventario-logic.ts');
  const ps = [{ code: 'A', name: 'a', stock: 3, min: 1, price: 10 }, { code: 'B', name: 'b', stock: 2, min: 1 }];
  assert.equal(stockValue(ps), 30);
@@ -60,12 +60,12 @@ test('valor en tienda y vendido hoy, a precio de venta', async () => {
 
 test('el QR de la etiqueta abre la app en el producto y la cámara se queda con el código', async () => {
  const { scanUrl, codeFromScan, normalizeCode, SAMPLE } = await import('../src/inventario-logic.ts');
- const url = scanUrl('https://tienda.mx', 'GR-HUEVO');
- assert.equal(url, 'https://tienda.mx/proyectos/inventario/app?c=GR-HUEVO');
- assert.equal(normalizeCode(codeFromScan(url)), 'GR-HUEVO');
+ const url = scanUrl('https://almacen.mx', 'GR-REMACHE');
+ assert.equal(url, 'https://almacen.mx/proyectos/inventario/app?c=GR-REMACHE');
+ assert.equal(normalizeCode(codeFromScan(url)), 'GR-REMACHE');
  assert.equal(codeFromScan('7501000000012'), '7501000000012');
  assert.equal(codeFromScan(scanUrl('https://x', 'A B&C')), 'A B&C');
- // Productos de abarrotes y a granel, sin códigos repetidos.
+ // Consumibles con código de fábrica y de surtido suelto, sin códigos repetidos.
  assert.equal(SAMPLE.length, 27);
  assert.equal(new Set(SAMPLE.map(p => p.code)).size, SAMPLE.length);
 });

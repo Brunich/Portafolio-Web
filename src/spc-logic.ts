@@ -108,6 +108,30 @@ export function verdict(c: Chart, cap: Capability | null, es: boolean) {
  return { control, capable, signals, text: b ? `${a} ${b}` : a, title, detail: parts.join(' · ') };
 }
 
+// Las exportaciones de la máquina de medición traen arriba el nombre de la pieza, la fecha y el operador.
+// El encabezado es la primera fila de puros textos con números debajo en las siguientes filas
+// (no basta la de abajo: «Pieza: B-21» va seguida de «Lote: 4411» y eso todavía es título).
+const plainNum = (v: string) => /^-?\d+([.,]\d+)?$/.test(v.trim());
+export function findHeader(rows: string[][]) {
+ for (let i = 0; i < Math.min(rows.length - 1, 20); i++) {
+  const cols = rows[i].flatMap((v, j) => (v.trim() ? [j] : []));
+  if (!cols.length || cols.some(j => plainNum(rows[i][j]))) continue;
+  if (rows.slice(i + 1, i + 6).every(r => cols.some(j => plainNum(r[j] ?? '')))) return i;
+ }
+ return 0;
+}
+
+// Una columna de mediciones: con Windows en español la máquina escribe 25,012 en vez de 25.012.
+// Si ningún valor trae punto y casi todos traen coma, la coma es el decimal (y se avisa, para que nadie se lleve sorpresas).
+export function readMeasures(values: string[]) {
+ // Sólo cuentan las celdas con pinta de número: un «N/A» no debe decidir cómo se leen las demás.
+ const v = values.map(x => x.trim()), filled = v.filter(x => /^-?[\d.,]+$/.test(x));
+ const decimalComma = filled.length > 0 && !filled.some(x => x.includes('.')) && filled.filter(x => /^-?\d+,\d+$/.test(x)).length >= filled.length * 0.8;
+ const nums = v.map(x => { if (!x) return NaN; const s = decimalComma ? x.replace(',', '.') : x.replace(/,(?=\d{3}\b)/g, ''); return /^-?\d+(\.\d+)?([eE][+-]?\d+)?$/.test(s) ? Number(s) : NaN; });
+ const bad = v.flatMap((x, i) => (x && Number.isNaN(nums[i]) ? [i] : []));
+ return { nums, decimalComma, bad };
+}
+
 // Ejemplo: diámetro de un buje, 25 muestras de 5 piezas cada hora; a partir de la 18 la herramienta se desgasta.
 export function sampleCsv() {
  let seed = 7; const rnd = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };

@@ -1,24 +1,19 @@
-// Cambio de página con telón: la tarjeta que tocaste crece hasta llenar la pantalla con el color
-// del proyecto y su nombre, se cambia la ruta por debajo y el telón sube dejando ver la página nueva.
-const EASE = 'cubic-bezier(.76,0,.24,1)';
+// Cambio de página con telón: una hoja de tinta plana sube, cambia la ruta por debajo y sigue de largo.
+// Corto a propósito (unos 350 ms): marca el cambio sin hacer esperar.
+const EASE = 'cubic-bezier(.65,0,.35,1)';
 const still = () => document.documentElement.dataset.motion === 'paused' || matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-export async function curtain(from: Element | null, color: string, title: string, swap: () => void) {
+export async function curtain(title: string, swap: () => void) {
  if (still()) { swap(); return; }
- const r = from?.getBoundingClientRect() ?? new DOMRect(innerWidth / 2 - 40, innerHeight / 2 - 40, 80, 80);
  const el = document.createElement('div');
  el.className = 'curtain';
- el.style.setProperty('--c', color || '#9b87ff');
- el.innerHTML = '<div class="curtain-inner"><span class="curtain-title"></span><i class="curtain-line"></i></div>';
+ el.innerHTML = '<span class="curtain-title"></span>';
  el.querySelector('.curtain-title')!.textContent = title;
  document.body.append(el);
- const box = (x: number, y: number, w: number, h: number, rad: number) => ({ clipPath: `inset(${y}px ${innerWidth - x - w}px ${innerHeight - y - h}px ${x}px round ${rad}px)` });
- await el.animate([box(r.left, r.top, r.width, r.height, 22), box(0, 0, innerWidth, innerHeight, 0)], { duration: 720, easing: EASE, fill: 'forwards' }).finished;
- await new Promise(ok => setTimeout(ok, 260));
+ await el.animate([{ transform: 'translateY(100%)' }, { transform: 'none' }], { duration: 170, easing: EASE, fill: 'forwards' }).finished;
  swap();
  await new Promise(requestAnimationFrame);
- document.querySelector('main')?.animate([{ transform: 'translateY(80px) scale(.98)', opacity: .4 }, { transform: 'none', opacity: 1 }], { duration: 900, easing: 'cubic-bezier(.16,1,.3,1)' });
- await el.animate([{ transform: 'none' }, { transform: 'translateY(-100%)' }], { duration: 760, easing: EASE, fill: 'forwards' }).finished;
+ await el.animate([{ transform: 'none' }, { transform: 'translateY(-100%)' }], { duration: 180, easing: EASE, fill: 'forwards' }).finished;
  el.remove();
 }
 

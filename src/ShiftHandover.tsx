@@ -1,14 +1,15 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Camera, WarningOctagon, Warning, Info, Clock, DotsSixVertical, ArrowRight, TerminalWindow, Plus, Play, Pause, X } from '@phosphor-icons/react';
+import { Camera, WarningOctagon, Warning, Info, Clock, DotsSixVertical, ArrowRight, TerminalWindow, Plus, Play, Pause, X, GearSix, Repeat, ClockCounterClockwise } from '@phosphor-icons/react';
 import './shift-handover.css';
 
 // Entrega de turno: tablero de incidencias de calidad (abierta → en curso → cerrada) con bitácora tipo consola.
 // Sólo se cierra con responsable y foto de evidencia; cada severidad tiene su tiempo máximo (SLA)
 // y al final sale el resumen para el siguiente turno. Se guarda en este navegador.
-import { closeStats, exportRows, fmtHours, OWNERS, SEV_EN, RANK, SLA, H, sample, sampleLog, shiftNow, canMove, pendingOf, nextId, validLot, summaryText, isLate } from './turno-logic';
-import type { Status, Sev, Incident, Log } from './turno-logic';
+import { closeStats, exportRows, fmtHours, SEV_EN, RANK, SLA, H, sample, sampleLog, shiftNow, canMove, pendingOf, nextId, validLot, summaryText, isLate, repeats, DEFAULT_CONFIG } from './turno-logic';
+import type { Status, Sev, Incident, Log, Config, Handover } from './turno-logic';
 const KEY = 'bruno-turno-v3';
-const load = (): { items: Incident[]; log: Log[] } => { try { const v = JSON.parse(localStorage.getItem(KEY) ?? ''); if (Array.isArray(v.items)) return v; } catch { /* ejemplo */ } const items = sample(); return { items, log: sampleLog(items) }; };
+type Saved = { items: Incident[]; log: Log[]; cfg?: Config; handovers?: Handover[] };
+const load = (): Saved => { try { const v = JSON.parse(localStorage.getItem(KEY) ?? ''); if (Array.isArray(v.items)) return v; } catch { /* ejemplo */ } const items = sample(); return { items, log: sampleLog(items) }; };
 
 function shrink(file: File): Promise<string> {
  return new Promise((ok, fail) => {
@@ -27,17 +28,31 @@ function useFlip(dep: unknown) {
   nodes.current.forEach((el, id) => {
    const r = el.getBoundingClientRect(); next.set(id, r);
    const p = last.current.get(id);
-   if (p && !still && (Math.abs(p.left - r.left) > 40)) el.animate([{ transform: `translate(${p.left - r.left}px, ${p.top - r.top}px) rotate(${p.left > r.left ? -3 : 3}deg)`, boxShadow: '0 30px 60px #000a' }, { transform: 'none' }], { duration: 650, easing: 'cubic-bezier(.16,1,.3,1)' });
+   if (p && !still && (Math.abs(p.left - r.left) > 40)) el.animate([{ transform: `translate(${p.left - r.left}px, ${p.top - r.top}px) rotate(${p.left > r.left ? -1 : 1}deg)` }, { transform: 'none' }], { duration: 650, easing: 'cubic-bezier(.16,1,.3,1)' });
   });
   last.current = next;
  }, [dep]);
  return (id: string) => (el: HTMLElement | null) => { if (el) nodes.current.set(id, el); else nodes.current.delete(id); };
 }
 
+// Lista editable de chips (líneas o personas). No deja borrar el último: el tablero necesita al menos uno.
+function ChipEditor({ label, items, onChange, placeholder, es }: { label: string; items: string[]; onChange: (v: string[]) => void; placeholder: string; es: boolean }) {
+ const [v, setV] = useState('');
+ const add = () => { const x = v.trim(); if (x && !items.some(i => i.toLowerCase() === x.toLowerCase())) onChange([...items, x]); setV(''); };
+ return <fieldset className="sh-chipedit"><legend>{label}</legend>
+  <ul>{items.map(i => <li key={i}>{i}{items.length > 1 && <button type="button" aria-label={es ? `Quitar ${i}` : `Remove ${i}`} onClick={() => onChange(items.filter(x => x !== i))}><X size={12} weight="bold"/></button>}</li>)}</ul>
+  <div><input value={v} placeholder={placeholder} aria-label={es ? `Agregar a ${label.toLowerCase()}` : `Add to ${label.toLowerCase()}`} onChange={e => setV(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); add(); } }}/><button type="button" onClick={add}><Plus size={14} weight="bold"/>{es ? 'Agregar' : 'Add'}</button></div>
+ </fieldset>;
+}
+
 export default function ShiftHandover({ lang }: { lang: 'es' | 'en' }) {
  const es = lang === 'es', t = (a: string, b: string) => (es ? a : b);
  const [state, setState] = useState(load);
  const { items, log } = state;
+ const cfg = state.cfg ?? DEFAULT_CONFIG, handovers = state.handovers ?? [];
+ // Las líneas de la configuración más las que ya traen las incidencias, para no esconder ninguna.
+ const lines = [...new Set([...cfg.lines, ...items.map(i => i.line)])];
+ const [setup, setSetup] = useState(false);
  const [draft, setDraft] = useState({ line: 'L2', lot: '', defect: '', sev: 'Mayor' as Sev });
  const [openId, setOpenId] = useState<string | null>(null);
  const [handed, setHanded] = useState<string | null>(null);
@@ -72,8 +87,11 @@ export default function ShiftHandover({ lang }: { lang: 'es' | 'en' }) {
  const orphan = pending.filter(i => !i.owner).length;
  const late = pending.filter(i => isLate(i)).length;
  const shift = shiftNow(now);
+ // Se redondea en minutos y luego se parte en horas; si no, salía «4 h 60 min».
+ const leftMin = Math.round(shift.left * 60);
  const closedNow = items.filter(i => i.status === 'closed');
  const stats = closeStats(items);
+ const rep = repeats(items);
  async function exportExcel() {
   const XLSX = await import('xlsx'); const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(exportRows(items, es)), t('Incidencias', 'Incidents'));
@@ -96,10 +114,11 @@ export default function ShiftHandover({ lang }: { lang: 'es' | 'en' }) {
  function add(e: React.FormEvent) {
   e.preventDefault();
   if (!draft.defect.trim()) return setErr(t('Escribe el defecto.', 'Write the defect.'));
-  if (!validLot(draft.lot)) return setErr(t('El lote son 3 a 5 números.', 'The batch is 3 to 5 digits.'));
+  if (!validLot(draft.lot)) return setErr(t('Escribe el lote: al menos 3 letras, números o guiones.', 'Write the batch: at least 3 letters, digits or dashes.'));
   setAdding(false); setTab('open');
   const id = nextId(items);
-  setState(s => ({ items: [{ id, line: draft.line, lot: draft.lot, defect: draft.defect.trim(), sev: draft.sev, status: 'open', owner: '', action: '', photo: '', at: Date.now() }, ...s.items], log: [{ at: Date.now(), id, tone: 'new' as const, text: `${t('registrada', 'logged')} · ${draft.line} · ${t('lote', 'batch')} ${draft.lot} · ${(es ? draft.sev : SEV_EN[draft.sev]).toUpperCase()}` }, ...s.log].slice(0, 40) }));
+  const line = lines.includes(draft.line) ? draft.line : lines[0];
+  setState(s => ({ ...s, items: [{ id, line, lot: draft.lot, defect: draft.defect.trim(), sev: draft.sev, status: 'open', owner: '', action: '', photo: '', at: Date.now() }, ...s.items], log: [{ at: Date.now(), id, tone: 'new' as const, text: `${t('registrada', 'logged')} · ${line} · ${t('lote', 'batch')} ${draft.lot} · ${(es ? draft.sev : SEV_EN[draft.sev]).toUpperCase()}` }, ...s.log].slice(0, 40) }));
   setDraft({ ...draft, lot: '', defect: '' }); setErr(''); setHanded(null);
  }
  async function attach(f: File | undefined) { if (!f) return; try { patch(target.current, { photo: await shrink(f) }); note(target.current, t('evidencia adjunta', 'evidence attached'), 'info'); } catch { setErr(t('No se pudo leer la foto.', 'Could not read the photo.')); } }
@@ -113,7 +132,7 @@ export default function ShiftHandover({ lang }: { lang: 'es' | 'en' }) {
   if (doing) { move(doing, 'closed'); setTab('closed'); return true; }
   const open = items.filter(i => i.status === 'open').sort((a, b) => RANK[a.sev] - RANK[b.sev] || a.at - b.at)[0];
   if (!open) return false;
-  const owner = open.owner || OWNERS[(Number(open.id.slice(4)) || 0) % OWNERS.length];
+  const owner = open.owner || cfg.people[(Number(open.id.slice(4)) || 0) % cfg.people.length];
   patch(open.id, { owner, status: 'doing' }); note(open.id, t(`asignada a ${owner} · en curso`, `assigned to ${owner} · in progress`), 'move'); setTab('doing');
   return true;
  }
@@ -124,7 +143,7 @@ export default function ShiftHandover({ lang }: { lang: 'es' | 'en' }) {
    <div><span className="sh-kicker">{t('Planta de ensamble · Calidad', 'Assembly plant · Quality')}</span><strong>{t('Incidencias del turno', 'Shift incidents')}</strong></div>
    <div className="sh-clock" aria-label={t('Reloj del turno', 'Shift clock')}>
     <span className="sh-time">{clock(now)}</span>
-    <span className="sh-shift">{t(`Turno ${shift.name.toLowerCase()}`, `${shift.name} shift`)} · {t(`entrega al ${shift.next} en ${Math.floor(shift.left)} h ${String(Math.round((shift.left % 1) * 60)).padStart(2, '0')} min`, `handover in ${Math.floor(shift.left)} h ${String(Math.round((shift.left % 1) * 60)).padStart(2, '0')} min`)}</span>
+    <span className="sh-shift">{t(`Turno ${shift.name.toLowerCase()}`, `${shift.name} shift`)} · {t(`entrega al ${shift.next} en ${Math.floor(leftMin / 60)} h ${String(leftMin % 60).padStart(2, '0')} min`, `handover in ${Math.floor(leftMin / 60)} h ${String(leftMin % 60).padStart(2, '0')} min`)}</span>
     <span className="sh-progress"><i style={{ width: `${shift.progress * 100}%` }}/></span>
    </div>
   </header>
@@ -132,13 +151,24 @@ export default function ShiftHandover({ lang }: { lang: 'es' | 'en' }) {
   <div className="sh-bar">
    <button type="button" className="sh-add" aria-expanded={adding} onClick={() => setAdding(a => !a)}>{adding ? <X size={16} weight="bold"/> : <Plus size={16} weight="bold"/>}{adding ? t('Cancelar', 'Cancel') : t('Nueva incidencia', 'New incident')}</button>
    <button type="button" className="sh-auto" aria-pressed={auto} onClick={() => setAuto(a => !a)}>{auto ? <Pause size={16} weight="fill"/> : <Play size={16} weight="fill"/>}{auto ? t('Pausar', 'Pause') : t('Reproducir turno', 'Play the shift')}</button>
+   <button type="button" className="sh-gear" aria-expanded={setup} onClick={() => setSetup(o => !o)}><GearSix size={16} weight="bold"/>{t('Líneas y personas', 'Lines and people')}</button>
    {late > 0 && <span className="sh-late-chip"><WarningOctagon size={15} weight="fill" aria-hidden="true"/>{t(`${late} fuera de tiempo`, `${late} overdue`)}</span>}
   </div>
   {stats.avg !== null && <p className="sh-speed"><Clock size={16} weight="fill" aria-hidden="true"/>{t('Cierre promedio', 'Average close')} <b>{fmtHours(stats.avg)}</b><span>{t(`${stats.onTime} de ${stats.n} dentro de tiempo`, `${stats.onTime} of ${stats.n} on time`)}</span>{stats.bySev.filter(([, h]) => h !== null).map(([s, h]) => <em key={s}>{es ? s : SEV_EN[s]} {fmtHours(h!)}</em>)}</p>}
 
+  {setup && <div className="sh-setup">
+   <ChipEditor es={es} label={t('Líneas', 'Lines')} placeholder={t('Ej. Pintura 2', 'e.g. Paint 2')} items={cfg.lines} onChange={v => setState(s => ({ ...s, cfg: { ...cfg, lines: v } }))}/>
+   <ChipEditor es={es} label={t('Responsables', 'Owners')} placeholder={t('Ej. J. Pérez', 'e.g. J. Smith')} items={cfg.people} onChange={v => setState(s => ({ ...s, cfg: { ...cfg, people: v } }))}/>
+   <p>{t('Se guardan en este navegador. Las incidencias que ya existen conservan su línea y responsable.', 'Saved in this browser. Existing incidents keep their line and owner.')}</p>
+  </div>}
+  {rep.length > 0 && <section className="sh-repeat" aria-labelledby="sh-repeat-h">
+   <h3 id="sh-repeat-h"><Repeat size={17} weight="bold" aria-hidden="true"/>{t('Se repite en los últimos 7 días', 'Repeating in the last 7 days')}</h3>
+   <ul>{rep.slice(0, 4).map(r => <li key={r.line + r.defect}><b>{r.defect}</b><span>{r.line} · {t(`${r.count} veces`, `${r.count} times`)} · {r.ids.join(', ')}</span></li>)}</ul>
+   <p>{t('Cerrar cada incidencia no basta si vuelve: pide un análisis de causa raíz (8D) para esa línea.', 'Closing each incident is not enough if it comes back: ask for a root-cause analysis (8D) on that line.')}</p>
+  </section>}
   {adding && <form className="sh-new" onSubmit={add}>
-   <label>{t('Línea', 'Line')}<select value={draft.line} onChange={e => setDraft({ ...draft, line: e.target.value })}>{['L1', 'L2', 'L3'].map(l => <option key={l}>{l}</option>)}</select></label>
-   <label>{t('Lote', 'Batch')}<input value={draft.lot} inputMode="numeric" placeholder="4480" onChange={e => setDraft({ ...draft, lot: e.target.value })}/></label>
+   <label>{t('Línea', 'Line')}<select value={lines.includes(draft.line) ? draft.line : lines[0]} onChange={e => setDraft({ ...draft, line: e.target.value })}>{lines.map(l => <option key={l}>{l}</option>)}</select></label>
+   <label>{t('Lote', 'Batch')}<input value={draft.lot} inputMode="numeric" placeholder="4480 · A-2311" onChange={e => setDraft({ ...draft, lot: e.target.value })}/></label>
    <label className="grow">{t('Defecto', 'Defect')}<input value={draft.defect} placeholder={t('Ej. soldadura incompleta', 'e.g. incomplete weld')} onChange={e => setDraft({ ...draft, defect: e.target.value })}/></label>
    <fieldset className="sh-sevpick"><legend>{t('Severidad', 'Severity')}</legend>{(['Crítica', 'Mayor', 'Menor'] as Sev[]).map(s => <button type="button" key={s} className={`sev-${RANK[s]}`} aria-pressed={draft.sev === s} onClick={() => setDraft({ ...draft, sev: s })}><SevIcon s={s}/>{es ? s : SEV_EN[s]}</button>)}</fieldset>
    <button type="submit" className="sh-log-it">{t('Registrar', 'Log it')}</button>
@@ -148,7 +178,7 @@ export default function ShiftHandover({ lang }: { lang: 'es' | 'en' }) {
 
   <div className="sh-work">
    <div className="sh-filters" role="group" aria-label={t('Filtrar incidencias', 'Filter incidents')}>
-    {['', 'L1', 'L2', 'L3'].map(l => <button type="button" key={l || 'all'} aria-pressed={fLine === l} onClick={() => setFLine(l)}>{l || t('Todas las líneas', 'All lines')}</button>)}
+    {['', ...lines].map(l => <button type="button" key={l || 'all'} aria-pressed={fLine === l} onClick={() => setFLine(l)}>{l || t('Todas las líneas', 'All lines')}</button>)}
     <span aria-hidden="true"/>
     {(['', 'Crítica', 'Mayor', 'Menor'] as (Sev | '')[]).map(v => <button type="button" key={v || 'any'} aria-pressed={fSev === v} className={v ? `sev-${RANK[v]}` : ''} onClick={() => setFSev(v)}>{v ? (es ? v : SEV_EN[v]) : t('Toda severidad', 'Any severity')}</button>)}
    </div>
@@ -175,7 +205,7 @@ export default function ShiftHandover({ lang }: { lang: 'es' | 'en' }) {
         </button>
         {!open && col !== 'closed' && <button type="button" className={`sh-next to-${col === 'open' ? 'doing' : 'closed'}`} onClick={() => move(i, col === 'open' ? 'doing' : 'closed')}>{col === 'open' ? t('Pasar a en curso', 'Move to in progress') : t('Cerrar', 'Close')}<ArrowRight size={14} weight="bold"/></button>}
         {open && col !== 'closed' && <div className="sh-edit">
-         <label>{t('Responsable', 'Owner')}<select value={i.owner} onChange={e => { const o = e.target.value; patch(i.id, { owner: o, status: o ? 'doing' : 'open' }); note(i.id, o ? t(`asignada a ${o} · en curso`, `assigned to ${o} · in progress`) : t('sin responsable', 'unassigned'), 'move'); }}><option value="">{t('Sin asignar', 'Unassigned')}</option>{OWNERS.map(o => <option key={o}>{o}</option>)}</select></label>
+         <label>{t('Responsable', 'Owner')}<select value={i.owner} onChange={e => { const o = e.target.value; patch(i.id, { owner: o, status: o ? 'doing' : 'open' }); note(i.id, o ? t(`asignada a ${o} · en curso`, `assigned to ${o} · in progress`) : t('sin responsable', 'unassigned'), 'move'); }}><option value="">{t('Sin asignar', 'Unassigned')}</option>{[...new Set([...cfg.people, ...(i.owner ? [i.owner] : [])])].map(o => <option key={o}>{o}</option>)}</select></label>
          <label>{t('Siguiente acción', 'Next action')}<input value={i.action} placeholder={t('¿Qué sigue?', 'What’s next?')} onChange={e => patch(i.id, { action: e.target.value })} onBlur={e => e.target.value && note(i.id, `${t('acción', 'action')}: ${e.target.value}`, 'info')}/></label>
          <div className="sh-evidence">
           {i.photo && i.photo !== 'demo' ? <img src={i.photo} alt={t('Evidencia', 'Evidence')}/> : i.photo ? <span className="sh-demo-photo">{t('foto de ejemplo', 'sample photo')}</span> : null}
@@ -202,9 +232,11 @@ export default function ShiftHandover({ lang }: { lang: 'es' | 'en' }) {
   </div>
 
   <div className="sh-hand">
-   <button type="button" className="sh-go" onClick={() => { setHanded(new Date().toLocaleTimeString(es ? 'es-MX' : 'en-US', { hour: '2-digit', minute: '2-digit' })); setCopied(false); note('TURNO', t(`entregado con ${pending.length} pendientes`, `handed over with ${pending.length} open`), 'ok'); }}>{t('Entregar turno', 'Hand over shift')}<ArrowRight size={18}/></button>
+   <button type="button" className="sh-go" onClick={() => { setHanded(new Date().toLocaleTimeString(es ? 'es-MX' : 'en-US', { hour: '2-digit', minute: '2-digit' })); setCopied(false); note('TURNO', t(`entregado con ${pending.length} pendientes`, `handed over with ${pending.length} open`), 'ok');
+    const at = Date.now(), h: Handover = { at, shift: shift.name, pending: pending.length, late, orphan, closed: items.filter(i => i.closedAt && at - i.closedAt <= 8 * H).length, text: summary() };
+    setState(s => ({ ...s, handovers: [h, ...(s.handovers ?? [])].slice(0, 30) })); }}>{t('Entregar turno', 'Hand over shift')}<ArrowRight size={18}/></button>
    <button type="button" className="sh-reset" onClick={() => void exportExcel()}>{t('Exportar Excel', 'Export Excel')}</button>
-   <button type="button" className="sh-reset" onClick={() => { const items = sample(); setState({ items, log: sampleLog(items) }); setHanded(null); setOpenId(null); }}>{t('Volver al ejemplo', 'Reset sample')}</button>
+   <button type="button" className="sh-reset" onClick={() => { const items = sample(); setState(s => ({ ...s, items, log: sampleLog(items) })); setHanded(null); setOpenId(null); }}>{t('Volver al ejemplo', 'Reset sample')}</button>
    <span className="sh-tip">{t('Arrastra o usa el botón de cada tarjeta.', 'Drag cards or use their button.')}</span>
    {handed && <div className="sh-summary" role="status">
     <header><strong>{t(`Para el turno ${shift.next} · ${handed}`, `For the next shift · ${handed}`)}</strong><span>{t(`${pending.length} pendientes`, `${pending.length} open`)}{orphan ? t(` · ${orphan} sin responsable`, ` · ${orphan} without owner`) : ''}{late ? t(` · ${late} fuera de tiempo`, ` · ${late} overdue`) : ''}</span></header>
@@ -215,6 +247,10 @@ export default function ShiftHandover({ lang }: { lang: 'es' | 'en' }) {
     <div className="sh-send"><button type="button" onClick={() => window.print()}>{t('Imprimir o guardar PDF', 'Print or save PDF')}</button><button type="button" onClick={copy}>{copied ? t('Copiado', 'Copied') : t('Copiar resumen', 'Copy summary')}</button><a href={`https://wa.me/?text=${encodeURIComponent(summary())}`} target="_blank" rel="noreferrer">{t('Mandar por WhatsApp', 'Send via WhatsApp')}</a></div>
    </div>}
   </div>
+  {handovers.length > 0 && <section className="sh-history" aria-label={t('Entregas anteriores', 'Previous handovers')}>
+   <h3><ClockCounterClockwise size={17} weight="bold" aria-hidden="true"/>{t('Entregas anteriores', 'Previous handovers')}</h3>
+   <ol>{handovers.map(h => <li key={h.at}><details><summary><time>{new Date(h.at).toLocaleString(es ? 'es-MX' : 'en-US', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</time><span>{t(`Turno ${h.shift.toLowerCase()}`, `${h.shift} shift`)}</span><b>{t(`${h.pending} pendientes`, `${h.pending} open`)}</b>{h.late > 0 && <em>{t(`${h.late} fuera de tiempo`, `${h.late} overdue`)}</em>}<small>{t(`${h.closed} cerradas en el turno`, `${h.closed} closed this shift`)}</small></summary><pre>{h.text}</pre></details></li>)}</ol>
+  </section>}
   <p className="sh-note">{t('Se guarda en este navegador: puedes usarlo en un turno real y tomar las fotos con el celular.', 'It is saved in this browser: you can use it on a real shift and take the photos with your phone.')}</p>
  </div>;
 }

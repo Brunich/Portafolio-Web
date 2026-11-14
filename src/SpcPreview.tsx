@@ -9,7 +9,7 @@ export default function SpcPreview({ lang }: { lang: 'es' | 'en' }) {
   <rect className="zone" x={18} width={W - 36} y={y(2)} height={y(-2) - y(2)}/>
   <line className="lim" x1={18} x2={W - 18} y1={y(3)} y2={y(3)}/><line className="lim" x1={18} x2={W - 18} y1={y(-3)} y2={y(-3)}/>
   <line className="cl" x1={18} x2={W - 18} y1={y(0)} y2={y(0)}/>
-  <text x={W - 18} y={y(3) - 6} textAnchor="end">LSC</text><text x={W - 18} y={y(-3) + 14} textAnchor="end">LIC</text>
+  <text x={18} y={y(3) - 6}>{lang === 'es' ? 'LSC' : 'UCL'}</text><text x={18} y={y(-3) + 14}>{lang === 'es' ? 'LIC' : 'LCL'}</text>
   <path className="ln" pathLength={1} d={PTS.map((z, i) => `${i ? 'L' : 'M'}${x(i)},${y(z)}`).join('')}/>
   {PTS.map((z, i) => <circle key={i} className={i >= 14 ? 'bad' : ''} cx={x(i)} cy={y(z)} r={i >= 14 ? 4.5 : 3}/>)}
   <text className="tag" x={x(PTS.length - 1) - 4} y={y(PTS[PTS.length - 1]) - 10} textAnchor="end">{lang === 'es' ? 'desgaste' : 'tool wear'}</text>

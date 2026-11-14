@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { profileColumns } from './csv';
 import type { ColumnProfile } from './csv';
 import { toNumber } from './quality';
@@ -12,10 +12,22 @@ type Agg = 'sum' | 'avg' | 'count' | 'max' | 'min';
 type Config = { kind: Kind; x: number; y: number; agg: Agg; top: number; sort: 'value' | 'label'; title: string };
 type Point = { label: string; value: number; x?: number };
 
-const PALETTES: Record<string, string[]> = {
- portafolio: ['#a894f0', '#9fd0bf', '#dd9fbd', '#d9c08a', '#b3aed8', '#8fb7d6', '#e0b39a', '#c3d98f'],
- sobrio: ['#5b6c8f', '#8aa1c1', '#b9c7da', '#6f8f7e', '#a8bfa9', '#9a8fb3', '#c9b8d8', '#7d8594'],
- calido: ['#c9795c', '#e0a86e', '#e8c98a', '#a8695a', '#d68f86', '#b98fa1', '#8f7a6a', '#e5b7a0'],
+// Colores de la gráfica: salen de los tokens del sitio para que coincidan en claro y oscuro.
+// El SVG lleva los valores ya resueltos porque se exporta a PNG y a archivo suelto, donde no hay hojas de estilo.
+type Ink = { bg: string; text: string; muted: string; line: string; accent: string };
+const norm = (c: string, fb: string) => { try { const x = document.createElement('canvas').getContext('2d')!; x.fillStyle = '#000'; x.fillStyle = c; return x.fillStyle as string; } catch { return fb; } };
+function readInk(): Ink {
+ const cs = getComputedStyle(document.documentElement), g = (n: string, fb: string) => norm(cs.getPropertyValue(n).trim() || fb, fb);
+ return { bg: g('--surface', '#f6f4ee'), text: g('--text', '#1c1d1a'), muted: g('--muted', '#5d5f58'), line: g('--line', '#cdc8bb'), accent: g('--accent', '#c4461b') };
+}
+const hex = (c: string): [number, number, number] => { const m = /^#?([0-9a-f]{6})/i.exec(c); const n = m ? parseInt(m[1], 16) : 0; return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+const mix = (a: string, b: string, t: number) => { const x = hex(a), y = hex(b); return '#' + x.map((v, i) => Math.round(v + (y[i] - v) * t).toString(16).padStart(2, '0')).join(''); };
+// Rampas de tinta: la primera serie es la más oscura y las demás se aclaran hacia el papel.
+const RAMP = [0, .45, .7, .25, .85, .55, .35, .78];
+const PALETTES: Record<string, (k: Ink) => string[]> = {
+ tinta: k => RAMP.map(t => mix(k.text, k.bg, t)),
+ acento: k => [k.accent, ...RAMP.slice(0, 7).map(t => mix(k.text, k.bg, t))],
+ suave: k => RAMP.map(t => mix(k.muted, k.bg, t * .8)),
 };
 const KINDS: [Kind, string, string][] = [['bar', 'Barras', 'Bars'], ['hbar', 'Barras horizontales', 'Horizontal bars'], ['line', 'Línea', 'Line'], ['area', 'Área', 'Area'], ['pie', 'Pastel', 'Pie'], ['donut', 'Dona', 'Donut'], ['scatter', 'Dispersión', 'Scatter'], ['hist', 'Histograma', 'Histogram']];
 const AGGS: [Agg, string, string][] = [['sum', 'Suma', 'Sum'], ['avg', 'Promedio', 'Average'], ['count', 'Conteo de filas', 'Row count'], ['max', 'Máximo', 'Max'], ['min', 'Mínimo', 'Min']];
@@ -68,13 +80,13 @@ function compute(t: Table, p: ColumnProfile[], c: Config): Point[] {
 }
 
 // Dibuja la gráfica como SVG autónomo (sirve igual en pantalla y al exportar).
-function draw(pts: Point[], c: Config, colors: string[], xName: string, yName: string, es: boolean): string {
+function draw(pts: Point[], c: Config, colors: string[], K: Ink, xName: string, yName: string, es: boolean): string {
  const W = 880, H = 500, L = c.kind === 'hbar' ? 170 : 70, R = 30, T = 70, B = c.kind === 'hbar' ? 40 : 86;
  const iw = W - L - R, ih = H - T - B;
- const font = `font-family="DM Sans Variable, DM Sans, Segoe UI, Arial, sans-serif"`;
+ const font = `font-family="Archivo Variable, Archivo, Segoe UI, Arial, sans-serif"`;
  let body = '';
- const title = `<text x="${L}" y="36" ${font} font-size="22" font-weight="700" fill="#f4f0f7">${esc(c.title)}</text><text x="${L}" y="58" ${font} font-size="13" fill="#b7aec4">${esc(c.kind === 'scatter' ? `${yName} contra ${xName}` : c.kind === 'hist' ? (es ? `Número de filas por rango de ${xName}` : `Rows per ${xName} range`) : `${c.y < 0 || c.agg === 'count' ? (es ? 'Filas' : 'Rows') : `${AGGS.find(a => a[0] === c.agg)![es ? 1 : 2]} de ${yName}`} · ${xName}`)}</text>`;
- if (!pts.length) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}"><rect width="${W}" height="${H}" rx="18" fill="#161225"/>${title}<text x="${W / 2}" y="${H / 2}" ${font} text-anchor="middle" fill="#b7aec4" font-size="15">${es ? 'No hay números en esa columna.' : 'No numbers in that column.'}</text></svg>`;
+ const title = `<text x="${L}" y="36" ${font} font-size="22" font-weight="700" fill="${K.text}">${esc(c.title)}</text><text x="${L}" y="58" ${font} font-size="13" fill="${K.muted}">${esc(c.kind === 'scatter' ? `${yName} contra ${xName}` : c.kind === 'hist' ? (es ? `Número de filas por rango de ${xName}` : `Rows per ${xName} range`) : `${c.y < 0 || c.agg === 'count' ? (es ? 'Filas' : 'Rows') : `${AGGS.find(a => a[0] === c.agg)![es ? 1 : 2]} de ${yName}`} · ${xName}`)}</text>`;
+ if (!pts.length) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}"><rect width="${W}" height="${H}" rx="3" fill="${K.bg}" stroke="${K.line}"/>${title}<text x="${W / 2}" y="${H / 2}" ${font} text-anchor="middle" fill="${K.muted}" font-size="15">${es ? 'No hay números en esa columna.' : 'No numbers in that column.'}</text></svg>`;
  const ticks = (max: number, min = 0) => { const span = max - min || 1, step = Math.pow(10, Math.floor(Math.log10(span / 4))), n = [1, 2, 2.5, 5, 10].map(m => m * step).find(s => span / s <= 5)!; const out: number[] = []; for (let v = Math.floor(min / n) * n; v <= max + n * .001; v += n) out.push(+v.toFixed(6)); return out; };
  if (c.kind === 'pie' || c.kind === 'donut') {
   const total = pts.reduce((s, d) => s + Math.max(0, d.value), 0) || 1, cx = 300, cy = T + ih / 2 + 6, r = Math.min(ih / 2, 190), ri = c.kind === 'donut' ? r * .58 : 0;
@@ -83,41 +95,48 @@ function draw(pts: Point[], c: Config, colors: string[], xName: string, yName: s
    const a1 = a0 + Math.max(0, d.value) / total * Math.PI * 2, big = a1 - a0 > Math.PI ? 1 : 0, col = colors[i % colors.length];
    const p = (a: number, rr: number) => `${(cx + rr * Math.cos(a)).toFixed(2)} ${(cy + rr * Math.sin(a)).toFixed(2)}`;
    const path = ri ? `M${p(a0, r)} A${r} ${r} 0 ${big} 1 ${p(a1, r)} L${p(a1, ri)} A${ri} ${ri} 0 ${big} 0 ${p(a0, ri)}Z` : `M${cx} ${cy} L${p(a0, r)} A${r} ${r} 0 ${big} 1 ${p(a1, r)}Z`;
-   body += `<path d="${path}" fill="${col}" stroke="#161225" stroke-width="2" class="ch-seg" style="--i:${i}"/>`;
+   body += `<path d="${path}" fill="${col}" stroke="${K.bg}" stroke-width="2" class="ch-seg" style="--i:${i}"/>`;
    const ly = T + 20 + i * 30;
-   body += `<rect x="560" y="${ly - 11}" width="14" height="14" rx="4" fill="${col}"/><text x="584" y="${ly}" ${font} font-size="14" fill="#e8e2f0">${esc(d.label.slice(0, 24))}</text><text x="${W - R}" y="${ly}" ${font} font-size="14" font-weight="700" text-anchor="end" fill="#f4f0f7">${Math.round(d.value / total * 100)} %</text>`;
+   body += `<rect x="560" y="${ly - 11}" width="14" height="14" rx="1" fill="${col}"/><text x="584" y="${ly}" ${font} font-size="14" fill="${K.text}">${esc(d.label.slice(0, 24))}</text><text x="${W - R}" y="${ly}" ${font} font-size="14" font-weight="700" text-anchor="end" fill="${K.text}">${Math.round(d.value / total * 100)} %</text>`;
    a0 = a1;
   });
-  if (ri) body += `<text x="${cx}" y="${cy}" ${font} text-anchor="middle" font-size="34" font-weight="800" fill="#f4f0f7">${fmt(total)}</text><text x="${cx}" y="${cy + 24}" ${font} text-anchor="middle" font-size="13" fill="#b7aec4">total</text>`;
+  if (ri) body += `<text x="${cx}" y="${cy}" ${font} text-anchor="middle" font-size="34" font-weight="800" fill="${K.text}">${fmt(total)}</text><text x="${cx}" y="${cy + 24}" ${font} text-anchor="middle" font-size="13" fill="${K.muted}">total</text>`;
  } else if (c.kind === 'hbar') {
   const max = Math.max(...pts.map(d => d.value), 0), bh = Math.min(34, ih / pts.length * .7), step = ih / pts.length;
-  ticks(max).forEach(v => { const x = L + v / (max || 1) * iw; if (x <= L + iw + 1) body += `<line x1="${x}" x2="${x}" y1="${T}" y2="${T + ih}" stroke="#ffffff14"/><text x="${x}" y="${T + ih + 20}" ${font} font-size="12" text-anchor="middle" fill="#9d93ad">${fmt(v)}</text>`; });
-  pts.forEach((d, i) => { const y = T + i * step + (step - bh) / 2, w = Math.max(2, d.value / (max || 1) * iw); body += `<text x="${L - 12}" y="${y + bh / 2 + 5}" ${font} font-size="13" text-anchor="end" fill="#e8e2f0">${esc(d.label.slice(0, 20))}</text><rect x="${L}" y="${y}" width="${w}" height="${bh}" rx="6" fill="${colors[0]}" class="ch-hbar" style="--i:${i}"/><text x="${L + w + 8}" y="${y + bh / 2 + 5}" ${font} font-size="13" font-weight="700" fill="#f4f0f7">${fmt(d.value)}</text>`; });
+  ticks(max).forEach(v => { const x = L + v / (max || 1) * iw; if (x <= L + iw + 1) body += `<line x1="${x}" x2="${x}" y1="${T}" y2="${T + ih}" stroke="${K.line}"/><text x="${x}" y="${T + ih + 20}" ${font} font-size="12" text-anchor="middle" fill="${K.muted}">${fmt(v)}</text>`; });
+  pts.forEach((d, i) => { const y = T + i * step + (step - bh) / 2, w = Math.max(2, d.value / (max || 1) * iw); body += `<text x="${L - 12}" y="${y + bh / 2 + 5}" ${font} font-size="13" text-anchor="end" fill="${K.text}">${esc(d.label.slice(0, 20))}</text><rect x="${L}" y="${y}" width="${w}" height="${bh}" rx="1" fill="${colors[0]}" class="ch-hbar" style="--i:${i}"/><text x="${L + w + 8}" y="${y + bh / 2 + 5}" ${font} font-size="13" font-weight="700" fill="${K.text}">${fmt(d.value)}</text>`; });
  } else if (c.kind === 'scatter') {
   const xs = pts.map(d => d.x!), ys = pts.map(d => d.value), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(0, ...ys), y1 = Math.max(...ys);
   const sx = (v: number) => L + (v - x0) / (x1 - x0 || 1) * iw, sy = (v: number) => T + ih - (v - y0) / (y1 - y0 || 1) * ih;
-  ticks(y1, y0).forEach(v => body += `<line x1="${L}" x2="${L + iw}" y1="${sy(v)}" y2="${sy(v)}" stroke="#ffffff14"/><text x="${L - 10}" y="${sy(v) + 4}" ${font} font-size="12" text-anchor="end" fill="#9d93ad">${fmt(v)}</text>`);
-  ticks(x1, x0).forEach(v => { if (v >= x0 && v <= x1) body += `<text x="${sx(v)}" y="${T + ih + 22}" ${font} font-size="12" text-anchor="middle" fill="#9d93ad">${fmt(v)}</text>`; });
-  pts.forEach((d, i) => body += `<circle cx="${sx(d.x!)}" cy="${sy(d.value)}" r="6" fill="${colors[0]}" fill-opacity=".75" stroke="#161225" class="ch-dot" style="--i:${i % 40}"/>`);
-  body += `<text x="${L + iw}" y="${H - 22}" ${font} font-size="13" text-anchor="end" fill="#b7aec4">${esc(xName)} →</text>`;
+  ticks(y1, y0).forEach(v => body += `<line x1="${L}" x2="${L + iw}" y1="${sy(v)}" y2="${sy(v)}" stroke="${K.line}"/><text x="${L - 10}" y="${sy(v) + 4}" ${font} font-size="12" text-anchor="end" fill="${K.muted}">${fmt(v)}</text>`);
+  ticks(x1, x0).forEach(v => { if (v >= x0 && v <= x1) body += `<text x="${sx(v)}" y="${T + ih + 22}" ${font} font-size="12" text-anchor="middle" fill="${K.muted}">${fmt(v)}</text>`; });
+  pts.forEach((d, i) => body += `<circle cx="${sx(d.x!)}" cy="${sy(d.value)}" r="6" fill="${colors[0]}" fill-opacity=".75" stroke="${K.bg}" class="ch-dot" style="--i:${i % 40}"/>`);
+  body += `<text x="${L + iw}" y="${H - 22}" ${font} font-size="13" text-anchor="end" fill="${K.muted}">${esc(xName)} →</text>`;
  } else {
   const max = Math.max(...pts.map(d => d.value), 0), min = Math.min(0, ...pts.map(d => d.value)), room = max + (max - min) * .1, sy = (v: number) => T + ih - (v - min) / (room - min || 1) * ih;
-  ticks(max, min).forEach(v => body += `<line x1="${L}" x2="${L + iw}" y1="${sy(v)}" y2="${sy(v)}" stroke="#ffffff14"/><text x="${L - 10}" y="${sy(v) + 4}" ${font} font-size="12" text-anchor="end" fill="#9d93ad">${fmt(v)}</text>`);
+  ticks(max, min).forEach(v => body += `<line x1="${L}" x2="${L + iw}" y1="${sy(v)}" y2="${sy(v)}" stroke="${K.line}"/><text x="${L - 10}" y="${sy(v) + 4}" ${font} font-size="12" text-anchor="end" fill="${K.muted}">${fmt(v)}</text>`);
   const step = iw / pts.length, every = Math.ceil(pts.length / 12);
-  const lab = (d: Point, i: number, x: number) => i % every ? '' : `<text x="${x}" y="${T + ih + 20}" ${font} font-size="12" text-anchor="end" transform="rotate(-30 ${x} ${T + ih + 20})" fill="#d8d0e4">${esc(d.label.slice(0, 16))}</text>`;
+  const lab = (d: Point, i: number, x: number) => i % every ? '' : `<text x="${x}" y="${T + ih + 20}" ${font} font-size="12" text-anchor="end" transform="rotate(-30 ${x} ${T + ih + 20})" fill="${K.text}">${esc(d.label.slice(0, 16))}</text>`;
   if (c.kind === 'bar' || c.kind === 'hist') {
    const bw = c.kind === 'hist' ? step - 2 : Math.min(56, step * .68);
-   pts.forEach((d, i) => { const x = L + i * step + (step - bw) / 2, y = sy(Math.max(0, d.value)), h = Math.abs(sy(d.value) - sy(0)); body += `<rect x="${x}" y="${y}" width="${bw}" height="${Math.max(1, h)}" rx="${c.kind === 'hist' ? 3 : 7}" fill="${colors[c.kind === 'hist' ? 1 : 0]}" class="ch-bar" style="--i:${i}"/>${pts.length <= 14 ? `<text x="${x + bw / 2}" y="${y - 8}" ${font} font-size="12" font-weight="700" text-anchor="middle" fill="#f4f0f7">${fmt(d.value)}</text>` : ''}${lab(d, i, x + bw / 2 + 4)}`; });
+   pts.forEach((d, i) => { const x = L + i * step + (step - bw) / 2, y = sy(Math.max(0, d.value)), h = Math.abs(sy(d.value) - sy(0)); body += `<rect x="${x}" y="${y}" width="${bw}" height="${Math.max(1, h)}" rx="1" fill="${colors[c.kind === 'hist' ? 1 : 0]}" class="ch-bar" style="--i:${i}"/>${pts.length <= 14 ? `<text x="${x + bw / 2}" y="${y - 8}" ${font} font-size="12" font-weight="700" text-anchor="middle" fill="${K.text}">${fmt(d.value)}</text>` : ''}${lab(d, i, x + bw / 2 + 4)}`; });
   } else {
    const pt = (d: Point, i: number) => `${(L + i * step + step / 2).toFixed(1)} ${sy(d.value).toFixed(1)}`;
    const line = pts.map((d, i) => `${i ? 'L' : 'M'}${pt(d, i)}`).join(' ');
-   if (c.kind === 'area') body += `<defs><linearGradient id="ch-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${colors[0]}" stop-opacity=".55"/><stop offset="1" stop-color="${colors[0]}" stop-opacity="0"/></linearGradient></defs><path d="${line} L${(L + (pts.length - .5) * step).toFixed(1)} ${sy(min)} L${(L + step / 2).toFixed(1)} ${sy(min)}Z" fill="url(#ch-fill)" class="ch-area"/>`;
+   if (c.kind === 'area') body += `<path d="${line} L${(L + (pts.length - .5) * step).toFixed(1)} ${sy(min)} L${(L + step / 2).toFixed(1)} ${sy(min)}Z" fill="${colors[0]}" fill-opacity=".14" class="ch-area"/>`;
    body += `<path d="${line}" fill="none" stroke="${colors[0]}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" pathLength="1" class="ch-line"/>`;
-   pts.forEach((d, i) => { body += `<circle cx="${L + i * step + step / 2}" cy="${sy(d.value)}" r="4.5" fill="#161225" stroke="${colors[0]}" stroke-width="2.5" class="ch-dot" style="--i:${i}"/>${lab(d, i, L + i * step + step / 2 + 4)}`; });
+   pts.forEach((d, i) => { body += `<circle cx="${L + i * step + step / 2}" cy="${sy(d.value)}" r="4.5" fill="${K.bg}" stroke="${colors[0]}" stroke-width="2.5" class="ch-dot" style="--i:${i}"/>${lab(d, i, L + i * step + step / 2 + 4)}`; });
   }
-  body += `<line x1="${L}" x2="${L + iw}" y1="${sy(0)}" y2="${sy(0)}" stroke="#ffffff40"/>`;
+  body += `<line x1="${L}" x2="${L + iw}" y1="${sy(0)}" y2="${sy(0)}" stroke="${K.muted}"/>`;
  }
- return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" role="img"><rect width="${W}" height="${H}" rx="18" fill="#161225"/>${title}${body}</svg>`;
+ return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" role="img"><rect width="${W}" height="${H}" rx="3" fill="${K.bg}" stroke="${K.line}"/>${title}${body}</svg>`;
+}
+
+// Vuelve a pintar la gráfica si el sistema cambia entre claro y oscuro.
+function useScheme() {
+ const [dark, setDark] = useState(() => matchMedia('(prefers-color-scheme: dark)').matches);
+ useEffect(() => { const m = matchMedia('(prefers-color-scheme: dark)'), on = () => setDark(m.matches); m.addEventListener('change', on); return () => m.removeEventListener('change', on); }, []);
+ return dark;
 }
 
 export default function CsvCharts({ lang, table, onBack }: { lang: 'es' | 'en'; table: Table; onBack?: () => void }) {
@@ -125,13 +144,15 @@ export default function CsvCharts({ lang, table, onBack }: { lang: 'es' | 'en'; 
  const profile = useMemo(() => profileColumns(table.headers, table.rows), [table]);
  const ideas = useMemo(() => suggest(profile, es), [profile, es]);
  const [cfg, setCfg] = useState<Config>(() => ideas[0] ?? { kind: 'bar', x: 0, y: -1, agg: 'count', top: 10, sort: 'value', title: table.name });
- const [palette, setPalette] = useState('portafolio');
+ const [palette, setPalette] = useState('tinta');
+ const dark = useScheme();
+ const ink = useMemo(readInk, [dark]);
  const [note, setNote] = useState('');
  const [run, setRun] = useState(0);
  const box = useRef<HTMLDivElement>(null);
  const safe = { ...cfg, x: Math.min(cfg.x, table.headers.length - 1), y: Math.min(cfg.y, table.headers.length - 1) };
  const pts = useMemo(() => compute(table, profile, safe), [table, profile, safe.kind, safe.x, safe.y, safe.agg, safe.top, safe.sort]); // eslint-disable-line react-hooks/exhaustive-deps
- const svg = useMemo(() => draw(pts, safe, PALETTES[palette], table.headers[safe.x] ?? '', table.headers[safe.y] ?? '', es), [pts, safe.title, palette, es]); // eslint-disable-line react-hooks/exhaustive-deps
+ const svg = useMemo(() => draw(pts, safe, PALETTES[palette](ink), ink, table.headers[safe.x] ?? '', table.headers[safe.y] ?? '', es), [pts, safe.title, palette, es, ink]); // eslint-disable-line react-hooks/exhaustive-deps
  const set = (p: Partial<Config>) => { setCfg(c => ({ ...c, ...p })); setRun(r => r + 1); setNote(''); };
  const numCols = profile.map((c, i) => [c, i] as const).filter(([c]) => c.kind === 'number');
  const needsY = safe.kind !== 'pie' && safe.kind !== 'donut' && safe.kind !== 'hist';
@@ -170,7 +191,7 @@ export default function CsvCharts({ lang, table, onBack }: { lang: 'es' | 'en'; 
      <label>{t('Orden', 'Order')}<select value={cfg.sort} onChange={e => set({ sort: e.target.value as 'value' | 'label' })}><option value="value">{t('De mayor a menor', 'Largest first')}</option><option value="label">{t('Por nombre', 'By name')}</option></select></label>
      <label>{t('Mostrar', 'Show')}<select value={cfg.top} onChange={e => set({ top: +e.target.value })}>{[5, 8, 10, 15, 25].map(n => <option key={n} value={n}>{t(`${n} más grandes`, `Top ${n}`)}</option>)}</select></label>
     </div>}
-    <fieldset className="ch-pal"><legend>{t('Colores', 'Colors')}</legend>{Object.entries(PALETTES).map(([k, cs]) => <button type="button" key={k} aria-pressed={palette === k} aria-label={k} onClick={() => setPalette(k)}>{cs.slice(0, 4).map(c => <i key={c} style={{ background: c }}/>)}</button>)}</fieldset>
+    <fieldset className="ch-pal"><legend>{t('Colores', 'Colors')}</legend>{Object.entries(PALETTES).map(([k, fn]) => <button type="button" key={k} aria-pressed={palette === k} aria-label={k} onClick={() => setPalette(k)}>{fn(ink).slice(0, 4).map(c => <i key={c} style={{ background: c }}/>)}</button>)}</fieldset>
    </form>
    <div className="ch-stage">
     <div className="ch-canvas" ref={box} key={run} dangerouslySetInnerHTML={{ __html: svg }}/>

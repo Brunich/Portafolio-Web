@@ -33,7 +33,10 @@ test('turnos de 8 horas y folios que siguen', () => {
  assert.equal(n.left, 4);
  assert.equal(nextId(items), 'INC-233');
  assert.equal(validLot('4480'), true);
- assert.equal(validLot('44a'), false);
+ assert.equal(validLot('A-2311'), true);
+ assert.equal(validLot('26L0457'), true);
+ assert.equal(validLot('44'), false);
+ assert.equal(validLot('4480 ; drop'), false);
 });
 
 test('el resumen avisa lo que queda sin dueño y fuera de tiempo', () => {
@@ -48,13 +51,23 @@ test('cierre promedio y Excel del mes: horas desde que se registró hasta que se
  const { closeStats, exportRows, fmtHours, sample, H } = await import('../src/turno-logic.ts');
  const now = Date.now(), items = sample(now);
  const s = closeStats(items);
- assert.equal(s.n, 1);
- assert.ok(Math.abs(s.avg! - 1.6) < 1e-9); // 6.5 h − 4.9 h
- assert.equal(s.onTime, 1); // Menor: 24 h de SLA
+ assert.equal(s.n, 2);
+ assert.ok(Math.abs(s.avg! - 3.3) < 1e-9); // (6.5 − 4.9) y (30 − 25) h
+ assert.equal(s.onTime, 2); // Menor: 24 h de SLA; Mayor: 8 h
  assert.equal(fmtHours(1.6), '1 h 36');
  const late = { ...items[0], status: 'closed' as const, closedAt: items[0].at + 3 * H }; // Crítica: 2 h de SLA
  assert.equal(closeStats([late]).onTime, 0);
  const rows = exportRows(items, true);
  assert.equal(rows.length, items.length + 1);
  assert.deepEqual(rows.find(r => r[0] === 'INC-226')!.slice(-2), [1.6, 'sí']);
+});
+
+test('un defecto que vuelve en la misma línea se marca para causa raíz', async () => {
+ const { repeats, defectKey } = await import('../src/turno-logic.ts');
+ assert.equal(defectKey('Burbuja en pintura del cofre'), defectKey('burbuja  en la pintura de cofre.'));
+ const rep = repeats(items, 7, now);
+ assert.equal(rep.length, 1);
+ assert.equal(rep[0].line, 'L2'); assert.equal(rep[0].count, 2); assert.equal(rep[0].open, true);
+ // Mismo defecto en otra línea, o fuera de la ventana, no cuenta.
+ assert.equal(repeats(items, 1, now).length, 0);
 });

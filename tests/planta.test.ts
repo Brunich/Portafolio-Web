@@ -74,3 +74,33 @@ test('Pareto de defectos: suma las piezas rechazadas de cada defecto, de mayor a
  assert.equal(d.reduce((s, x) => s + x[1], 0), r.lots.reduce((s, l) => s + (l.rej ?? 0), 0));
  assert.ok(d.every((x, i) => !i || x[1] <= d[i - 1][1]));
 });
+
+test('un Excel real: título arriba, totales abajo y un lote capturado dos veces', async () => {
+ const { fitGrid } = await import('../src/planta-logic.ts');
+ const raw = parseCsv(['Reporte de producción,,,,,,,', 'Planta Norte · impreso 10/03/2026,,,,,,,', ',,,,,,,',
+  'Fecha,Turno,Línea,Lote,Plan,Piezas producidas,Min programados,Ciclo ideal',
+  '2026-03-09,Matutino,L1,4411,400,392,450,60', '2026-03-09,Matutino,L1,4411,400,392,450,60', '2026-03-09,Matutino,L2,4412,330,318,450,72',
+  'Total,,,,1130,1102,1350,'].join('\n'));
+ const fit = fitGrid('prod', raw);
+ assert.equal(fit.titleRows, 3);
+ assert.equal(fit.totalRows, 1);
+ assert.equal(fit.grid.headers[5], 'Piezas producidas');
+ assert.equal(fit.grid.rows.length, 3);
+ const q = parseCsv('fecha,turno,linea,lote,revisadas,rechazadas\n2026-03-09,Matutino,L1,4411,392,2\n2026-03-09,Matutino,L2,4412,318,3');
+ const res = consolidate(fit.grid, q, null);
+ assert.equal(res.exceptions.filter(e => e.rule === 'duplicado').length, 1);
+ // Sin título ni totales, el archivo queda igual.
+ const same = fitGrid('prod', parseCsv(SAMPLE_PROD));
+ assert.equal(same.titleRows, 0); assert.equal(same.totalRows, 0); assert.equal(same.grid.rows.length, parseCsv(SAMPLE_PROD).rows.length);
+});
+
+test('el historial guarda cada periodo una vez y lo más reciente primero', async () => {
+ const { snapshot, addSnapshot } = await import('../src/planta-logic.ts');
+ const a = snapshot(r, 1);
+ assert.equal(a.from, '2026-03-09'); assert.equal(a.to, '2026-03-10'); assert.equal(a.lines.length, 3);
+ let h = addSnapshot([], a);
+ h = addSnapshot(h, { ...a, at: 2, oee: 0.5 }); // mismo periodo corregido: reemplaza
+ assert.equal(h.length, 1); assert.equal(h[0].oee, 0.5);
+ h = addSnapshot(h, { ...a, id: 'otro', from: '2026-03-11', to: '2026-03-11' });
+ assert.equal(h[0].from, '2026-03-11');
+});

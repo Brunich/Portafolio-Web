@@ -1,15 +1,21 @@
-import { useMemo, useRef, useState } from 'react';
-import { FileXls, FileCsv, CheckCircle, WarningCircle, DownloadSimple, WhatsappLogo, Copy } from '@phosphor-icons/react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { FileXls, FileCsv, CheckCircle, WarningCircle, DownloadSimple, WhatsappLogo, Copy, Printer, ClockCounterClockwise, Trash } from '@phosphor-icons/react';
 import { parseCsv } from './csv';
 import { readTable, TABLE_ACCEPT } from './read-file';
-import { defectPareto, byDay, consolidate, mapColumns, summaryText, NEEDS, SAMPLE_PROD, SAMPLE_QUAL, SAMPLE_STOPS } from './planta-logic';
-import type { ColumnMap, Field, FileKind, Grid, LineOee } from './planta-logic';
+import { addSnapshot, defectPareto, byDay, consolidate, fitGrid, mapColumns, snapshot, summaryText, NEEDS, SAMPLE_PROD, SAMPLE_QUAL, SAMPLE_STOPS } from './planta-logic';
+import type { ColumnMap, Field, FileKind, Grid, LineOee, Result, Snapshot } from './planta-logic';
 import { exportCsv } from './csv';
+import { esc, printDoc } from './print-doc';
 import './planta.css';
 
 // Planta: tres reportes de un turno (producción, calidad y paros) se cruzan solos,
 // salen las excepciones, el OEE de cada línea y el reporte en Excel.
-type Slot = { name: string; grid: Grid; sample: boolean };
+type Slot = { name: string; grid: Grid; sample: boolean; titleRows?: number; totalRows?: number };
+// Metas, revisadas e historial se quedan en el navegador: el supervisor regresa mañana y ahí siguen.
+const KEY = 'bruno-linea-v1';
+type Saved = { goals: Record<string, number>; seen: string[]; history: Snapshot[] };
+const loadSaved = (): Saved => { try { const v = JSON.parse(localStorage.getItem(KEY) ?? ''); return { goals: v.goals ?? {}, seen: Array.isArray(v.seen) ? v.seen : [], history: Array.isArray(v.history) ? v.history : [] }; } catch { return { goals: {}, seen: [], history: [] }; } };
+const RULE_NAMES: Record<string, [string, string]> = { 'sin-inspeccion': ['Sin inspección', 'Not inspected'], 'sin-produccion': ['Lote no existe', 'Unknown batch'], revisadas: ['Revisadas > producidas', 'Inspected > produced'], rechazo: ['Rechazo alto', 'High rejection'], plan: ['Plan', 'Plan'], paro: ['Detención sin causa', 'Stop without cause'], dato: ['Dato inválido', 'Invalid value'], duplicado: ['Lote repetido', 'Duplicate batch'] };
 const SAMPLES: Record<FileKind, [string, string]> = { prod: ['produccion_marzo.csv', SAMPLE_PROD], qual: ['calidad_marzo.csv', SAMPLE_QUAL], stops: ['detenciones_marzo.csv', SAMPLE_STOPS] };
 const FIELD_ES: Record<string, string> = { fecha: 'fecha', turno: 'turno', linea: 'línea', lote: 'lote', plan: 'plan', prod: 'producidas', prog: 'min programados', ciclo: 'ciclo ideal', rev: 'revisadas', rej: 'rechazadas', min: 'minutos', causa: 'causa' };
 const pct = (n: number) => `${(n * 100).toFixed(1)} %`;
@@ -48,14 +54,17 @@ export default function Planta({ lang }: { lang: 'es' | 'en' }) {
  const [slots, setSlots] = useState<Record<FileKind, Slot | null>>(() => ({ prod: { name: SAMPLES.prod[0], grid: parseCsv(SAMPLES.prod[1]), sample: true }, qual: { name: SAMPLES.qual[0], grid: parseCsv(SAMPLES.qual[1]), sample: true }, stops: { name: SAMPLES.stops[0], grid: parseCsv(SAMPLES.stops[1]), sample: true } }));
  const [limit, setLimit] = useState(3);
  // Meta de OEE por línea: 85 % es la referencia de clase mundial, pero cada línea tiene la suya.
- const [goals, setGoals] = useState<Record<string, number>>({});
+ const [saved] = useState(loadSaved);
+ const [goals, setGoals] = useState<Record<string, number>>(saved.goals);
  const goalOf = (linea: string) => goals[linea] ?? .85;
  const [err, setErr] = useState('');
  const [filter, setFilter] = useState('');
  const [note, setNote] = useState('');
  const [run, setRun] = useState(0);
  const [over, setOver] = useState<Record<FileKind, ColumnMap>>({ prod: {}, qual: {}, stops: {} });
- const [seen, setSeen] = useState<Set<string>>(() => new Set());
+ const [seen, setSeen] = useState<Set<string>>(() => new Set(saved.seen));
+ const [history, setHistory] = useState<Snapshot[]>(saved.history);
+ useEffect(() => { try { localStorage.setItem(KEY, JSON.stringify({ goals, seen: [...seen].slice(-500), history })); } catch { /* sin espacio: sigue en memoria */ } }, [goals, seen, history]);
  const inputs = useRef<Record<FileKind, HTMLInputElement | null>>({ prod: null, qual: null, stops: null });
  const maps = useMemo(() => (['prod', 'qual', 'stops'] as FileKind[]).map(k => slots[k] ? mapColumns(k, slots[k]!.grid.headers, over[k]) : null), [slots, over]);
  const ready = slots.prod && slots.qual && !maps[0]?.missing.length && !maps[1]?.missing.length;
@@ -80,7 +89,7 @@ export default function Planta({ lang }: { lang: 'es' | 'en' }) {
 
  async function load(kind: FileKind, file: File | undefined) {
   if (!file) return;
-  try { const grid = await readFile(file); setSlots(s => ({ ...s, [kind]: { name: file.name, grid, sample: false } })); setOver(o => ({ ...o, [kind]: {} })); setErr(''); setRun(r => r + 1); }
+  try { const fit = fitGrid(kind, await readFile(file)); setSlots(s => ({ ...s, [kind]: { name: file.name, grid: fit.grid, sample: false, titleRows: fit.titleRows, totalRows: fit.totalRows } })); setOver(o => ({ ...o, [kind]: {} })); setErr(''); setRun(r => r + 1); }
   catch { setErr(t(`No pude leer ${file.name}. Usa Excel (.xlsx) o CSV en UTF-8.`, `Could not read ${file.name}. Use Excel (.xlsx) or UTF-8 CSV.`)); }
  }
  async function sampleXlsx(kind: FileKind) {
@@ -99,6 +108,27 @@ export default function Planta({ lang }: { lang: 'es' | 'en' }) {
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([[t('Defecto', 'Defect'), t('Piezas rechazadas', 'Rejected parts'), t('% acumulado', 'Cumulative %')], ...defects.map((d, i) => [d[0], d[1], r4(defects.slice(0, i + 1).reduce((s, x) => s + x[1], 0) / (defTotal || 1))])]), t('Defectos', 'Defects'));
   XLSX.writeFile(wb, 'reporte_planta.xlsx'); setNote(t('Reporte descargado: cinco hojas.', 'Report downloaded: five sheets.'));
  }
+ function save(r: Result) { setHistory(h => addSnapshot(h, snapshot(r))); setNote(t('Guardado en el historial.', 'Saved to history.')); }
+ const day = (d: string) => d ? new Date(`${d}T12:00:00`).toLocaleDateString(es ? 'es-MX' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+ const period = (from: string, to: string) => from === to ? day(from) : `${day(from)} – ${day(to)}`;
+ // La hoja que se entrega en la junta: KPIs, OEE por línea, excepciones pendientes, paros y firmas.
+ function printReport(r: Result) {
+  const s = snapshot(r), pending = r.exceptions.filter(e => !seen.has(idOf(e))), cls = (v: number, g: number) => v >= g ? 'ok' : v >= g - .2 ? 'warn' : 'bad';
+  const files = (['prod', 'qual', 'stops'] as FileKind[]).map(k => slots[k]?.name).filter(Boolean).join(' · ');
+  printDoc(t('Reporte de planta', 'Plant report'), `
+<header><div><h1>${t('Reporte de planta', 'Plant report')}</h1><p>${esc(period(s.from, s.to))} · ${s.lots} ${t('lotes', 'batches')}</p></div><small>${esc(files)}<br>${t('Impreso', 'Printed')} ${esc(new Date().toLocaleString(es ? 'es-MX' : 'en-US', { dateStyle: 'medium', timeStyle: 'short' }))}</small></header>
+<dl class="kpis"><div><dt>OEE</dt><dd class="${cls(s.oee, planGoal)}">${pct(s.oee)}</dd></div><div><dt>${t('Disponibilidad', 'Availability')}</dt><dd>${pct(s.A)}</dd></div><div><dt>${t('Rendimiento', 'Performance')}</dt><dd>${pct(s.R)}</dd></div><div><dt>${t('Calidad', 'Quality')}</dt><dd>${pct(s.Q)}</dd></div></dl>
+<h2>${t('OEE por línea', 'OEE by line')}</h2>
+<table><thead><tr><th>${t('Línea', 'Line')}</th><th class="n">OEE</th><th class="n">${t('Meta', 'Goal')}</th><th class="n">${t('Disp.', 'Avail.')}</th><th class="n">${t('Rend.', 'Perf.')}</th><th class="n">${t('Cal.', 'Qual.')}</th><th class="n">${t('Piezas', 'Parts')}</th><th class="n">${t('Rechazadas', 'Rejected')}</th><th class="n">${t('Min de paro', 'Stop min')}</th></tr></thead><tbody>
+${r.lines.map(l => `<tr><td>${esc(l.linea)}</td><td class="n ${cls(l.oee, goalOf(l.linea))}">${pct(l.oee)}</td><td class="n">${Math.round(goalOf(l.linea) * 100)} %</td><td class="n">${pct(l.A)}</td><td class="n">${pct(l.R)}</td><td class="n">${pct(l.Q)}</td><td class="n">${l.prod.toLocaleString('es-MX')}</td><td class="n">${l.rej}</td><td class="n">${l.stops}</td></tr>`).join('')}
+</tbody></table>
+<h2>${t('Excepciones por atender', 'Open exceptions')} (${pending.length} ${t('de', 'of')} ${r.exceptions.length})</h2>
+${pending.length ? `<table><thead><tr><th>${t('Severidad', 'Severity')}</th><th>${t('Qué pasó', 'What happened')}</th><th>${t('Dónde', 'Where')}</th></tr></thead><tbody>${pending.map(e => `<tr><td class="${e.severity === 'alta' ? 'bad' : 'warn'}">${e.severity === 'alta' ? t('Alta', 'High') : t('Media', 'Medium')}</td><td>${esc(e.text[L])}</td><td>${esc(e.where)}</td></tr>`).join('')}</tbody></table>` : `<p class="ok">${t('Todas revisadas.', 'All reviewed.')}</p>`}
+<h2>${t('Detenciones por causa', 'Stops by cause')}</h2>
+${r.pareto.length ? `<table><thead><tr><th>${t('Causa', 'Cause')}</th><th class="n">${t('Minutos', 'Minutes')}</th><th class="n">${t('% acumulado', 'Cumulative %')}</th></tr></thead><tbody>${r.pareto.map(([c, m], i) => `<tr><td>${esc(c)}</td><td class="n">${m}</td><td class="n">${Math.round(r.pareto.slice(0, i + 1).reduce((a, x) => a + x[1], 0) / (stopTotal || 1) * 100)} %</td></tr>`).join('')}</tbody></table>` : `<p class="note">${t('Sin reporte de paros.', 'No stops report.')}</p>`}
+${defects.length ? `<h2>${t('Rechazos por defecto', 'Rejects by defect')}</h2><table><thead><tr><th>${t('Defecto', 'Defect')}</th><th class="n">${t('Piezas', 'Parts')}</th></tr></thead><tbody>${defects.slice(0, 10).map(([d, n]) => `<tr><td>${esc(d)}</td><td class="n">${n}</td></tr>`).join('')}</tbody></table>` : ''}
+<div class="sign"><div>${t('Supervisor de producción', 'Production supervisor')}</div><div>${t('Calidad', 'Quality')}</div></div>`, lang);
+ }
 
  return <div className="pl">
   <div className="pl-files">
@@ -107,6 +137,7 @@ export default function Planta({ lang }: { lang: 'es' | 'en' }) {
     return <div key={k} className={`pl-file${m?.missing.length ? ' bad' : s ? ' ok' : ''}`} onDragOver={e => e.preventDefault()} onDrop={e => { e.preventDefault(); void load(k, e.dataTransfer.files?.[0]); }}>
      <span className="pl-file-kind">{[t('1 · Producción', '1 · Production'), t('2 · Calidad', '2 · Quality'), t('3 · Detenciones (opcional)', '3 · Stops (optional)')][i]}</span>
      <div className="pl-file-name">{s && /\.xlsx?$/i.test(s.name) ? <FileXls size={26} weight="duotone"/> : <FileCsv size={26} weight="duotone"/>}<div><strong>{s?.name ?? t('Sin archivo', 'No file')}</strong><small>{s ? `${s.grid.rows.length} ${t('filas', 'rows')}${s.sample ? t(' · ejemplo', ' · sample') : ''}` : ''}</small></div></div>
+     {s && (s.titleRows || s.totalRows) ? <p className="pl-fit">{[s.titleRows ? t(`Empecé en la fila ${s.titleRows + 1}: arriba había título`, `Started at row ${s.titleRows + 1}: there was a title above`) : '', s.totalRows ? t(`sin ${s.totalRows === 1 ? 'la fila' : `las ${s.totalRows} filas`} de totales`, `without the ${s.totalRows} total row${s.totalRows === 1 ? '' : 's'}`) : ''].filter(Boolean).join(' · ')}.</p> : null}
      <ul className="pl-cols">{NEEDS[k].map(f => <li key={f} className={m && !m.missing.includes(f as never) ? 'on' : ''}>{es ? FIELD_ES[f] : f}</li>)}</ul>
      {m && m.missing.length > 0 && s && <div className="pl-miss"><p><WarningCircle size={15}/>{t('No reconocí estas columnas. Dime cuál es cuál:', 'I did not recognize these columns. Tell me which is which:')}</p>
       {m.missing.map(f => <label key={f}><span>{es ? FIELD_ES[f] : f}</span><select value="" onChange={e => { const v = Number(e.target.value); setOver(o => ({ ...o, [k]: { ...o[k], [f as Field]: v } })); }}><option value="">{t('Elegir columna…', 'Choose column…')}</option>{s.grid.headers.map((h, j) => <option key={j} value={j} disabled={Object.values(m.map).includes(j)}>{h || `${t('columna', 'column')} ${j + 1}`}</option>)}</select></label>)}</div>}
@@ -152,7 +183,7 @@ export default function Planta({ lang }: { lang: 'es' | 'en' }) {
     <section className="pl-ex">
      <h3 className="pl-h">{t('Incoherencias entre reportes', 'Inconsistencies between reports')}{res.exceptions.length - reviewed > 0 ? <em className="pl-chip warn"><WarningCircle size={15} weight="fill" aria-hidden="true"/>{t(`${res.exceptions.length - reviewed} por revisar`, `${res.exceptions.length - reviewed} to review`)}</em> : <em className="pl-chip ok"><CheckCircle size={15} weight="fill" aria-hidden="true"/>{t('Todo revisado', 'All reviewed')}</em>}</h3>
      <label className="pl-limit">{t('Rechazo máximo', 'Max rejection')} <input type="range" min={1} max={8} step={0.5} value={limit} onChange={e => setLimit(+e.target.value)}/><b>{limit} %</b></label>
-     <div className="pl-filter">{['', ...rules].map(r => <button key={r || 'all'} aria-pressed={filter === r} onClick={() => setFilter(r)}>{r ? ({ 'sin-inspeccion': t('Sin inspección', 'Not inspected'), 'sin-produccion': t('Lote no existe', 'Unknown batch'), revisadas: t('Revisadas > producidas', 'Inspected > produced'), rechazo: t('Rechazo alto', 'High rejection'), plan: t('Plan', 'Plan'), paro: t('Detención sin causa', 'Stop without cause'), dato: t('Dato inválido', 'Invalid value') } as Record<string, string>)[r] : t(`Todas (${res.exceptions.length})`, `All (${res.exceptions.length})`)}</button>)}</div>
+     <div className="pl-filter">{['', ...rules].map(r => <button key={r || 'all'} aria-pressed={filter === r} onClick={() => setFilter(r)}>{r ? (RULE_NAMES[r]?.[L] ?? r) :t(`Todas (${res.exceptions.length})`, `All (${res.exceptions.length})`)}</button>)}</div>
      <p className="pl-progress"><span><i style={{ width: `${res.exceptions.length ? reviewed / res.exceptions.length * 100 : 100}%` }}/></span>{t(`${reviewed} de ${res.exceptions.length} revisadas`, `${reviewed} of ${res.exceptions.length} reviewed`)}<button className="pl-link" onClick={exportExceptions}>{t('Exportar CSV', 'Export CSV')}</button></p>
      <ol>{shown.map((e, i) => { const id = idOf(e), done = seen.has(id); return <li key={id} className={`sev-${e.severity}${done ? ' is-done' : ''}`} style={{ ['--i' as string]: i }}><span>{e.severity === 'alta' ? <WarningCircle size={13} weight="fill" aria-hidden="true"/> : null}{e.severity === 'alta' ? t('Alta', 'High') : t('Media', 'Medium')}</span><div><strong>{e.text[L]}</strong><small>{e.where}</small></div><label className="pl-check"><input type="checkbox" checked={done} onChange={() => toggle(id)}/><span>{t('Revisada', 'Reviewed')}</span></label></li>; })}</ol>
      {!shown.length && <p className="pl-ok"><CheckCircle size={18}/>{t('Sin incoherencias.', 'No inconsistencies.')}</p>}
@@ -173,14 +204,29 @@ export default function Planta({ lang }: { lang: 'es' | 'en' }) {
    </div>
 
    <section className="pl-report">
-    <div><h3 className="pl-h">{t('Reporte del turno', 'Shift report')}</h3><p>{t('Excel con OEE, excepciones, consolidado, detenciones y defectos. O el resumen para WhatsApp.', 'Excel with OEE, exceptions, consolidated, stops and defects. Or the WhatsApp summary.')}</p></div>
+    <div><h3 className="pl-h">{t('Reporte del turno', 'Shift report')}</h3><p>{t('Hoja para la junta con firmas, Excel con cinco hojas o el resumen para WhatsApp. Guárdalo en el historial para compararlo con otros días.', 'A meeting sheet with signatures, a five-sheet Excel or the WhatsApp summary. Save it to history to compare with other days.')}</p></div>
     <div className="pl-report-actions">
-     <button className="dw-primary" onClick={() => void report()}><DownloadSimple size={17}/>{t('Descargar Excel', 'Download Excel')}</button>
+     <button className="dw-primary" onClick={() => printReport(res)}><Printer size={17}/>{t('Imprimir o PDF', 'Print or PDF')}</button>
+     <button onClick={() => save(res)}><ClockCounterClockwise size={17}/>{t('Guardar en el historial', 'Save to history')}</button>
+     <button onClick={() => void report()}><DownloadSimple size={17}/>{t('Descargar Excel', 'Download Excel')}</button>
      <button onClick={async () => { try { await navigator.clipboard.writeText(summaryText(res, es)); setNote(t('Resumen copiado.', 'Summary copied.')); } catch { setNote(''); } }}><Copy size={17}/>{t('Copiar resumen', 'Copy summary')}</button>
      <a className="pl-wa" href={`https://wa.me/?text=${encodeURIComponent(summaryText(res, es))}`} target="_blank" rel="noreferrer"><WhatsappLogo size={17}/>WhatsApp</a>
     </div>
     {note && <p className="pl-note" role="status">{note}</p>}
    </section>
   </div>}
+
+  {history.length > 0 && <section className="pl-history" aria-label={t('Historial', 'History')}>
+   <h3 className="pl-h">{t('Historial', 'History')}<span>{t('Cada reporte guardado, del más reciente al más viejo. La flecha compara contra el anterior.', 'Every saved report, newest first. The arrow compares with the one before.')}</span></h3>
+   <div className="pl-history-scroll"><table>
+    <thead><tr><th scope="col">{t('Periodo', 'Period')}</th><th scope="col">OEE</th>{[...new Set(history.flatMap(h => h.lines.map(l => l.linea)))].sort().map(l => <th key={l} scope="col">{l}</th>)}<th scope="col">{t('Excepciones', 'Exceptions')}</th><th scope="col">{t('Min de paro', 'Stop min')}</th><th scope="col"><span className="pl-sr">{t('Borrar', 'Delete')}</span></th></tr></thead>
+    <tbody>{history.map((h, i) => { const prev = history[i + 1], d = prev ? h.oee - prev.oee : 0, names = [...new Set(history.flatMap(x => x.lines.map(l => l.linea)))].sort();
+     return <tr key={h.id}><th scope="row">{period(h.from, h.to)}<small>{h.lots} {t('lotes', 'batches')}</small></th>
+      <td><b>{pct(h.oee)}</b>{prev && Math.abs(d) >= .0005 && <em className={d > 0 ? 'up' : 'down'}>{d > 0 ? '▲' : '▼'} {Math.abs(d * 100).toFixed(1)}</em>}</td>
+      {names.map(n => { const v = h.lines.find(l => l.linea === n)?.oee; return <td key={n}>{v === undefined ? '—' : pct(v)}</td>; })}
+      <td>{h.exceptions}</td><td>{h.stopMin}</td>
+      <td><button className="pl-icon" aria-label={t(`Borrar ${period(h.from, h.to)}`, `Delete ${period(h.from, h.to)}`)} onClick={() => setHistory(x => x.filter(y => y.id !== h.id))}><Trash size={16}/></button></td></tr>; })}</tbody>
+   </table></div>
+  </section>}
  </div>;
 }

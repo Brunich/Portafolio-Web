@@ -78,7 +78,7 @@ export function StampPage({ lang }: { lang: Lang }) {
    {biz.wa && <a className="st-btn ghost" href={`https://wa.me/${biz.wa}`} target="_blank" rel="noreferrer">{es ? `Escribirle a ${biz.name}` : `Message ${biz.name}`}</a>}
   </nav>}
   {demo && <button className="st-demo" onClick={another} disabled={card.stamps >= biz.goal}>{es ? 'Demo: simular la visita de otro día' : 'Demo: simulate another day’s visit'}</button>}
-  <footer className="st-foot">{es ? `${card.visits} ${card.visits === 1 ? 'visita' : 'visitas'}${card.rewards ? ` · ${card.rewards} ${card.rewards === 1 ? 'premio' : 'premios'}` : ''} · tus sellos viven en este celular` : `${card.visits} visit${card.visits === 1 ? '' : 's'}${card.rewards ? ` · ${card.rewards} reward${card.rewards === 1 ? '' : 's'}` : ''} · your stamps live on this phone`}<a href="/proyectos/club-nfc">{es ? 'Hecho por Bruno Salas' : 'Made by Bruno Salas'}</a></footer>
+  <footer className="st-foot">{es ? `${card.visits} ${card.visits === 1 ? 'visita' : 'visitas'}${card.rewards ? ` · ${card.rewards} ${card.rewards === 1 ? 'premio' : 'premios'}` : ''} · tus sellos viven en este celular` : `${card.visits} visit${card.visits === 1 ? '' : 's'}${card.rewards ? ` · ${card.rewards} reward${card.rewards === 1 ? '' : 's'}` : ''} · your stamps live on this phone`}<a href="/proyectos/club-nfc" data-title={es ? 'NFC para negocios' : 'NFC for businesses'}>{es ? 'Hecho por Bruno Salas' : 'Made by Bruno Salas'}</a></footer>
  </main>;
 }
 

@@ -10,11 +10,28 @@ export const SLA: Record<Sev, number> = { 'Crítica': 2, 'Mayor': 8, 'Menor': 24
 export const H = 60 * 60 * 1000;
 
 export const sample = (now = Date.now()): Incident[] => [
- { id: 'INC-232', line: 'L1', lot: '4468', defect: 'Torque fuera de rango en rueda', sev: 'Crítica', status: 'doing', owner: 'R. Garza', action: 'Recalibrar la llave 3', photo: '', at: now - 2.6 * H },
- { id: 'INC-231', line: 'L2', lot: '4471', defect: 'Burbuja en pintura de cofre', sev: 'Mayor', status: 'open', owner: '', action: '', photo: '', at: now - 1.4 * H },
- { id: 'INC-229', line: 'L3', lot: '4459', defect: 'Fuga en sello de parabrisas', sev: 'Mayor', status: 'doing', owner: 'L. Treviño', action: 'Cambiar lote de sellador', photo: 'demo', at: now - 5 * H },
- { id: 'INC-226', line: 'L1', lot: '4450', defect: 'Rayón en puerta trasera', sev: 'Menor', status: 'closed', owner: 'A. Cantú', action: 'Pulido y reinspección', photo: 'demo', at: now - 6.5 * H, closedAt: now - 4.9 * H },
+ { id: 'INC-232', line: 'L1', lot: '4420', defect: 'Torque fuera de rango en rueda', sev: 'Crítica', status: 'doing', owner: 'R. Garza', action: 'Recalibrar la llave 3', photo: '', at: now - 2.6 * H },
+ { id: 'INC-231', line: 'L2', lot: '4424', defect: 'Burbuja en pintura de cofre', sev: 'Mayor', status: 'open', owner: '', action: '', photo: '', at: now - 1.4 * H },
+ { id: 'INC-229', line: 'L3', lot: '4422', defect: 'Fuga en sello de parabrisas', sev: 'Mayor', status: 'doing', owner: 'L. Treviño', action: 'Cambiar lote de sellador', photo: 'demo', at: now - 5 * H },
+ { id: 'INC-226', line: 'L1', lot: '4411', defect: 'Rayón en puerta trasera', sev: 'Menor', status: 'closed', owner: 'A. Cantú', action: 'Pulido y reinspección', photo: 'demo', at: now - 6.5 * H, closedAt: now - 4.9 * H },
+ { id: 'INC-221', line: 'L2', lot: '4412', defect: 'Burbuja en pintura del cofre', sev: 'Mayor', status: 'closed', owner: 'M. Salinas', action: 'Repintado y limpieza de pistola', photo: 'demo', at: now - 30 * H, closedAt: now - 25 * H },
 ];
+
+// Líneas y personas de la planta: cada quien las cambia por las suyas.
+export type Config = { lines: string[]; people: string[] };
+export const DEFAULT_CONFIG: Config = { lines: ['L1', 'L2', 'L3'], people: [...OWNERS] };
+
+// Lo que se entregó en cada cambio de turno, para que el que llega pueda ver qué se dijo antes.
+export type Handover = { at: number; shift: string; pending: number; late: number; orphan: number; closed: number; text: string };
+
+// Un defecto que vuelve en la misma línea no se arregla con otra incidencia: pide una acción de fondo (8D).
+const STOP = new Set(['en', 'de', 'del', 'la', 'el', 'los', 'las', 'por', 'con', 'y', 'a', 'al']);
+export const defectKey = (s: string) => s.toLocaleLowerCase('es').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9ñ ]/g, ' ').split(/\s+/).filter(w => w && !STOP.has(w)).join(' ');
+export function repeats(items: Incident[], days = 7, now = Date.now()) {
+ const m = new Map<string, Incident[]>();
+ items.filter(i => now - i.at <= days * 24 * H).forEach(i => { const k = `${i.line}|${defectKey(i.defect)}`; m.set(k, [...(m.get(k) ?? []), i]); });
+ return [...m.values()].filter(g => g.length >= 2).map(g => ({ line: g[0].line, defect: g[0].defect, count: g.length, ids: g.map(i => i.id), open: g.some(i => i.status !== 'closed'), last: Math.max(...g.map(i => i.at)) })).sort((a, b) => b.count - a.count || b.last - a.last);
+}
 export const sampleLog = (items: Incident[]): Log[] => items.map(i => ({ at: i.at, id: i.id, tone: 'new' as const, text: `registrada · ${i.line} · lote ${i.lot} · ${i.sev.toUpperCase()}` })).sort((a, b) => b.at - a.at); // la más nueva arriba, como en la consola
 
 // Turnos de planta: matutino 06–14, vespertino 14–22, nocturno 22–06.
@@ -59,7 +76,8 @@ export function exportRows(items: Incident[], es: boolean) {
 
 export const pendingOf = (items: Incident[]) => items.filter(i => i.status !== 'closed').sort((a, b) => RANK[a.sev] - RANK[b.sev] || a.at - b.at);
 export const nextId = (items: Incident[]) => `INC-${Math.max(232, ...items.map(i => Number(i.id.slice(4)) || 0)) + 1}`;
-export const validLot = (lot: string) => /^\d{3,5}$/.test(lot);
+// Cada planta numera sus lotes a su manera (4480, A-2311, 26L0457): letras, números y guiones.
+export const validLot = (lot: string) => /^[A-Za-z0-9][A-Za-z0-9-]{2,19}$/.test(lot.trim());
 
 // El texto que se manda al siguiente turno (WhatsApp o portapapeles).
 export function summaryText(items: Incident[], es: boolean, when = new Date(), now = Date.now()) {
