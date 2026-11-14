@@ -136,7 +136,7 @@ test('game block: cover, three thumbnails, pixel toggle and the IA Rogue page', 
  await block.getByRole('link',{name:'Ver la ficha de IA Rogue'}).click();
  await expect(page).toHaveURL(/\/proyectos\/ia-rogue$/);
  await expect(page.getByRole('heading',{level:1})).toHaveText('IA Rogue');
- await expect(page.locator('#lugares figure')).toHaveCount(5);
+ await expect(page.locator('#lugares figure')).toHaveCount(6);
  await expect(page.locator('#agua figure')).toHaveCount(3);
  // Fotos 16:9 con tamaño, alt real y carga diferida; el pie dice lugar / cámara / hora.
  for (const img of await page.locator('#lugares img, #agua img').all()) {

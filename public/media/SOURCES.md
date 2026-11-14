@@ -58,6 +58,8 @@ Capturas reales del juego en `IA Rogue DEFINITIVE/tmp/portafolio_v3/` (2560×144
 - portal-cerca-tarde: portal_transitdoorreturn_cerca_tarde.png
 - agua-tarde-cascada-horizonte / agua-tarde-cascada-epica / agua-dia-templo-hombro: las tres cámaras sobre la misma agua.
 Quedan fuera las demás de la carpeta (variantes de día, `descartes_*` y `contacto.png`).
+- 14-11-2026: costa-tarde-mirador, agua-tarde-cascada-horizonte y agua-tarde-cascada-epica se rehacen con los mismos encuadres y el mismo método. La costa sale con el pecio nuevo del juego (commit a2615670 en IA Rogue); en las dos tomas de agua el capturador oculta en memoria los mapaches y los recortes de ver a través, sin cambiar escenas.
+- costa-tarde-alto: costa_tarde_alto.png (misma pasada; cámara alta sobre el pecio).
 
 ## Retrato
 12-10-2026: en bruno-retrato se reconstruyó con Codex sólo el fondo izquierdo (la mancha donde se difuminó a otra persona). La cara, los lentes y la ropa quedaron idénticos al recorte anterior (comparado píxel a píxel). Se sirve en AVIF y WebP, con JPG de respaldo.

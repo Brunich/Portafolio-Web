@@ -158,7 +158,8 @@ function Home({ lang, paused, projects }: { lang: Lang; paused: boolean; project
     <div className="pi-group"><span className="pi-head">C · {es ? 'Juego' : 'Game'}</span><ol><li><button onClick={jump('graphics')}><strong>IA Rogue</strong><ArrowDown size={16}/></button></li></ol></div>
     <div className="pi-group"><span className="pi-head">D · {es ? 'Otros trabajos' : 'Other work'}</span><ol>{others.map(x => <li key={x.id}><button onClick={jump('otros')}><strong>{x.title}</strong><ArrowDown size={16}/></button></li>)}</ol></div>
    </div></div>
-   {GROUPS.map(g => <div key={g.letter} className="rows">{g.ids.map((id, i) => <ProjectRow key={id} lang={lang} project={byId(id)} flip={i % 2 === 1} n={i + 1} group={i === 0 ? g : undefined} letter={g.letter} of={g.ids.length}/>)}</div>)}
+   {/* El bloque A va en filas cortas (la descripción larga queda en cada ficha); el B conserva las grandes, ahí está el trabajo para cliente */}
+   {GROUPS.map(g => { const compact = g.letter === 'A'; return <div key={g.letter} className={`rows${compact ? ' rows-compact' : ''}`}>{g.ids.map((id, i) => <ProjectRow key={id} lang={lang} project={byId(id)} flip={!compact && i % 2 === 1} compact={compact} n={i + 1} group={i === 0 ? g : undefined} letter={g.letter} of={g.ids.length}/>)}</div>; })}
   </section>
   <OriginalScenes lang={lang} paused={paused}/>
   <section id="otros" className="wrap section-space others-list" data-zone={es ? 'Otros trabajos' : 'Other work'}>
@@ -172,11 +173,17 @@ function Home({ lang, paused, projects }: { lang: Lang; paused: boolean; project
   <section id="about" className="about-section section-space"><div className="wrap">
    <div className="about-grid" data-zone="CV">
     <figure className="portrait"><picture><source srcSet="/media/bruno-retrato.avif" type="image/avif"/><source srcSet="/media/bruno-retrato.webp" type="image/webp"/><img src="/media/bruno-retrato.jpg" alt="Bruno Salas" width="560" height="700" loading="lazy"/></picture><figcaption><strong>Bruno Salas</strong><span>Monterrey, N. L.</span></figcaption></figure>
-    <div className="about-copy"><span className="kicker">02 · CV</span><h2>{p.aboutTitle}</h2><p>{p.about}</p><a className="inline-link" href={cv} download>{es ? 'Descargar CV' : 'Download CV'}<DownloadSimple size={20}/></a>
-</div>
+    <div className="about-copy"><span className="kicker">02 · CV</span><h2>{p.aboutTitle}</h2><p>{p.about}</p>
+     {/* Resumen en una sola parada: el detalle de cada puesto está en el PDF y el de La Casa del Ángel en su ficha */}
+     <div className="cv-summary">
+      <div><h3>{c.timelineTitle}</h3><ul>{c.experience.map(e => <li key={e.year}><span className="year">{e.year}</span><span><strong>{e.role}</strong><small>{e.org}</small></span></li>)}</ul></div>
+      <div><h3>{c.learning}</h3><ul>{certificates.map(cert => <li key={cert.title}><span className="year">{cert.year}</span><a href={cert.url} {...EXT}><strong>{cert.title}</strong><small>{cert.org}</small><Out es={es} size={14}/></a></li>)}</ul></div>
+      <div><h3>{p.techTitle}</h3><ul className="cv-tools">{p.skills.map(s => <li key={s.name}><strong>{s.name}</strong><small>{s.tools.join(' · ')}</small></li>)}</ul></div>
+     </div>
+     <p className="languages-line">{c.languages}</p>
+     <a className="inline-link" href={cv} download>{es ? 'CV completo en PDF' : 'Full CV as PDF'}<DownloadSimple size={20}/></a>
+    </div>
    </div>
-   <div className="experience-grid" data-zone={es ? 'Experiencia' : 'Experience'}><div><h3>{c.timelineTitle}</h3>{c.experience.map(e => <div className="experience-row" key={e.year}><span className="year">{e.year}</span><div><h4>{e.role}</h4><span className="org">{e.org}</span><p>{e.text}</p></div></div>)}</div><div><h3>{c.learning}</h3>{certificates.map(cert => <a className="certificate" key={cert.title} href={cert.url} {...EXT}><div><h4>{cert.title}</h4><p>{cert.org}</p><span>{cert.year}</span></div><Out es={es} size={22}/></a>)}</div></div>
-   <div className="skills tools-block" data-zone={es ? 'Herramientas que sé manejar' : 'Tools I work with'}><h3>{p.techTitle}</h3><div className="skills-grid">{p.skills.map(s => <div key={s.name}><h4>{s.name}</h4><p>{s.desc}</p><div className="tags">{s.tools.map(tool => <span key={tool}>{tool}</span>)}</div></div>)}</div><p className="languages-line">{c.languages}</p></div>
   </div></section>
   <Motion lang={lang}/>
   <Contact lang={lang}/>
@@ -202,13 +209,13 @@ function Media({ lang, project }: { lang: Lang; project: Project }) {
 // Datos llanos en mono (tecnología / qué se prueba / estado) en lugar de cifras de vitrina.
 const Facts = ({ items }: { items: string[] }) => <p className="facts">{items.map(f => <span key={f}>{f}</span>)}</p>;
 
-function ProjectRow({ lang, project, flip, n, of, letter, group }: { lang: Lang; project: Project; flip: boolean; n: number; of: number; letter: string; group?: Group }) {
+function ProjectRow({ lang, project, flip, compact = false, n, of, letter, group }: { lang: Lang; project: Project; flip: boolean; compact?: boolean; n: number; of: number; letter: string; group?: Group }) {
  const es = lang === 'es', page = `/proyectos/${project.slug}`;
- return <article id={`p-${project.id}`} data-c data-zone={project.title} className={`row project project-${project.id}${flip ? ' flip' : ''}${group ? ' has-head' : ''}`}>
+ return <article id={`p-${project.id}`} data-c data-zone={project.title} className={`row project project-${project.id}${flip ? ' flip' : ''}${compact ? ' compact' : ''}${group ? ' has-head' : ''}`}>
   {/* El cajetín del bloque va dentro de su primera fila: así la portada por zonas no lo deja suelto entre pantallas */}
   {group && <div className="group-head"><span className="kicker">{group.letter} · {group.name[es ? 0 : 1]}</span><p>{group.line[es ? 0 : 1]}</p></div>}
   <a className={`project-media media-${project.id}`} href={page} data-title={project.title} aria-label={`${project.title} — ${es ? 'ver proyecto' : 'view project'}`}><Media lang={lang} project={project}/><span className="media-open"><ArrowRight size={22}/></span></a>
-  <div className="project-info"><span className="row-num">{letter} · {String(n).padStart(2, '0')}<i>/ {String(of).padStart(2, '0')}</i></span><span className="project-kind">{project.kind}{unfinished(project.status)}</span><h3><a href={page} data-title={project.title}>{project.title}</a></h3><p className="pitch">{project.pitch}</p><p>{project.desc}</p>
+  <div className="project-info"><span className="row-num">{letter} · {String(n).padStart(2, '0')}<i>/ {String(of).padStart(2, '0')}</i></span><span className="project-kind">{project.kind}{unfinished(project.status)}</span><h3><a href={page} data-title={project.title}>{project.title}</a></h3><p className="pitch">{project.pitch}</p>{!compact && <p>{project.desc}</p>}
    <Facts items={project.facts}/>
    <div className="project-links"><a className="button primary" href={page} data-title={project.title}>{es ? 'Ver proyecto' : 'View project'}<ArrowRight size={18}/></a>{project.link.startsWith('http') && <a className="inline-link" href={project.link} {...EXT}>{project.action}<Out es={es}/></a>}</div>
   </div>
@@ -370,7 +377,7 @@ const HAS_APP = ['club', 'csv', 'planta', 'spc', 'inventario', 'turno', 'agente'
 function Motion({ lang }: { lang: Lang }) {
  const es = lang === 'es';
  return <section id="motion" className="wrap section-space motion-section" data-zone="Motion">
-  <div className="section-heading"><div><span className="kicker">03 · Motion design</span><h2>{es ? 'También en movimiento.' : 'In motion, too.'}</h2><p>{es ? 'Videos cortos para presentar un producto, un proyecto o un juego. Cada cuadro sale de código, con la misma identidad que la web.' : 'Short videos to present a product, a project or a game. Every frame comes from code, with the same identity as the site.'}</p></div></div>
+  <div className="section-heading"><div><span className="kicker">03 · Motion design</span><h2>{es ? 'También en movimiento.' : 'In motion, too.'}</h2><p>{es ? 'Videos cortos para presentar un producto, un proyecto o un juego. El reel recorre cinco demos con sus propios datos de ejemplo; cada cuadro sale de código, con el papel y la letra de esta web.' : 'Short videos to present a product, a project or a game. The reel walks through five demos with their own sample data; every frame comes from code, with this site’s paper and type.'}</p></div></div>
   <div className="motion-grid">
    <figure className="motion-main"><video src="/media/reel.mp4" poster="/media/reel-poster.jpg" controls playsInline preload="none" width="1920" height="1080" aria-label={es ? 'Reel del portafolio' : 'Portfolio reel'}/><figcaption><strong>{es ? 'Reel del portafolio' : 'Portfolio reel'}</strong><span>50 s · 1080p · 60 fps</span></figcaption></figure>
   </div>

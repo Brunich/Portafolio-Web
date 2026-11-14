@@ -10,5 +10,10 @@
 .cap-phone img{animation:cap-scroll 22s cubic-bezier(.65,0,.35,1) -4s infinite}
 /* Se detiene en cada sección, como alguien que la está leyendo, y regresa arriba. */
 @keyframes cap-scroll{0%,12%{object-position:50% 0}26%,38%{object-position:50% 30%}52%,64%{object-position:50% 62%}78%,88%{object-position:50% 100%}100%{object-position:50% 0}}
+/* En la tarjeta de la portada el marco ya tiene proporción fija: la ventana lo llena entero
+   (si no, sobraban franjas vacías) y el celular se apoya encima, en la orilla derecha. */
+.project-media .cap{display:block}
+.project-media .cap-web{position:absolute;inset:0;aspect-ratio:auto;border:0;border-radius:0}
+.project-media .cap-phone{position:absolute;right:3%;bottom:4%;height:88%;width:auto;margin:0;border-width:5px;border-radius:18px}
 html[data-motion=paused] .cap img{animation-play-state:paused}
 @media (prefers-reduced-motion:reduce){.cap img{animation:none}}
