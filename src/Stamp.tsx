@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import qrcode from 'qrcode-generator';
+import { ArrowUpRight } from '@phosphor-icons/react';
 import './stamp.css';
 
 // Tarjeta de sellos real: un chip NFC (o un QR) abre /sello con los datos del negocio en el enlace.
@@ -146,7 +147,8 @@ export function NfcSetup({ lang }: { lang: Lang }) {
     {check === 'error' && <p className="st-err">{es ? 'No se pudo leer. Prende el NFC y acerca el chip a la parte de atrás del celular.' : 'Could not read it. Turn NFC on and hold the chip to the back of the phone.'}</p>}
     {nfc === 'ok' && <p className="st-ok">{es ? 'Listo: acerca un celular al chip para probarlo.' : 'Done: tap a phone on the chip to try it.'}</p>}
     {nfc === 'error' && <p className="st-err">{es ? 'No se pudo grabar. Revisa que el NFC esté prendido y vuelve a intentarlo.' : 'Could not write it. Check NFC is on and try again.'}</p>}
-    <a className="st-btn ghost" href={`${link}&demo`} target="_blank" rel="noreferrer">{es ? 'Abrir como cliente' : 'Open as a customer'}</a>
+    {/* Va en otra pestaña: el armador no guarda nada y el enlace sólo lleva la huella del PIN, así que al volver se perdería lo capturado */}
+    <a className="st-btn ghost" href={`${link}&demo`} target="_blank" rel="noopener noreferrer">{es ? 'Abrir como cliente' : 'Open as a customer'}<ArrowUpRight size={16} aria-hidden="true"/><span className="sr-only">{es ? '(se abre en otra pestaña)' : '(opens in a new tab)'}</span></a>
    </div>
    <div className="st-print"><Qr text={link} label={es ? 'QR del enlace' : 'Link QR code'}/><p>{es ? 'El mismo enlace en QR, para los celulares sin NFC. Imprímelo junto al chip.' : 'The same link as a QR, for phones without NFC. Print it next to the chip.'}</p></div>
   </div>
