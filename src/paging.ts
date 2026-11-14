@@ -53,8 +53,6 @@ async function step(dir: 1 | -1) {
 
 export function usePaging(on: boolean, key: string) {
  const [paged, setPaged] = useState(false);
- const [current, setCurrent] = useState(0);
- const [labels, setLabels] = useState<string[]>([]);
 
  useEffect(() => {
   const root = document.documentElement;
@@ -87,7 +85,7 @@ export function usePaging(on: boolean, key: string) {
   return () => { root.classList.remove('paged'); removeEventListener('wheel', onWheel); removeEventListener('keydown', onKey); };
  }, [on, key]);
 
- // Zona actual: la que ocupa la pantalla recibe `zone-in` para que su contenido entre animado.
+ // La zona que ocupa la pantalla queda marcada con `zone-in`; las pruebas la leen para saber dónde va.
  useEffect(() => {
   if (!paged) return;
   let frame = 0, prev = -1;
@@ -95,15 +93,12 @@ export function usePaging(on: boolean, key: string) {
    frame = 0;
    const zs = zoneList(), i = currentIndex(zs);
    if (i === prev) return;
-   prev = i; setCurrent(i);
-   zs.forEach((z, n) => { if (n !== i) z.classList.remove('zone-in'); });
-   const z = zs[i]; if (z && !z.classList.contains('zone-in')) { z.classList.add('zone-in'); }
+   prev = i;
+   zs.forEach((z, n) => z.classList.toggle('zone-in', n === i));
   };
   const onScroll = () => { if (!frame) frame = requestAnimationFrame(read); };
-  const t = setTimeout(() => { setLabels(zoneList().map(z => z.dataset.zone ?? '')); read(); }, 50);
+  const t = setTimeout(read, 50);
   addEventListener('scroll', onScroll, { passive: true });
   return () => { clearTimeout(t); removeEventListener('scroll', onScroll); cancelAnimationFrame(frame); zoneList().forEach(z => z.classList.remove('zone-in')); };
  }, [paged, key]);
-
- return { paged, current, labels };
 }

@@ -1,16 +1,16 @@
-.model-lab{border:1px solid #5a5e6b;border-radius:14px;overflow:hidden;background:#2a2d37}
-.ml-stage{position:relative;aspect-ratio:16/9;background:radial-gradient(ellipse 55% 70% at 50% 55%,#444859 0%,#23262f 60%,#1b1d24 100%);touch-action:none}
+.model-lab{border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden;background:var(--surface)}
+.ml-stage{position:relative;aspect-ratio:16/9;background:#262724;touch-action:none}
 .ml-stage canvas{display:block;width:100%;height:100%;cursor:grab}
 .ml-stage canvas:active{cursor:grabbing}
-.ml-status{position:absolute;inset:0;display:grid;place-items:center;color:#c8ced6;font-size:14px}
+.ml-status{position:absolute;inset:0;display:grid;place-items:center;color:#ece9df;font:500 13px var(--mono)}
 .ml-split{position:absolute;top:0;bottom:0;width:30px;margin-left:-15px;cursor:ew-resize;z-index:2;touch-action:none}
-.ml-split::before{content:'';position:absolute;left:14px;top:0;bottom:0;border-left:2px solid #ffffffd9}
-.ml-split span{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border:1px solid #c2cedb;border-radius:50%;background:#272a35;color:#fff;padding:10px;line-height:1}
+.ml-split::before{content:'';position:absolute;left:14px;top:0;bottom:0;border-left:1px solid #ece9df}
+.ml-split span{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border:1px solid #ece9df;border-radius:var(--radius);background:#1c1d1a;color:#ece9df;padding:8px 10px;line-height:1}
 .ml-zoom{position:absolute;right:14px;bottom:14px;display:flex;gap:6px;z-index:2}
-.ml-zoom button{width:40px;height:40px;border:1px solid #788390;border-radius:8px;background:#1f222be8;color:#fff;font-size:18px}
+.ml-zoom button{width:44px;height:44px;border:1px solid #ece9df;border-radius:var(--radius);background:#1c1d1a;color:#ece9df;font-size:18px}
 .ml-controls{display:flex;flex-wrap:wrap;gap:22px;padding:16px 24px 0}
-.ml-controls label{display:flex;align-items:center;gap:12px;font-size:13px;color:#e0e5eb}
-.ml-controls input{width:180px;accent-color:#cbd5e0}
+.ml-controls label{display:flex;align-items:center;gap:12px;font:500 12.5px var(--mono);color:var(--muted)}
+.ml-controls input{width:180px;accent-color:var(--accent)}
 @media(max-width:640px){.ml-stage{aspect-ratio:4/5}.ml-controls{padding:14px 16px 0}.ml-controls input{width:140px}}
 
 /* Con la portada por zonas el comparador tiene que caber entero en la pantalla, si no la rueda lo deja a medias. */

@@ -1,56 +1,42 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
+import { ArrowRight } from '@phosphor-icons/react';
 import ModelLab from './ModelLab';
+import { COVER, PLACES, WATER, ShotImg, Caption, rogueText } from './Rogue';
 import './original-scenes.css';
 
-// Una sola galería: el bosque en sus dos cámaras y las panorámicas de otros biomas.
-// `soft` es la misma toma sin pixelado: esas fotos llevan un interruptor de pixel art.
-type Shot = { file: string; w: number; h: number; soft?: string; title: [string, string]; note: [string, string] };
-const PANORAMAS: Shot[] = [
- { file: 'escenas/templo-noche-pixel', w: 1600, h: 900, soft: 'escenas/templo-noche-suave', title: ['El templo de noche', 'The temple at night'], note: ['Cámara 1, de frente. Quita y pon el pixel art', 'Camera 1, front view. Toggle the pixel art'] },
- { file: 'panoramas/costa-atardecer', w: 1600, h: 686, title: ['La cascada al atardecer', 'The waterfall at sunset'], note: ['Agua que cae por delante del acantilado', 'Water falling in front of the cliff'] },
- { file: 'rogue-forest-overview', w: 1600, h: 1000, title: ['Rayos entre los árboles', 'Light through the trees'], note: ['Vista tres cuartos en pixel art', 'Three-quarter view in pixel art'] },
- { file: 'rogue-forest-first-person', w: 1600, h: 1000, title: ['El bosque al anochecer', 'The forest at dusk'], note: ['Primera persona, niebla y luna', 'First person, fog and moon'] },
-];
-
+// Bloque C de la portada: la portada del juego con tres miniaturas que llevan a su ficha,
+// el visor 3D del personaje y el templo de noche con su interruptor de pixel art (lo que no está en la ficha).
+const THUMBS = [PLACES[0], PLACES[1], WATER[0]];
 
 export default function OriginalScenes({ lang, paused }: { lang: 'es' | 'en'; paused: boolean }) {
- const es = lang === 'es', L = es ? 0 : 1;
- const [pano, setPano] = useState(0);
+ const es = lang === 'es', t = rogueText(es);
  const [pixel, setPixel] = useState(true);
- const src = (p: Shot) => `/media/${p.soft && !pixel ? p.soft : p.file}.webp`;
- const cur = PANORAMAS[pano];
- const [open, setOpen] = useState(false);
- const [hovering, setHovering] = useState(false);
- const dialog = useRef<HTMLDialogElement>(null);
+ return <section id="graphics" className="wrap section-space gamedev" data-zone="Game dev">
+  <div className="group-head"><span className="kicker">C · {es ? 'Juego' : 'Game'}</span><p>{es ? 'Mi proyecto personal: un juego que hago por mi cuenta.' : 'My personal project: a game I make on my own.'}</p></div>
+  <div className="gd-feature">
+   <a className="gd-cover" href="/proyectos/ia-rogue" data-title="IA Rogue" aria-label={es ? 'IA Rogue — ver la ficha' : 'IA Rogue — see the project page'}><figure className="rg-fig"><ShotImg s={COVER} lang={lang} sizes="(min-width: 980px) 780px, 100vw"/><Caption s={COVER} lang={lang}/></figure></a>
+   <div className="gd-copy">
+    <span className="project-kind">{t.kind}<em>{es ? 'En desarrollo' : 'In development'}</em></span>
+    <h3><a href="/proyectos/ia-rogue" data-title="IA Rogue">IA Rogue</a></h3>
+    <p className="pitch">{t.pitch}</p>
+    <p>{es ? 'Modelado en Blender, shaders, biomas y varias cámaras jugables. El repositorio es privado; la ficha tiene capturas del juego.' : 'Modeling in Blender, shaders, biomes and several playable cameras. The repository is private; the project page has in-game captures.'}</p>
+    <div className="gd-thumbs">{THUMBS.map(s => <a key={s.file} href={`/proyectos/ia-rogue#${s === WATER[0] ? 'agua' : 'lugares'}`} data-title="IA Rogue"><figure className="rg-fig"><ShotImg s={s} lang={lang} sizes="200px"/><Caption s={s} lang={lang}/></figure></a>)}</div>
+    <a className="inline-link" href="/proyectos/ia-rogue" data-title="IA Rogue">{es ? 'Ver la ficha de IA Rogue' : 'See the IA Rogue page'}<ArrowRight size={18}/></a>
+   </div>
+  </div>
 
- useEffect(() => {
-  if (paused || open || hovering) return;
-  const id = setInterval(() => setPano(p => (p + 1) % PANORAMAS.length), 6500);
-  return () => clearInterval(id);
- }, [paused, open, hovering]);
- useEffect(() => { if (open) dialog.current?.showModal(); else dialog.current?.close(); }, [open]);
-
- return <section id="graphics" className="wrap section-space gamedev" data-zone="Game dev"><div className="section-heading" data-num="03"><div><span className="kicker">03 · Game development</span><h2>{es ? 'IA Rogue, mi videojuego en Godot.' : 'IA Rogue, my Godot game.'}</h2><p>{es ? 'Proyecto personal de modelado y diseño en Blender, con escenas jugables, mecánicas y distintas cámaras funcionales.' : 'A personal project of modeling and design in Blender, with playable scenes, mechanics and several working cameras.'}</p><div className="tags gamedev-tags">{(es ? ['Dirección visual', 'Game dev', 'Modelado 3D', 'Shaders', 'Hobby profesional'] : ['Visual direction', 'Game dev', '3D modeling', 'Shaders', 'Professional hobby']).map(tag => <span key={tag}>{tag}</span>)}</div></div></div>
   <div className="gd-block" data-zone={es ? 'Tres estilos' : 'Three styles'}>
-  <div className="original-compare-heading"><h3>{es ? 'Un personaje, tres estilos.' : 'One character, three styles.'}</h3><p>{es ? 'Gíralo, acércate y cambia el tamaño del píxel.' : 'Rotate it, zoom in and change the pixel size.'}</p></div>
-  <ModelLab lang={lang} paused={paused}/>
+   <div className="original-compare-heading"><h3>{es ? 'Un personaje, tres estilos.' : 'One character, three styles.'}</h3><p>{es ? 'Gíralo, acércate y cambia el tamaño del píxel.' : 'Rotate it, zoom in and change the pixel size.'}</p></div>
+   <ModelLab lang={lang} paused={paused}/>
   </div>
 
-  <div className="gd-block" data-zone={es ? 'Escenas' : 'Scenes'}>
-  <div className="original-compare-heading"><h3>{es ? 'Escenas del juego.' : 'Scenes from the game.'}</h3><p>{es ? 'Capturas del juego, sin retoque. Toca una para verla completa.' : 'In-game captures, untouched. Tap one to see it in full.'}</p></div>
-  <div className="pano" onMouseEnter={() => setHovering(true)} onMouseLeave={() => setHovering(false)}>
-   <button className="pano-stage" onClick={() => setOpen(true)} aria-label={`${PANORAMAS[pano].title[L]} — ${es ? 'ver a pantalla completa' : 'view full screen'}`}>
-    {PANORAMAS.map((p, i) => <img key={p.file} src={src(p)} width={p.w} height={p.h} alt="" className={i === pano ? 'on' : ''} loading={i ? 'lazy' : undefined}/>)}
-    <span className="pano-title"><strong>{PANORAMAS[pano].title[L]}</strong>{PANORAMAS[pano].note[L]}</span>
-    {!paused && !hovering && !open && <span className="pano-progress" key={pano}/>}
-   </button>
-   {cur.soft && <button className="pano-pixel" aria-pressed={pixel} onClick={() => setPixel(!pixel)}><span className="pano-switch" aria-hidden="true"/>{es ? 'Pixel art' : 'Pixel art'}</button>}
-   <div className="pano-thumbs" role="tablist" aria-label={es ? 'Escenas' : 'Scenes'}>{PANORAMAS.map((p, i) => <button key={p.file} role="tab" aria-selected={i === pano} onClick={() => setPano(i)}><img src={`/media/${p.file}.webp`} width={p.w} height={p.h} alt="" loading="lazy"/><span>{p.title[L]}</span></button>)}</div>
-  </div>
-  <dialog ref={dialog} className="pano-dialog" onClose={() => setOpen(false)} onClick={e => { if (e.target === e.currentTarget) setOpen(false); }}>
-   <img src={src(cur)} width={cur.w} height={cur.h} alt={cur.title[L]}/>
-   <div className="pano-dialog-bar"><button onClick={() => setPano((pano + PANORAMAS.length - 1) % PANORAMAS.length)} aria-label={es ? 'Anterior' : 'Previous'}>←</button><span>{PANORAMAS[pano].title[L]} · {PANORAMAS[pano].note[L]}</span><button onClick={() => setPano((pano + 1) % PANORAMAS.length)} aria-label={es ? 'Siguiente' : 'Next'}>→</button><button onClick={() => setOpen(false)} aria-label={es ? 'Cerrar' : 'Close'}>✕</button></div>
-  </dialog>
+  <div className="gd-block" data-zone="Pixel art">
+   <div className="original-compare-heading"><h3>{es ? 'La misma toma, con y sin pixel art.' : 'The same shot, with and without pixel art.'}</h3><p>{es ? 'El templo de noche en el mismo instante; el botón cambia sólo el pixelado.' : 'The temple at night at the same instant; the button only switches the pixelation.'}</p></div>
+   <figure className="rg-fig gd-pixel">
+    <img src={`/media/escenas/templo-noche-${pixel ? 'pixel' : 'suave'}.webp`} width={1600} height={900} loading="lazy" decoding="async" alt={es ? `El templo de noche ${pixel ? 'con' : 'sin'} pixel art` : `The temple at night ${pixel ? 'with' : 'without'} pixel art`}/>
+    <button className="pano-pixel" aria-pressed={pixel} onClick={() => setPixel(!pixel)}><span className="pano-switch" aria-hidden="true"/>Pixel art</button>
+    <figcaption className="rg-cap"><span>{es ? 'Templo' : 'Temple'}</span><span>{es ? 'cámara 1, de frente' : 'camera 1, front'}</span><span>{es ? 'noche' : 'night'}</span></figcaption>
+   </figure>
   </div>
  </section>;
 }

@@ -68,7 +68,7 @@ export default function HeroShowcase({ lang, paused }: { lang: 'es' | 'en'; paus
   </div>
   <div className="hs-tabs" role="tablist" aria-label={es ? 'Apps destacadas' : 'Featured apps'}>
    {SLIDES.map((s, i) => <button key={s.slug} role="tab" aria-selected={i === front} onClick={() => { setFront(i); setView('sum'); setHold(true); }} className={`t-${s.kind}`}>
-    <ProjectIcon kind={s.kind}/><strong>{s.title[L]}</strong>
+    <span className="hs-key">1{'abc'[i]}</span><strong>{s.title[L]}</strong>
     {i === front && !paused && !hover && !hold && <span className="hs-progress" key={front} style={{ animationDuration: `${SUM + FULL}ms` }} aria-hidden="true"/>}
    </button>)}
   </div>

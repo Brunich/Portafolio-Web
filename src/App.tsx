@@ -1,12 +1,13 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { flushSync } from 'react-dom';
-import { ArrowUpRight, ArrowDown, ArrowLeft, ArrowRight, DownloadSimple, GithubLogo, EnvelopeSimple, LinkedinLogo, WhatsappLogo, Pause, Play, AndroidLogo, Globe, MusicNotes } from '@phosphor-icons/react';
+import { ArrowUpRight, ArrowDown, ArrowLeft, ArrowRight, DownloadSimple, Pause, Play } from '@phosphor-icons/react';
 import { copy, certificates } from './content';
 import type { Lang } from './content';
 import { professional } from './professional-content';
 import { personal } from './personal';
 import OriginalScenes from './OriginalScenes';
 import Hobbies from './Hobbies';
+import { RoguePage } from './Rogue';
 // Las demos pesadas se cargan sólo en su página.
 const DataWorkbench = lazy(() => import('./DataWorkbench'));
 const LoyaltyDemo = lazy(() => import('./LoyaltyDemo'));
@@ -26,29 +27,32 @@ import ClubPreview from './ClubPreview';
 import CsvChart from './CsvChart';
 import TurnoPreview from './TurnoPreview';
 import HeroShowcase, { NfcTap } from './HeroShowcase';
-import './pages.css';
-import './theme.css';
 import './layout.css';
-import { useMotion } from './motion';
+import './pages.css';
 import { curtain } from './transition';
-import { usePaging, glide, glideTo, zoneList } from './paging';
+import { usePaging, glideTo } from './paging';
 import { StampPage, NfcSetup, Qr, bizLink, bizFrom } from './Stamp';
-import './brand.css';
-import './identity.css';
 import AppShell, { BRANDS } from './AppShell';
 
 type Native = { es: string; en: string; href?: string; android?: boolean };
 
-const PROJECT_ORDER = ['club', 'csv', 'planta', 'spc', 'inventario', 'turno', 'agente', 'vibe', 'punto', 'casa'];
-// En la portada van al frente los que resuelven un problema de negocio; el hackathon y la app de estudiantes, abajo.
-const OTHER = ['spc', 'vibe', 'punto'];
-// Lo que todavía no está listo va en su propio apartado, para que la lista principal sea sólo lo que ya funciona.
-const DEV = ['agente'];
-// Trabajos hechos para un cliente: van debajo del perfil, no entre las demos.
-const CLIENT = ['casa'];
+// La portada va en cuatro bloques: lo que comparte la planta ficticia, lo de negocio pequeño, el juego y una lista corta.
+// 'rogue' no es un proyecto de la lista: sólo marca dónde entra su ficha en la cadena de «siguiente proyecto».
+const PROJECT_ORDER = ['turno', 'csv', 'planta', 'spc', 'inventario', 'casa', 'club', 'rogue', 'vibe', 'punto', 'agente'];
+type Group = { letter: string; ids: string[]; name: [string, string]; line: [string, string] };
+const GROUPS: Group[] = [
+ { letter: 'A', ids: ['turno', 'csv', 'planta', 'spc', 'inventario'], name: ['Turno en planta', 'Plant shift'], line: ['Las cinco usan la misma planta ficticia: Líneas 1 a 3, lotes 4411 a 4428 y folios INC-221 a INC-232. La INC-232, en curso en Entrega de turno, aparece en Planta como el paro de la Línea 1; el inventario es el de su almacén de consumibles.', 'All five use the same made-up plant: Lines 1 to 3, batches 4411 to 4428 and tickets INC-221 to INC-232. INC-232, in progress in Shift handover, shows up in Plant as Line 1’s stop; the inventory is its consumables stockroom.'] },
+ { letter: 'B', ids: ['casa', 'club'], name: ['Negocio pequeño', 'Small business'], line: ['Para negocios que atienden al cliente de frente. La Casa del Ángel es un trabajo para un cliente real y está en uso; NFC para negocios funciona y se puede adaptar a otro local.', 'For businesses that serve customers face to face. La Casa del Ángel was built for a real client and is in use; NFC for businesses works and can be adapted to another shop.'] },
+];
+const OTHER = ['vibe', 'punto', 'agente'];
+const ROGUE = { id: 'rogue', slug: 'ia-rogue', title: 'IA Rogue' };
 type Project = ReturnType<typeof professional>['projects'][number];
 const unfinished = (status: string) => /^(Funcional|Working|Publicad[oa]|Published)$/.test(status) ? null : <em>{status}</em>;
-const external = (url: string) => url.startsWith('http') ? { target: '_blank', rel: 'noreferrer' } : {};
+// Todo lo que sale del sitio abre otra pestaña y lo avisa con la flecha ↗ antes de picar.
+const EXT = { target: '_blank', rel: 'noopener noreferrer' } as const;
+function Out({ es, size = 18 }: { es: boolean; size?: number }) {
+ return <><ArrowUpRight size={size} aria-hidden="true"/><span className="sr-only">{es ? '(se abre en otra pestaña)' : '(opens in a new tab)'}</span></>;
+}
 
 // Rutas: la portada resume; cada proyecto tiene su propia página.
 function route() {
@@ -68,16 +72,15 @@ function useNavigation() {
   const render = () => flushSync(() => setTick(n => n + 1));
   const land = (hash: string) => { if (hash) document.getElementById(hash.slice(1))?.scrollIntoView(); else scrollTo(0, 0); };
   const onClick = (e: MouseEvent) => {
-   if (document.documentElement.classList.contains('is-app')) return;
-  if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+   if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
    const a = (e.target as Element).closest?.('a');
-   if (!a || a.target || a.hasAttribute('download')) return;
+   if (!a || a.hasAttribute('download')) return;
    const url = new URL(a.href, location.href);
    if (url.origin !== location.origin || /\.\w+$/.test(url.pathname) || url.pathname === location.pathname) return;
+   // Fichas y apps siempre en la misma pestaña, aunque algún enlace viejo aún traiga target (el «Abrir» del visor de la portada).
+   if (a.target && !url.pathname.startsWith('/proyectos/')) return;
    e.preventDefault();
-   const from = a.closest('.row')?.querySelector('.project-media') ?? a;
-   const color = getComputedStyle(a.closest('[data-c]') ?? a).getPropertyValue('--c').trim();
-   void curtain(from, color, a.dataset.title ?? 'Bruno Salas', () => { history.pushState(null, '', url.pathname + url.search + url.hash); render(); land(url.hash); });
+   void curtain(a.dataset.title ?? 'Bruno Salas', () => { history.pushState(null, '', url.pathname + url.search + url.hash); render(); land(url.hash); });
   };
   const onPop = () => { render(); land(location.hash); };
   document.addEventListener('click', onClick); addEventListener('popstate', onPop);
@@ -89,117 +92,92 @@ export default function App() {
  const [lang, setLang] = useState<Lang>(() => { try { return localStorage.getItem('bruno-language') === 'en' ? 'en' : 'es'; } catch { return 'es'; } });
  const [paused, setPaused] = useState(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
  useNavigation();
- const pg = usePaging(location.pathname === '/' || location.pathname === '', `${location.pathname}:${lang}`);
+ usePaging(location.pathname === '/' || location.pathname === '', `${location.pathname}:${lang}`);
  const es = lang === 'es', p = professional(lang), c = copy[lang], r = route();
  const projects = [...p.projects].sort((a, b) => PROJECT_ORDER.indexOf(a.id) - PROJECT_ORDER.indexOf(b.id));
  const project = r.page === 'project' ? projects.find(x => x.slug === r.slug) : undefined;
- const home = !project && r.page === 'home';
- useMotion(`${project?.id ?? r.page}:${lang}`);
+ const rogue = r.page === 'project' && r.slug === ROGUE.slug && !r.app;
+ const chain = PROJECT_ORDER.map(id => id === 'rogue' ? ROGUE : projects.find(x => x.id === id)!);
+ const nextOf = (id: string) => chain[(chain.findIndex(x => x.id === id) + 1) % chain.length];
+ const home = !project && !rogue && r.page === 'home';
+ // index.html pinta el fondo de la app sólo al cargar directo en /app; al entrar o salir sin recarga se ajusta aquí.
+ useEffect(() => {
+  const root = document.documentElement, metas = document.querySelectorAll('meta[name=theme-color]');
+  if (r.page === 'project' && r.app) {
+   const ax = document.querySelector('.ax');
+   if (ax) { root.classList.add('is-app'); root.style.background = getComputedStyle(ax).backgroundColor; }
+   return;
+  }
+  root.classList.remove('is-app'); root.style.background = '';
+  metas.forEach(m => m.setAttribute('content', m.getAttribute('media')?.includes('dark') ? '#171815' : '#efece4'));
+ }, [location.pathname]);
  useEffect(() => { document.documentElement.lang = lang; try { localStorage.setItem('bruno-language', lang); } catch { /* Preferencia opcional. */ } }, [lang]);
  useEffect(() => { document.documentElement.dataset.motion = paused ? 'paused' : 'active'; }, [paused]);
  useEffect(() => { const pref = matchMedia('(prefers-reduced-motion: reduce)'); const change = () => setPaused(pref.matches); pref.addEventListener('change', change); return () => pref.removeEventListener('change', change); }, []);
- useEffect(() => { if (r.page === 'sello' || r.page === 'menu' || (r.page === 'project' && r.app)) return; document.title = r.page === 'about' ? (es ? 'Sobre mí — Bruno Salas' : 'About me — Bruno Salas') : r.page === 'nfc' ? (es ? 'Arma tu tarjeta NFC — Bruno Salas' : 'Build your NFC card — Bruno Salas') : project ? `${project.title} — Bruno Salas` : (es ? 'Bruno Salas — Web, datos y automatización' : 'Bruno Salas — Web, data & automation'); }, [project, es, r.page]);
+ useEffect(() => { if (r.page === 'sello' || r.page === 'menu' || (r.page === 'project' && r.app)) return; document.title = r.page === 'about' ? (es ? 'Sobre mí — Bruno Salas' : 'About me — Bruno Salas') : r.page === 'nfc' ? (es ? 'Arma tu tarjeta NFC — Bruno Salas' : 'Build your NFC card — Bruno Salas') : rogue ? 'IA Rogue — Bruno Salas' : project ? `${project.title} — Bruno Salas` : (es ? 'Bruno Salas · Ingeniería en Software' : 'Bruno Salas · Software Engineering'); }, [project, rogue, es, r.page]);
  const at = (id: string) => home ? `#${id}` : `/#${id}`;
  if (r.page === 'sello') return <StampPage lang={lang}/>;
  if (r.page === 'menu') return <Suspense fallback={null}><MenuPage lang={lang}/></Suspense>;
+ // AppShell no trae salida: el «volver» a la ficha va como primera pieza del escenario de la app.
  if (project && r.app && HAS_APP.includes(project.id)) return <AppShell id={project.id} lang={lang} setLang={setLang}><Suspense fallback={<p className="case-loading">{es ? 'Cargando…' : 'Loading…'}</p>}><Demo lang={lang} project={project}/></Suspense></AppShell>;
 
  return <>
   <a className="skip-link" href="#main">{c.skip}</a>
-  <div className="scroll-progress" aria-hidden="true"/>
   <header className="topbar" aria-label={es ? 'Navegación del portafolio' : 'Portfolio navigation'}><div className="topbar-inner wrap">
-   <a className="brand" href="/" data-title="Bruno Salas" aria-label="Bruno Salas — inicio"><span className="brand-name"><span className="brand-top"><b>Bruno Salas</b><em>{es ? 'portafolio' : 'portfolio'}</em></span><small>{p.role}</small></span></a>
+   <a className="brand" href="/" data-title="Bruno Salas" aria-label="Bruno Salas — inicio"><span className="brand-name"><b>Bruno Salas</b><small>{es ? 'Ingeniería en Software · UANL' : 'Software Engineering · UANL'}</small></span></a>
    <nav className="topnav" aria-label={es ? 'Secciones' : 'Sections'}>{[['projects', es ? 'Proyectos' : 'Projects'], ['about', 'CV'], ['graphics', 'Game dev'], ['motion', 'Motion']].map(([id, label]) => <a key={id} href={at(id)}>{label}</a>)}</nav>
    <div className="topbar-tools">
     <button className="icon-button" aria-label={paused ? c.play : c.pause} onClick={() => setPaused(!paused)}>{paused ? <Play size={16} weight="fill"/> : <Pause size={16} weight="fill"/>}</button>
     <div className="language-control" aria-label={es ? 'Idioma' : 'Language'}>{(['es', 'en'] as const).map(l => <button key={l} aria-label={l === 'es' ? 'Cambiar a español' : 'Switch to English'} aria-pressed={lang === l} onClick={() => setLang(l)}>{l.toUpperCase()}</button>)}</div>
-    <a className="topbar-cta" href={at('contact')}>{c.contact}</a>
+    <a className="topbar-cta" href={at('contact')}>{es ? 'Contacto' : 'Contact'}</a>
    </div>
   </div></header>
-  {r.page === 'about' ? <Hobbies lang={lang}/> : r.page === 'nfc' ? <NfcPage lang={lang}/> : project ? <ProjectPage lang={lang} project={project} projects={projects}/> : <Home lang={lang} paused={paused} projects={projects}/>}
-  <ZoneNav lang={lang} routeKey={`${r.page}:${project?.id ?? ''}`}/>
-  {pg.paged && <ZoneDots labels={pg.labels} current={pg.current}/>}
+  {r.page === 'about' ? <Hobbies lang={lang}/> : r.page === 'nfc' ? <NfcPage lang={lang}/> : rogue ? <RoguePage lang={lang} next={nextOf('rogue')}/> : project ? <ProjectPage lang={lang} project={project} next={nextOf(project.id)}/> : <Home lang={lang} paused={paused} projects={projects}/>}
   <footer className="site-footer wrap" aria-label={es ? 'Pie del portafolio' : 'Portfolio footer'}>© {new Date().getFullYear()} Bruno Salas Rodríguez <span>{c.location}</span></footer>
  </>;
 }
 
-// Botón de zonas: baja con animación a la siguiente parte de la página; en la última, vuelve arriba.
-function ZoneNav({ lang, routeKey }: { lang: Lang; routeKey: string }) {
- const es = lang === 'es';
- const [next, setNext] = useState<HTMLElement | null>(null);
- const [label, setLabel] = useState('');
- const [hidden, setHidden] = useState(false);
- useEffect(() => {
-  let lastY = scrollY;
-  // En celular no hay margen libre: arranca oculto y aparece al subir.
-  setHidden(!document.documentElement.classList.contains('paged') && matchMedia('(max-width:760px)').matches);
-  const update = () => {
-   const zones = [...document.querySelectorAll<HTMLElement>('main [data-zone]')];
-   const n = zones.find(z => z.getBoundingClientRect().top > 110) ?? null;
-   setNext(n); setLabel(n?.dataset.zone ?? (es ? 'Arriba' : 'Top'));
-   // Fuera de la portada por zonas se esconde mientras bajas leyendo, para no tapar texto; vuelve al subir o al final.
-   const y = scrollY, end = y > 240 && y + innerHeight > document.documentElement.scrollHeight - 80;
-   if (!document.documentElement.classList.contains('paged') && Math.abs(y - lastY) > 6) setHidden(y > lastY && y > 240 && !end);
-   if (end) setHidden(false);
-   lastY = y;
-  };
-  update(); const late = setTimeout(update, 600);
-  addEventListener('scroll', update, { passive: true }); addEventListener('resize', update);
-  return () => { clearTimeout(late); removeEventListener('scroll', update); removeEventListener('resize', update); };
- }, [routeKey, es]);
- return <button className={`zone-nav${next ? '' : ' is-top'}${hidden ? ' is-hidden' : ''}`} onClick={() => { if (next) void glideTo(next); else void glide(0); }} aria-label={next ? `${es ? 'Bajar a' : 'Go to'} ${label}` : (es ? 'Volver arriba' : 'Back to top')}>
-  <span className="zone-label">{label}</span><span className="zone-arrow" aria-hidden="true"><ArrowDown size={18} weight="bold"/></span>
- </button>;
-}
-
-// Guía lateral: una marca por zona; la actual se alarga y muestra su nombre.
-function ZoneDots({ labels, current }: { labels: string[]; current: number }) {
- return <nav className="zone-dots" aria-label="Zonas">{labels.map((l, i) => <button key={l + i} className={i === current ? 'on' : ''} aria-current={i === current ? 'true' : undefined} onClick={() => void glideTo(zoneList()[i])}><span>{l}</span></button>)}</nav>;
-}
-
-// Arte de fondo de la portada: órbitas de línea fina con puntos que las recorren.
-function HeroArt() {
- return <svg className="hero-art" viewBox="0 0 800 800" aria-hidden="true">
-  <defs><linearGradient id="ha" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#a391ff"/><stop offset=".5" stopColor="#6fd6ff"/><stop offset="1" stopColor="#7fe3c6"/></linearGradient></defs>
-  {[150, 230, 310, 390].map((r, i) => <g key={r} className={`orbit o${i}`}><ellipse cx="400" cy="400" rx={r} ry={r * .62} fill="none" stroke="url(#ha)" strokeWidth="1"/><circle cx={400 + r} cy="400" r={3 + (i % 2)} fill="url(#ha)"/></g>)}
-  {[[120, 140], [690, 210], [610, 660], [170, 600], [430, 90]].map(([x, y], i) => <path key={i} className={`spark s${i}`} d={`M${x} ${y - 9}L${x + 2.2} ${y - 2.2}L${x + 9} ${y}L${x + 2.2} ${y + 2.2}L${x} ${y + 9}L${x - 2.2} ${y + 2.2}L${x - 9} ${y}L${x - 2.2} ${y - 2.2}Z`} fill="#e9e4ff"/>)}
- </svg>;
-}
-
 function Home({ lang, paused, projects }: { lang: Lang; paused: boolean; projects: Project[] }) {
- const c = copy[lang], p = professional(lang), es = lang === 'es';
- const featured = projects.filter(x => !OTHER.includes(x.id) && !DEV.includes(x.id) && !CLIENT.includes(x.id)), others = projects.filter(x => OTHER.includes(x.id)), dev = projects.filter(x => DEV.includes(x.id)), works = projects.filter(x => CLIENT.includes(x.id));
+ const c = copy[lang], p = professional(lang), es = lang === 'es', L = es ? 0 : 1;
+ const byId = (id: string) => projects.find(x => x.id === id)!;
+ const others = OTHER.map(byId);
  const cv = es ? '/cv/Bruno-Salas-ES.pdf' : '/cv/Bruno-Salas-EN.pdf';
+ const jump = (id: string) => () => void glideTo(document.getElementById(id));
  return <main id="main">
-  <section id="home" className="hero wrap" data-zone={es ? 'Inicio' : 'Home'}><HeroArt/><div className="hero-copy"><h1>{p.title}<em>{p.accent}</em></h1><p>{p.intro}</p><div className="hero-actions"><a className="button primary" href="#projects">{c.view}<ArrowDown size={19}/></a><a className="button secondary" href={cv} download>{es ? 'Descargar CV' : 'Download CV'}<DownloadSimple size={19}/></a></div><p className="hero-facts">{es ? 'Monterrey, N. L. · UANL 2023–2028 · Español, inglés y portugués' : 'Monterrey, Mexico · UANL 2023–2028 · Spanish, English & Portuguese'}</p></div><div className="hero-workbench"><HeroShowcase lang={lang} paused={paused}/></div></section>
-  <section id="projects" className="wrap section-space"><div className="projects-intro" data-zone={es ? 'Proyectos' : 'Projects'}><div className="section-heading" data-num="01"><div><span className="kicker">01 · {es ? 'Proyectos' : 'Projects'}</span><h2>{p.projectsTitle}</h2><p>{p.projectsIntro}</p></div></div>
-   <ol className="project-index">{featured.map((x, i) => <li key={x.id} className={`project-${x.id}`}><button onClick={() => void glideTo(document.getElementById(`p-${x.id}`))}><span className="pi-num">{String(i + 1).padStart(2, '0')}</span><span className="pi-main"><strong>{x.title}</strong></span><span className="pi-kind">{x.kind}</span><ArrowDown size={18}/></button></li>)}</ol></div>
-   <div className="rows">{featured.map((project, i) => <ProjectRow key={project.id} lang={lang} project={project} flip={i % 2 === 1} n={i + 1} of={featured.length}/>)}</div>
-   <div className="others is-dev" data-zone={es ? 'En desarrollo' : 'In development'}>
-    <div className="others-head"><span className="kicker">{es ? 'En desarrollo' : 'In development'}</span><p>{es ? 'Lo que estoy construyendo ahora.' : 'What I am building now.'}</p></div>
-    <div className="others-grid">{dev.map(x => <a key={x.id} className={`other-card project-${x.id}`} data-c href={`/proyectos/${x.slug}`} data-title={x.title}><span className={`other-media media-${x.id}`}><Media lang={lang} project={x}/></span><span className="other-copy"><em>{x.kind}</em><strong>{x.title}</strong><span>{x.pitch}</span></span><ArrowUpRight size={20}/></a>)}
-     <div className="other-card other-plain project-android"><span className="other-media other-icon" aria-hidden="true"><AndroidLogo size={72} weight="duotone"/><small>NFC · {es ? 'cámara · avisos' : 'camera · alerts'}</small></span><span className="other-copy"><em>Android</em><strong>{es ? 'Apps Android nativas' : 'Native Android apps'}</strong><span>{es ? 'Ya en Android: La Casa del Ángel, Punto U y NFC para negocios. Todavía faltan las de Inventario y Entrega de turno.' : 'Already on Android: La Casa del Ángel, Punto U and NFC for businesses. Inventory and Shift handover still need theirs.'}</span></span></div></div>
-   </div>
-   <div className="others" data-zone={es ? 'Otros códigos' : 'Other code'}>
-    <div className="others-head"><span className="kicker">{es ? 'Otros códigos' : 'Other code'}</span><p>{es ? 'Extras: gráficas de control, un hackathon, una app para estudiantes y más en mi GitHub.' : 'Extras: control charts, a hackathon, a student app and more on my GitHub.'}</p></div>
-    <div className="others-grid">{others.map(x => <a key={x.id} className={`other-card project-${x.id}`} data-c href={`/proyectos/${x.slug}`} data-title={x.title}><span className={`other-media media-${x.id}`}><Media lang={lang} project={x}/></span><span className="other-copy"><em>{x.kind}</em><strong>{x.title}</strong><span>{x.pitch}</span></span><ArrowUpRight size={20}/></a>)}
-     <a className="other-card other-plain other-github" href={personal.github} {...external(personal.github)}><span className="other-copy"><em>GitHub · Brunich</em><strong>{es ? 'Tengo más proyectos, pequeños y grandes' : 'I have more projects, small and large'}</strong><span>{es ? 'Juegos, herramientas y pruebas: todo el código.' : 'Games, tools and experiments: all the code.'}</span></span><GithubLogo size={26}/></a></div>
-   </div>
+  <section id="home" className="hero wrap" data-zone={es ? 'Inicio' : 'Home'}>
+   <dl className="hero-sheet">{(es
+    ? [['Lugar', 'Monterrey, N. L.'], ['Carrera', 'Ing. en Software · UANL 2023–2028'], ['Idiomas', 'ES / EN / PT'], ['Hoja', '00 · Portada']]
+    : [['Place', 'Monterrey, Mexico'], ['Degree', 'Software Eng. · UANL 2023–2028'], ['Languages', 'ES / EN / PT'], ['Sheet', '00 · Cover']]).map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
+   <div className="hero-copy"><h1>{p.title} {p.accent}</h1><p>{p.intro}</p><div className="hero-actions"><a className="button primary" href="#projects">{c.view}<ArrowDown size={18}/></a><a className="button secondary" href={cv} download>{es ? 'Descargar CV' : 'Download CV'}<DownloadSimple size={18}/></a></div></div>
+   <div className="hero-workbench"><span className="hero-label">{es ? 'Fig. 1 · Tres apps en vivo' : 'Fig. 1 · Three live apps'}</span><HeroShowcase lang={lang} paused={paused}/></div>
+  </section>
+  <section id="projects" className="wrap section-space"><div className="projects-intro" data-zone={es ? 'Proyectos' : 'Projects'}><div className="section-heading"><div><span className="kicker">01 · {es ? 'Proyectos' : 'Projects'}</span><h2>{p.projectsTitle}</h2><p>{p.projectsIntro}</p></div></div>
+   {/* Índice en cuatro columnas, una por bloque: cabe en una pantalla aunque sean diez proyectos */}
+   <div className="project-index">
+    {GROUPS.map(g => <div key={g.letter} className="pi-group"><span className="pi-head">{g.letter} · {g.name[L]}</span><ol>{g.ids.map(id => { const x = byId(id); return <li key={id} className={`project-${id}`}><button onClick={jump(`p-${id}`)}><strong>{x.title}</strong><ArrowDown size={16}/></button></li>; })}</ol></div>)}
+    <div className="pi-group"><span className="pi-head">C · {es ? 'Juego' : 'Game'}</span><ol><li><button onClick={jump('graphics')}><strong>IA Rogue</strong><ArrowDown size={16}/></button></li></ol></div>
+    <div className="pi-group"><span className="pi-head">D · {es ? 'Otros trabajos' : 'Other work'}</span><ol>{others.map(x => <li key={x.id}><button onClick={jump('otros')}><strong>{x.title}</strong><ArrowDown size={16}/></button></li>)}</ol></div>
+   </div></div>
+   {GROUPS.map(g => <div key={g.letter} className="rows">{g.ids.map((id, i) => <ProjectRow key={id} lang={lang} project={byId(id)} flip={i % 2 === 1} n={i + 1} group={i === 0 ? g : undefined} letter={g.letter} of={g.ids.length}/>)}</div>)}
+  </section>
+  <OriginalScenes lang={lang} paused={paused}/>
+  <section id="otros" className="wrap section-space others-list" data-zone={es ? 'Otros trabajos' : 'Other work'}>
+   <div className="group-head"><span className="kicker">D · {es ? 'Otros trabajos' : 'Other work'}</span><p>{es ? 'Un hackathon, una app para estudiantes, un asistente que todavía estoy armando y las versiones para Android.' : 'A hackathon, a student app, an assistant I am still building and the Android versions.'}</p></div>
+   <ul className="ol-list">
+    {others.map(x => <li key={x.id}><a href={`/proyectos/${x.slug}`} data-title={x.title}><strong>{x.title}</strong><span>{x.pitch}</span><em>{x.kind}{unfinished(x.status)}</em><ArrowRight size={18} aria-hidden="true"/></a></li>)}
+    <li><div><strong>{es ? 'Apps Android' : 'Android apps'}</strong><span>{es ? 'Ya en Android: La Casa del Ángel, Punto U y NFC para negocios. Faltan las de Inventario y Entrega de turno.' : 'Already on Android: La Casa del Ángel, Punto U and NFC for businesses. Inventory and Shift handover still need theirs.'}</span><em>Capacitor · Android</em></div></li>
+    <li><a href={personal.github} {...EXT}><strong>GitHub</strong><span>{es ? 'Juegos, herramientas y pruebas más chicas.' : 'Games, tools and smaller experiments.'}</span><em>github.com/Brunich</em><Out es={es}/></a></li>
+   </ul>
   </section>
   <section id="about" className="about-section section-space"><div className="wrap">
    <div className="about-grid" data-zone="CV">
     <figure className="portrait"><picture><source srcSet="/media/bruno-retrato.avif" type="image/avif"/><source srcSet="/media/bruno-retrato.webp" type="image/webp"/><img src="/media/bruno-retrato.jpg" alt="Bruno Salas" width="560" height="700" loading="lazy"/></picture><figcaption><strong>Bruno Salas</strong><span>Monterrey, N. L.</span></figcaption></figure>
-    <div className="about-copy"><span className="kicker">02 · CV</span><h2>{p.aboutTitle}</h2><p>{p.about}</p><a className="inline-link" href={cv} download>{es ? 'Descargar CV' : 'Download CV'}<DownloadSimple size={20}/></a></div>
+    <div className="about-copy"><span className="kicker">02 · CV</span><h2>{p.aboutTitle}</h2><p>{p.about}</p><a className="inline-link" href={cv} download>{es ? 'Descargar CV' : 'Download CV'}<DownloadSimple size={20}/></a>
+</div>
    </div>
-   <div className="client-works" data-zone={es ? 'Trabajos' : 'Client work'}><h3>{p.worksTitle}</h3>{works.map(x => <article key={x.id} className="client-work">
-    <a className="client-shot" href={x.link} {...external(x.link)} aria-label={`${x.title} — ${x.action}`}><CasaPreview lang={lang}/></a>
-    <div className="client-copy"><em>{x.kind}</em><strong>{x.title}</strong><p>{es ? 'Residencia para adultos mayores en Celaya, con tres casas y enfermería las 24 horas. Su página, donde las familias conocen los espacios y agendan una visita, y su portal de cuidados con app para Android: el personal registra el día de cada residente y cada familia ve el de los suyos.' : 'A senior residence in Celaya with three houses and round-the-clock nursing. Its website, where families see the spaces and book a visit, and its care portal with an Android app: staff log each resident’s day and every family sees their own.'}</p>
-     <div className="client-links"><a className="button primary" href={x.link} {...external(x.link)}>{x.action}<ArrowUpRight size={18}/></a><a className="inline-link" href={`/proyectos/${x.slug}`} data-title={x.title}>{es ? 'Ver presentación' : 'See overview'}<ArrowRight size={18}/></a></div></div>
-   </article>)}</div>
-   <div className="experience-grid" data-zone={es ? 'Experiencia' : 'Experience'}><div><h3>{c.timelineTitle}</h3>{c.experience.map(e => <div className="experience-row" key={e.year}><span className="year">{e.year}</span><div><h4>{e.role}</h4><span className="org">{e.org}</span><p>{e.text}</p></div></div>)}</div><div><h3>{c.learning}</h3>{certificates.map(cert => <a className="certificate" key={cert.title} href={cert.url} {...external(cert.url)}><div><h4>{cert.title}</h4><p>{cert.org}</p><span>{cert.year}</span></div><ArrowUpRight size={22}/></a>)}</div></div>
+   <div className="experience-grid" data-zone={es ? 'Experiencia' : 'Experience'}><div><h3>{c.timelineTitle}</h3>{c.experience.map(e => <div className="experience-row" key={e.year}><span className="year">{e.year}</span><div><h4>{e.role}</h4><span className="org">{e.org}</span><p>{e.text}</p></div></div>)}</div><div><h3>{c.learning}</h3>{certificates.map(cert => <a className="certificate" key={cert.title} href={cert.url} {...EXT}><div><h4>{cert.title}</h4><p>{cert.org}</p><span>{cert.year}</span></div><Out es={es} size={22}/></a>)}</div></div>
    <div className="skills tools-block" data-zone={es ? 'Herramientas que sé manejar' : 'Tools I work with'}><h3>{p.techTitle}</h3><div className="skills-grid">{p.skills.map(s => <div key={s.name}><h4>{s.name}</h4><p>{s.desc}</p><div className="tags">{s.tools.map(tool => <span key={tool}>{tool}</span>)}</div></div>)}</div><p className="languages-line">{c.languages}</p></div>
   </div></section>
-  <OriginalScenes lang={lang} paused={paused}/>
   <Motion lang={lang}/>
   <Contact lang={lang}/>
  </main>;
@@ -221,13 +199,18 @@ function Media({ lang, project }: { lang: Lang; project: Project }) {
  }
 }
 
-function ProjectRow({ lang, project, flip, n, of }: { lang: Lang; project: Project; flip: boolean; n: number; of: number }) {
+// Datos llanos en mono (tecnología / qué se prueba / estado) en lugar de cifras de vitrina.
+const Facts = ({ items }: { items: string[] }) => <p className="facts">{items.map(f => <span key={f}>{f}</span>)}</p>;
+
+function ProjectRow({ lang, project, flip, n, of, letter, group }: { lang: Lang; project: Project; flip: boolean; n: number; of: number; letter: string; group?: Group }) {
  const es = lang === 'es', page = `/proyectos/${project.slug}`;
- return <article id={`p-${project.id}`} data-c data-zone={project.title} className={`row project project-${project.id}${flip ? ' flip' : ''}${project.id === 'vibe' ? ' wide' : ''}`}>
-  <a className={`project-media media-${project.id}`} href={page} data-title={project.title} aria-label={`${project.title} — ${es ? 'ver proyecto' : 'view project'}`}><Media lang={lang} project={project}/><span className="media-open"><ArrowUpRight size={22}/></span></a>
-  <div className="project-info"><span className="row-num">{String(n).padStart(2, '0')}<i>/ {String(of).padStart(2, '0')}</i></span><span className="project-kind">{project.kind}{unfinished(project.status)}</span><h3><a href={page} data-title={project.title}>{project.title}</a></h3><p className="pitch">{project.pitch}</p><p>{project.desc}</p>
-   {project.metrics.length > 0 && <dl className="project-metrics">{project.metrics.map(([value, label]) => <div key={value + label}><dt>{value}</dt><dd>{label}</dd></div>)}</dl>}
-   <div className="project-links"><a className="button primary" href={page} data-title={project.title}>{es ? 'Ver proyecto' : 'View project'}<ArrowRight size={18}/></a>{project.link.startsWith('http') && <a className="inline-link" href={project.link} {...external(project.link)}>{project.action}<ArrowUpRight size={18}/></a>}</div>
+ return <article id={`p-${project.id}`} data-c data-zone={project.title} className={`row project project-${project.id}${flip ? ' flip' : ''}${group ? ' has-head' : ''}`}>
+  {/* El cajetín del bloque va dentro de su primera fila: así la portada por zonas no lo deja suelto entre pantallas */}
+  {group && <div className="group-head"><span className="kicker">{group.letter} · {group.name[es ? 0 : 1]}</span><p>{group.line[es ? 0 : 1]}</p></div>}
+  <a className={`project-media media-${project.id}`} href={page} data-title={project.title} aria-label={`${project.title} — ${es ? 'ver proyecto' : 'view project'}`}><Media lang={lang} project={project}/><span className="media-open"><ArrowRight size={22}/></span></a>
+  <div className="project-info"><span className="row-num">{letter} · {String(n).padStart(2, '0')}<i>/ {String(of).padStart(2, '0')}</i></span><span className="project-kind">{project.kind}{unfinished(project.status)}</span><h3><a href={page} data-title={project.title}>{project.title}</a></h3><p className="pitch">{project.pitch}</p><p>{project.desc}</p>
+   <Facts items={project.facts}/>
+   <div className="project-links"><a className="button primary" href={page} data-title={project.title}>{es ? 'Ver proyecto' : 'View project'}<ArrowRight size={18}/></a>{project.link.startsWith('http') && <a className="inline-link" href={project.link} {...EXT}>{project.action}<Out es={es}/></a>}</div>
   </div>
  </article>;
 }
@@ -238,45 +221,46 @@ function Demo({ lang, project }: { lang: Lang; project: Project }) {
  return <>
    {project.id === 'club' && <><div className="case-demo-head"><h2>{es ? 'Así se ve en el restaurante.' : 'This is how it looks at the restaurant.'}</h2><p>{es ? 'Acerca el celular al chip y adelanta el tiempo.' : 'Tap the phone on the chip and fast-forward.'}</p></div><LoyaltyDemo lang={lang}/><ClubReal lang={lang}/></>}
    {project.id === 'turno' && <ShiftHandover lang={lang}/>}
-   {project.id === 'planta' && <><div className="case-demo-head"><h2>{es ? 'Súbele tus reportes del turno.' : 'Upload your shift reports.'}</h2><p>{es ? 'Ya vienen tres de ejemplo; cambia cualquiera por tu Excel o CSV.' : 'Three samples are loaded; swap any for your Excel or CSV.'}</p></div><Planta lang={lang}/><div className="monitor-live"><div className="case-demo-head"><h2>{es ? 'Y mientras pasa el turno: Monitor de planta.' : 'And while the shift runs: Plant monitor.'}</h2><p>{es ? 'Una app aparte, en tiempo real y con estilo Windows 98: OEE en vivo, lotes que se liberan o retienen y detenciones que tú provocas.' : 'A separate app, real time and Windows 98 style: live OEE, batches released or held and stops you trigger.'}</p></div><div className="monitor-shots"><img src="/media/monitor-planta.webp" width={1006} height={705} loading="lazy" alt={es ? 'Monitor de planta con tres líneas, OEE en vivo y cola de lotes' : 'Plant monitor with three lines, live OEE and batch queue'}/><img src="/media/monitor-planta-detencion.webp" width={1006} height={705} loading="lazy" alt={es ? 'Diálogo para registrar la causa de una detención' : 'Dialog to log a stop cause'}/></div><p className="demo-vibe-links"><a className="inline-link" href="https://monitor-de-planta.vercel.app" {...external('https://monitor-de-planta.vercel.app')}>{es ? 'Abrir el monitor' : 'Open the monitor'}<ArrowUpRight size={18}/></a><a className="inline-link" href="https://github.com/Brunich/Monitor-De-Planta" {...external('https://github.com/Brunich/Monitor-De-Planta')}>{es ? 'Ver el código' : 'View the code'}<ArrowUpRight size={18}/></a></p></div></>}
+   {project.id === 'planta' && <><div className="case-demo-head"><h2>{es ? 'Súbele tus reportes del turno.' : 'Upload your shift reports.'}</h2><p>{es ? 'Ya vienen tres de ejemplo; cambia cualquiera por tu Excel o CSV.' : 'Three samples are loaded; swap any for your Excel or CSV.'}</p></div><Planta lang={lang}/><div className="monitor-live"><div className="case-demo-head"><h2>{es ? 'Y mientras pasa el turno: Monitor de planta.' : 'And while the shift runs: Plant monitor.'}</h2><p>{es ? 'Una app aparte, en tiempo real y con estilo Windows 98: OEE en vivo, lotes que se liberan o retienen y detenciones que tú provocas.' : 'A separate app, real time and Windows 98 style: live OEE, batches released or held and stops you trigger.'}</p></div><div className="monitor-shots"><img src="/media/monitor-planta.webp" width={1006} height={705} loading="lazy" alt={es ? 'Monitor de planta con tres líneas, OEE en vivo y cola de lotes' : 'Plant monitor with three lines, live OEE and batch queue'}/><img src="/media/monitor-planta-detencion.webp" width={1006} height={705} loading="lazy" alt={es ? 'Diálogo para registrar la causa de una detención' : 'Dialog to log a stop cause'}/></div><p className="demo-vibe-links"><a className="inline-link" href="https://monitor-de-planta.vercel.app" {...EXT}>{es ? 'Abrir el monitor' : 'Open the monitor'}<Out es={es}/></a><a className="inline-link" href="https://github.com/Brunich/Monitor-De-Planta" {...EXT}>{es ? 'Ver el código' : 'View the code'}<Out es={es}/></a></p></div></>}
    {project.id === 'agente' && <><div className="case-demo-head"><h2>{es ? 'Así va a trabajar.' : 'This is how it will work.'}</h2><p>{es ? 'Escríbele como cliente o pregúntale a la base de una planta.' : 'Write to it as a customer or ask a plant’s database.'}</p></div><Agente lang={lang}/></>}
    {project.id === 'spc' && <><div className="case-demo-head"><h2>{es ? 'Súbele las mediciones de una pieza.' : 'Upload a part’s measurements.'}</h2><p>{es ? 'Ejemplo: el diámetro de un buje, con la herramienta desgastándose al final. Cambia la tolerancia o sube tu Excel.' : 'Sample: a bushing diameter, with the tool wearing out at the end. Change the tolerance or upload your Excel.'}</p></div><Spc lang={lang}/></>}
-   {project.id === 'inventario' && <><div className="case-demo-head"><h2>{es ? 'El inventario de la tiendita, en el celular.' : 'The corner store’s stock, on a phone.'}</h2><p>{es ? 'Toca un producto y escanea su QR con tu celular: se abre aquí mismo para venderlo o surtirlo.' : 'Tap a product and scan its QR with your phone: it opens right here to sell or restock it.'}</p></div><Inventario lang={lang}/></>}
+   {project.id === 'inventario' && <><div className="case-demo-head"><h2>{es ? 'El almacén de consumibles, en el celular.' : 'The consumables stockroom, on a phone.'}</h2><p>{es ? 'Toca un producto y escanea su QR con tu celular: se abre aquí mismo para darle salida o surtirlo.' : 'Tap a product and scan its QR with your phone: it opens right here to issue or restock it.'}</p></div><Inventario lang={lang}/></>}
    {project.id === 'csv' && <><div className="case-demo-head"><h2>{es ? 'Pruébalo con tu reporte.' : 'Try it with your report.'}</h2><p>{es ? 'CSV o Excel. Todo pasa en tu navegador.' : 'CSV or Excel. It all runs in your browser.'}</p></div><DataWorkbench lang={lang}/></>}
  </>;
 }
 
-function ProjectPage({ lang, project, projects }: { lang: Lang; project: Project; projects: Project[] }) {
- const es = lang === 'es';
- const next = projects[(projects.indexOf(project) + 1) % projects.length];
+function ProjectPage({ lang, project, next }: { lang: Lang; project: Project; next: { id: string; slug: string; title: string } }) {
+ const es = lang === 'es', app = `/proyectos/${project.slug}/app`, brand = BRANDS[project.id];
  useEffect(() => { const d = location.hash && document.getElementById(location.hash.slice(1)); if (d) d.scrollIntoView(); else scrollTo(0, 0); }, [project.id]);
+ const native = NATIVE[project.id];
  return <main id="main" data-c className={`case case-${project.id} project-${project.id}`} aria-label={project.title}>
   <div className="wrap">
    <a className="case-back" href="/#projects" data-title={es ? 'Proyectos' : 'Projects'}><ArrowLeft size={18}/>{es ? 'Todos los proyectos' : 'All projects'}</a>
    <header className="case-head" data-zone={project.title}>
     <div><span className="project-kind">{project.kind}{unfinished(project.status)}</span><h1>{project.title}</h1><p className="pitch">{project.pitch}</p><p>{project.desc}</p>
-     {project.metrics.length > 0 && <dl className="project-metrics case-metrics">{project.metrics.map(([value, label]) => <div key={value + label}><dt>{value}</dt><dd>{label}</dd></div>)}</dl>}
+     <Facts items={project.facts}/>
      <div className="tags">{project.tags.map(t => <span key={t}>{t}</span>)}</div>
-     {(!OTHER.includes(project.id) || project.id === 'spc') && !CLIENT.includes(project.id) ? <p className="web-note"><Globe size={17} aria-hidden="true"/>{es ? 'Versión web: adaptada para funcionar en el navegador.' : 'Web version: adapted to run in the browser.'}</p> : null}
-     {HAS_APP.includes(project.id) ? <a className="button primary case-action" href={`/proyectos/${project.slug}/app`} target="_blank" rel="noopener">{es ? 'Abrir la app' : 'Open the app'}<ArrowUpRight size={18}/></a> : project.link.startsWith('http') && <a className="button primary case-action" href={project.link} {...external(project.link)}>{project.action}<ArrowUpRight size={18}/></a>}
-     {NATIVE[project.id] && (NATIVE[project.id].href
-      ? <a className="native-note" href={NATIVE[project.id].href} {...external('https://github.com')}><strong>{es ? NATIVE[project.id].es : NATIVE[project.id].en}</strong><span>{es ? 'Descargar' : 'Download'}<ArrowUpRight size={14}/></span></a>
-      : <p className="native-note is-dev"><strong>{es ? NATIVE[project.id].es : NATIVE[project.id].en}</strong><span>{es ? 'En desarrollo' : 'In development'}</span></p>)}
-     {REPO[project.id] && <a className="inline-link case-code" href={`https://github.com/Brunich/${REPO[project.id]}`} {...external('https://github.com')}><GithubLogo size={20}/>{es ? 'Código en GitHub' : 'Code on GitHub'}<ArrowUpRight size={16}/></a>}
+     {/* Sólo SPC nació como app de escritorio; las demás ya eran web */}
+     {project.id === 'spc' && <p className="web-note">{es ? 'Versión web: adaptada de la app de escritorio para funcionar en el navegador.' : 'Web version: adapted from the desktop app to run in the browser.'}</p>}
+     {HAS_APP.includes(project.id) ? <a className="button primary case-action" href={app} data-title={brand.name}>{es ? 'Abrir la app' : 'Open the app'}<ArrowRight size={18}/></a> : project.link.startsWith('http') && <a className="button primary case-action" href={project.link} {...EXT}>{project.action}<Out es={es}/></a>}
+     {native && (native.href
+      ? <a className="native-note" href={native.href} {...EXT}><strong>{es ? native.es : native.en}</strong><span>{es ? 'Descargar' : 'Download'}<Out es={es} size={14}/></span></a>
+      : <p className="native-note is-dev"><strong>{es ? native.es : native.en}</strong><span>{es ? 'En desarrollo' : 'In development'}</span></p>)}
+     {REPO[project.id] && <a className="inline-link case-code" href={`https://github.com/Brunich/${REPO[project.id]}`} {...EXT}>{es ? 'Código en GitHub' : 'Code on GitHub'}<Out es={es} size={16}/></a>}
     </div>
     <div className={`case-visual media-${project.id}`} aria-hidden="true">{project.id === 'club' ? <NfcTap lang={lang}/> : <Media lang={lang} project={project}/>}</div>
    </header>
    <section className="how" data-zone={es ? 'Cómo funciona' : 'How it works'} aria-label={es ? 'Cómo funciona' : 'How it works'}><h2>{es ? 'Cómo funciona' : 'How it works'}</h2><ol style={{ '--n': project.how.length } as React.CSSProperties}>{project.how.map(([title, text], i) => <li key={title}><span>{String(i + 1).padStart(2, '0')}</span><strong>{title}</strong><p>{text}</p></li>)}</ol></section>
   </div>
   {HAS_APP.includes(project.id) && <section id="demo" className="case-launch wrap" data-zone={es ? 'Pruébalo' : 'Try it'} aria-label={es ? 'Pruébalo' : 'Try it'}>
-   <div><h2>{es ? 'Pruébalo' : 'Try it'}</h2><p>{es ? `Se abre en otra pestaña como ${BRANDS[project.id].name}, la app por su cuenta, con datos de ejemplo.` : `It opens in a new tab as ${BRANDS[project.id].name}, the app on its own, with sample data.`}</p></div>
-   <a className="button primary" href={`/proyectos/${project.slug}/app`} target="_blank" rel="noopener">{es ? 'Abrir la app' : 'Open the app'}<ArrowUpRight size={18}/></a>
+   <div><h2>{es ? 'Pruébalo' : 'Try it'}</h2><p>{es ? `Se abre ${brand.name}, la app sola${brand.real ? '' : ', con datos de ejemplo'}. Arriba tiene un enlace para volver a esta ficha.` : `${brand.name} opens, the app on its own${brand.real ? '' : ', with sample data'}. A link at the top brings you back to this page.`}</p></div>
+   <a className="button primary" href={app} data-title={brand.name}>{es ? 'Abrir la app' : 'Open the app'}<ArrowRight size={18}/></a>
   </section>}
   {(project.id === 'punto' || project.id === 'vibe') && <section id="demo" className="case-demo" data-zone={es ? 'Pruébalo' : 'Try it'} aria-label={es ? 'Pruébalo' : 'Try it'}><div className="wrap">
    {project.id === 'punto' && <PuntoDemo lang={lang} link={project.link}/>}
-   {project.id === 'vibe' && <div className="demo-vibe"><div className="case-demo-head"><h2>{es ? 'Pruébalo aquí mismo.' : 'Try it right here.'}</h2><p>{es ? 'Toca «Un RPG en Godot» o suelta la carpeta de tu proyecto. Todo corre en tu navegador.' : 'Tap “Un RPG en Godot” or drop your own project folder. Everything runs in your browser.'}</p></div><LiveOrShots probe={project.link} lang={lang} shots={[['/media/vibemap-mapa.webp', 1210, 350, es ? 'Mapa mental de VibeMap' : 'VibeMap mind map']]}><div className="case-browser"><span className="case-browser-bar"><i/><i/><i/><b>vibemap-brunich.vercel.app</b></span><iframe src={project.link} title={es ? 'VibeMap en vivo' : 'VibeMap live'} loading="lazy"/></div></LiveOrShots><p className="demo-vibe-links"><a className="inline-link" href={project.link} {...external(project.link)}>{es ? 'Abrir en otra pestaña' : 'Open in a new tab'}<ArrowUpRight size={18}/></a><a className="inline-link" href="https://github.com/Brunich/VibeMap" {...external('https://github.com/Brunich/VibeMap')}>{es ? 'Ver el código' : 'View the code'}<ArrowUpRight size={18}/></a></p></div>}
+   {project.id === 'vibe' && <div className="demo-vibe"><div className="case-demo-head"><h2>{es ? 'Pruébalo aquí mismo.' : 'Try it right here.'}</h2><p>{es ? 'Toca «Un RPG en Godot» o suelta la carpeta de tu proyecto. Todo corre en tu navegador.' : 'Tap “Un RPG en Godot” or drop your own project folder. Everything runs in your browser.'}</p></div><LiveOrShots probe={project.link} lang={lang} shots={[['/media/vibemap-mapa.webp', 1210, 350, es ? 'Mapa mental de VibeMap' : 'VibeMap mind map']]}><div className="case-browser"><span className="case-browser-bar"><i/><i/><i/><b>vibemap-brunich.vercel.app</b></span><iframe src={project.link} title={es ? 'VibeMap en vivo' : 'VibeMap live'} loading="lazy"/></div></LiveOrShots><p className="demo-vibe-links"><a className="inline-link" href={project.link} {...EXT}>{es ? 'Abrir en otra pestaña' : 'Open in a new tab'}<Out es={es}/></a><a className="inline-link" href="https://github.com/Brunich/VibeMap" {...EXT}>{es ? 'Ver el código' : 'View the code'}<Out es={es}/></a></p></div>}
   </div></section>}
-  {!OTHER.includes(project.id) && <aside className={`case-cta wrap project-${project.id}`} aria-label={es ? 'Contacto' : 'Contact'}><div><strong>{es ? '¿Te sirve para tu negocio?' : 'Useful for your business?'}</strong><span>{es ? 'Lo adapto a tus datos y te lo dejo funcionando.' : 'I adapt it to your data and leave it running.'}</span></div><a className="button primary" href={`mailto:${personal.email}?subject=${encodeURIComponent(project.title)}`}>{es ? 'Escríbeme' : 'Write to me'}<ArrowUpRight size={18}/></a></aside>}
+  {!OTHER.includes(project.id) && project.id !== 'casa' && <aside className={`case-cta wrap project-${project.id}`} aria-label={es ? 'Contacto' : 'Contact'}><div><strong>{es ? 'Se puede adaptar a los datos de tu negocio.' : 'It can be adapted to your business’s data.'}</strong><span>{es ? 'Escríbeme y vemos qué le hace falta.' : 'Write to me and we will see what it needs.'}</span></div><a className="button primary" href={`mailto:${personal.email}?subject=${encodeURIComponent(project.title)}`}>{es ? 'Escribir por correo' : 'Send an email'}<ArrowRight size={18}/></a></aside>}
   <nav data-c data-zone={es ? 'Siguiente' : 'Next'} className={`case-next wrap project-${next.id}`} aria-label={es ? 'Siguiente proyecto' : 'Next project'}><a href={`/proyectos/${next.slug}`} data-title={next.title}><span>{es ? 'Siguiente proyecto' : 'Next project'}</span><strong>{next.title}</strong><ArrowRight size={26}/></a></nav>
  </main>;
 }
@@ -309,7 +293,7 @@ function PuntoDemo({ lang, link }: { lang: Lang; link: string }) {
   <LiveOrShots probe={PUNTO_API} live={live} lang={lang} shots={[['/media/punto-u-mapa.webp', 780, 2000, es ? 'Mapa del campus con misiones' : 'Campus map with missions'], ['/media/punto-u.webp', 600, 1300, es ? 'Crear perfil' : 'Create a profile']]}><div className="case-phone"><iframe src={link} title={es ? 'Punto U en vivo' : 'Punto U live'}/></div></LiveOrShots>
   <div className="demo-punto-copy">{live === false
    ? <><h2>{es ? 'Así se ve la app.' : 'This is the app.'}</h2><p>{es ? 'El mapa del campus con las misiones abiertas y el registro con matrícula y facultad. La versión en vivo vuelve cuando su servidor esté arriba.' : 'The campus map with open missions and sign-up with student ID and school. The live version returns once its server is back up.'}</p></>
-   : <><h2>{es ? 'Pruébala aquí mismo.' : 'Try it right here.'}</h2><p>{es ? 'La app real, en vivo: crea tu perfil y publica una misión.' : 'The real app, live: create your profile and post a mission.'}</p><a className="inline-link" href={link} target="_blank" rel="noreferrer">{es ? 'Abrir en otra pestaña' : 'Open in a new tab'}<ArrowUpRight size={18}/></a></>}</div>
+   : <><h2>{es ? 'Pruébala aquí mismo.' : 'Try it right here.'}</h2><p>{es ? 'La app real, en vivo: crea tu perfil y publica una misión.' : 'The real app, live: create your profile and post a mission.'}</p><a className="inline-link" href={link} {...EXT}>{es ? 'Abrir en otra pestaña' : 'Open in a new tab'}<Out es={es}/></a></>}</div>
  </div>;
 }
 
@@ -322,13 +306,13 @@ function ClubReal({ lang }: { lang: Lang }) {
   <Qr text={demo} label={es ? 'QR para abrir la tarjeta de sellos' : 'QR to open the stamp card'}/>
   <div><span className="kicker">{es ? 'Pruébalo con tu celular' : 'Try it on your phone'}</span><h3>{es ? 'Escanéalo: es lo mismo que tocar el chip.' : 'Scan it: same as tapping the chip.'}</h3>
    <p>{es ? 'Se abre la tarjeta de sellos real con el sello de hoy. Vuelve mañana y suma otro; al llenarla, el premio.' : 'The real stamp card opens with today’s stamp. Come back tomorrow for another; fill it for the reward.'}</p>
-   <div className="club-real-links"><a className="button primary" href="/nfc" target="_blank" rel="noopener">{es ? 'Arma la de tu negocio' : 'Build one for your business'}<ArrowRight size={18}/></a><a className="inline-link" href={demo} target="_blank" rel="noreferrer">{es ? 'Abrirla aquí' : 'Open it here'}<ArrowUpRight size={18}/></a></div></div>
+   <div className="club-real-links"><a className="button primary" href="/nfc" data-title={es ? 'Tu tarjeta NFC' : 'Your NFC card'}>{es ? 'Arma la de tu negocio' : 'Build one for your business'}<ArrowRight size={18}/></a><a className="inline-link" href={demo} data-title={es ? 'Tarjeta de sellos' : 'Stamp card'}>{es ? 'Abrirla aquí' : 'Open it here'}<ArrowRight size={18}/></a></div></div>
  </div>
  <div className="club-real club-menu">
   <Qr text={menuDemo} label={es ? 'QR para abrir el menú de ejemplo' : 'QR to open the sample menu'}/>
   <div><span className="kicker">{es ? 'El mismo chip, el menú' : 'Same chip, the menu'}</span><h3>{es ? 'La carta en el celular y el pedido por WhatsApp.' : 'The menu on the phone, the order via WhatsApp.'}</h3>
    <p>{es ? 'El cliente ve platillos, precios y alérgenos, arma su pedido y lo manda con el número de mesa. El negocio arma su menú en un minuto y no paga servidor.' : 'The customer sees dishes, prices and allergens, builds an order and sends it with the table number. The business builds its menu in a minute, with no server to pay for.'}</p>
-   <div className="club-real-links"><a className="button primary" href="/nfc#menu" target="_blank" rel="noopener">{es ? 'Arma tu menú' : 'Build your menu'}<ArrowRight size={18}/></a><a className="inline-link" href={menuDemo} target="_blank" rel="noreferrer">{es ? 'Ver el menú de ejemplo' : 'See the sample menu'}<ArrowUpRight size={18}/></a></div></div>
+   <div className="club-real-links"><a className="button primary" href="/nfc#menu" data-title={es ? 'Tu menú' : 'Your menu'}>{es ? 'Arma tu menú' : 'Build your menu'}<ArrowRight size={18}/></a><a className="inline-link" href={menuDemo} data-title={es ? 'Menú de ejemplo' : 'Sample menu'}>{es ? 'Ver el menú de ejemplo' : 'See the sample menu'}<ArrowRight size={18}/></a></div></div>
  </div></>;
 }
 
@@ -386,15 +370,14 @@ const HAS_APP = ['club', 'csv', 'planta', 'spc', 'inventario', 'turno', 'agente'
 function Motion({ lang }: { lang: Lang }) {
  const es = lang === 'es';
  return <section id="motion" className="wrap section-space motion-section" data-zone="Motion">
-  <div className="section-heading" data-num="04"><div><span className="kicker">04 · Motion design</span><h2>{es ? 'También en movimiento.' : 'In motion, too.'}</h2><p>{es ? 'Videos cortos para presentar un producto, un proyecto o un juego. Cada cuadro sale de código, con la misma identidad que la web.' : 'Short videos to present a product, a project or a game. Every frame comes from code, with the same identity as the site.'}</p></div></div>
+  <div className="section-heading"><div><span className="kicker">03 · Motion design</span><h2>{es ? 'También en movimiento.' : 'In motion, too.'}</h2><p>{es ? 'Videos cortos para presentar un producto, un proyecto o un juego. Cada cuadro sale de código, con la misma identidad que la web.' : 'Short videos to present a product, a project or a game. Every frame comes from code, with the same identity as the site.'}</p></div></div>
   <div className="motion-grid">
    <figure className="motion-main"><video src="/media/reel.mp4" poster="/media/reel-poster.jpg" controls playsInline preload="none" width="1920" height="1080" aria-label={es ? 'Reel del portafolio' : 'Portfolio reel'}/><figcaption><strong>{es ? 'Reel del portafolio' : 'Portfolio reel'}</strong><span>50 s · 1080p · 60 fps</span></figcaption></figure>
-   <div className="motion-next"><span className="motion-tag">{es ? 'En preparación' : 'In the works'}</span><strong>{es ? 'Tráiler de IA Rogue' : 'IA Rogue trailer'}</strong><p>{es ? 'Un comercial corto de mi videojuego, en cuanto tenga las escenas.' : 'A short spot for my game, once the scenes are ready.'}</p></div>
   </div>
  </section>;
 }
 
 function Contact({ lang }: { lang: Lang }) {
  const c = copy[lang], es = lang === 'es';
- return <section id="contact" className="contact-section wrap" data-zone={es ? 'Contacto' : 'Contact'}><div className="section-heading" data-num="05"><div><span className="kicker">05 · {es ? 'Contacto' : 'Contact'}</span><h2>{es ? 'Hablemos de tu proyecto.' : 'Let’s talk about your project.'}</h2><p>{c.contactText}</p></div></div><div className="contact-links"><a href={`mailto:${personal.email}`}><EnvelopeSimple size={25}/><span>Email<small>{personal.email}</small></span><ArrowUpRight size={22}/></a><a href={personal.github} {...external(personal.github)}><GithubLogo size={25}/><span>GitHub<small>Brunich</small></span><ArrowUpRight size={22}/></a>{personal.linkedIn && <a href={personal.linkedIn} {...external(personal.linkedIn)}><LinkedinLogo size={25}/><span>LinkedIn<small>Bruno Salas</small></span><ArrowUpRight size={22}/></a>}<a href={`https://wa.me/${personal.phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer"><WhatsappLogo size={25}/><span>WhatsApp<small>{personal.phone}</small></span><ArrowUpRight size={22}/></a><a className="contact-about" href="/sobre-mi" data-title={es ? 'Sobre mí' : 'About me'}><MusicNotes size={25}/><span>{es ? 'Sobre mí' : 'About me'}<small>{es ? 'Música y viajes' : 'Music and travel'}</small></span><ArrowRight size={22}/></a></div></section>;
+ return <section id="contact" className="contact-section wrap" data-zone={es ? 'Contacto' : 'Contact'}><div className="section-heading"><div><span className="kicker">04 · {es ? 'Contacto' : 'Contact'}</span><h2>{es ? 'Busco prácticas y también tomo encargos.' : 'Looking for an internship, and open to projects.'}</h2><p>{c.contactText}</p></div></div><div className="contact-links"><a href={`mailto:${personal.email}`}><span>Email<small>{personal.email}</small></span><ArrowRight size={22}/></a><a href={personal.github} {...EXT}><span>GitHub<small>Brunich</small></span><Out es={es} size={22}/></a>{personal.linkedIn && <a href={personal.linkedIn} {...EXT}><span>LinkedIn<small>Bruno Salas</small></span><Out es={es} size={22}/></a>}<a href={`https://wa.me/${personal.phone.replace(/\D/g, '')}`} {...EXT}><span>WhatsApp<small>{personal.phone}</small></span><Out es={es} size={22}/></a><a className="contact-about" href="/sobre-mi" data-title={es ? 'Sobre mí' : 'About me'}><span>{es ? 'Sobre mí' : 'About me'}<small>{es ? 'Música y viajes' : 'Music and travel'}</small></span><ArrowRight size={22}/></a></div></section>;
 }

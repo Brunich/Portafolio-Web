@@ -21,7 +21,7 @@ export const copy = {
     skillsTitle:'Herramientas según el problema.',
     skillGroups:[['Web & producto','React · TypeScript · Vite · Node.js · Supabase'],['Datos & automatización','Python · Pandas · SQL · R · Excel'],['Gráficos & sistemas','Godot · GDScript · Shaders · Git']],
     languages:'Español nativo · Inglés fluido · Portugués competente',
-    contactTitle:'¿Qué construimos ahora?',contactText:'Una idea, una oportunidad o un problema interesante. Me gustaría conocerlo.',
+    contactTitle:'¿Qué construimos ahora?',contactText:'Estoy buscando prácticas profesionales. También hago páginas y herramientas para negocios: si tienes una vacante o algo que construir, escríbeme por correo o por WhatsApp.',
     mail:'Escríbeme', copyMail:'Copiar correo', copied:'Correo copiado', copyError:'No se pudo copiar. Puedes seleccionar el correo de abajo.',
     footer:'Diseñado para explorar. Construido para funcionar.', pause:'Pausar movimiento', play:'Activar movimiento', menu:'Abrir navegación', close:'Cerrar navegación',
     skip:'Ir al contenido', updated:'CV · septiembre 2026',
@@ -29,11 +29,6 @@ export const copy = {
       {year:'2026',role:'Diseño y soporte de páginas web',org:'Pequeñas empresas',text:'Web y app de La Casa del Ángel, residencia en Celaya: diseño, publicación y soporte.'},
       {year:'2024',role:'Tutoría de programación y bases de datos',org:'UANL',text:'Diagnóstico de errores, consultas SQL y apoyo en C, C# y JavaScript. Guías y demostraciones para explicar conceptos con claridad.'},
       {year:'2023',role:'Desarrollo de software y soporte de sistemas',org:'UANL · Asistente',text:'Validación de actualizaciones, reproducción de defectos y revisión de flujos de datos. Documentación para equipos técnicos.'}
-    ],
-    projects:[
-      {id:'rogue',title:'IA Rogue',type:'Mundos interactivos',description:'Un roguelike 3D donde una IA busca su libertad. Biomas procedurales, combate y una identidad visual propia.',tags:['Godot 4','GDScript','Shaders'],challenge:'Construir un mundo modular que combine exploración, combate y una dirección visual coherente.',contribution:'Trabajo en modelos 3D, shaders, biomas procedurales y organización de sistemas y clases. El proyecto sigue en desarrollo.',result:'El video corresponde a Aqua Stylized 3D, mi estudio independiente de agua en Godot. Ilustra mi trabajo con materiales; no es una captura de gameplay de IA Rogue. El repositorio del juego es privado.',link:'#lab',linkType:'lab',media:'aqua',status:'En desarrollo'},
-      {id:'punto',title:'Punto U',type:'Web + Android',description:'Estudiantes que publican favores y los cambian por dinero, sesiones de estudio u otro favor, en la web y Android.',tags:['React','Supabase','Capacitor'],challenge:'Llevar una experiencia universitaria desde la interfaz hasta una aplicación conectada a una base de datos y disponible en móvil.',contribution:'Interfaz con React y Vite, integración con Supabase y empaquetado Android con Capacitor. Flujo de perfiles universitarios y datos en la nube.',result:'Puedes abrir la aplicación publicada y explorar su acceso. La imagen es una captura real de la pantalla de perfil, sin datos personales.',link:'https://punto-u-app.vercel.app',linkType:'visit',media:'punto',status:'Web publicada'},
-      {id:'cel',title:'Faceted Cel Lighting',type:'Materiales & iluminación',description:'De superficies suaves a facetas definidas. Luz por bandas y bordes que cambian el carácter de una escena.',tags:['GLSL / Godot','Cel shading','3D'],challenge:'Conseguir una iluminación estilizada que conserve una lectura clara de las formas.',contribution:'Material con normales por faceta, bandas de iluminación, tonos de sombra y realce de silueta. Escena de demostración en Godot.',result:'Video original del material en una escena de ruinas. El laboratorio permite comparar iluminación continua y estilizada sobre una misma geometría.',link:'#lab',linkType:'lab',media:'cel',status:'Demo visual'}
     ]
   },
   en: {
@@ -52,17 +47,12 @@ export const copy = {
     education:'Software Engineering',university:'Universidad Autónoma de Nuevo León',timelineTitle:'Experience & education',learning:'Additional education',certificate:'View certificate',
     skillsTitle:'The right tools for the problem.',skillGroups:[['Web & product','React · TypeScript · Vite · Node.js · Supabase'],['Data & automation','Python · Pandas · SQL · R · Excel'],['Graphics & systems','Godot · GDScript · Shaders · Git']],
     languages:'Native Spanish · Fluent English · Proficient Portuguese',
-    contactTitle:'What should we build next?',contactText:'An idea, an opportunity, or an interesting problem. I’d love to hear about it.',
+    contactTitle:'What should we build next?',contactText:'I am looking for an internship. I also build websites and tools for businesses: if you have an opening or something to build, write to me by email or WhatsApp.',
     mail:'Email me',copyMail:'Copy email',copied:'Email copied',copyError:'Could not copy. You can select the email below.',footer:'Designed to explore. Built to work.',pause:'Pause motion',play:'Enable motion',menu:'Open navigation',close:'Close navigation',skip:'Skip to content',updated:'CV · September 2026',
     experience:[
       {year:'2026',role:'Website design & support',org:'Small businesses',text:'Website and app for La Casa del Ángel, a residence in Celaya: design, launch and support.'},
       {year:'2024',role:'Programming & database tutoring',org:'UANL',text:'Error diagnosis, SQL queries and support in C, C# and JavaScript. Guides and demonstrations to explain concepts clearly.'},
       {year:'2023',role:'Software development & systems support',org:'UANL · Assistant',text:'Update validation, defect reproduction and data-flow reviews. Process documentation for technical teams.'}
-    ],
-    projects:[
-      {id:'rogue',title:'IA Rogue',type:'Interactive worlds',description:'A 3D roguelike about an AI seeking freedom. Procedural biomes, combat and a distinctive visual identity.',tags:['Godot 4','GDScript','Shaders'],challenge:'Build a modular world that brings exploration, combat and a coherent visual direction together.',contribution:'Work on 3D models, shaders, procedural biomes and the organization of systems and classes. The project is in active development.',result:'The video is from Aqua Stylized 3D, my independent water study in Godot. It illustrates my material work, not IA Rogue gameplay. The game repository is private.',link:'#lab',linkType:'lab',media:'aqua',status:'In development'},
-      {id:'punto',title:'Punto U',type:'Web + Android',description:'Students post favors and trade them for money, study sessions or another favor, on the web and Android.',tags:['React','Supabase','Capacitor'],challenge:'Take a university experience from interface design to a database-backed application available on mobile.',contribution:'React and Vite interface, Supabase integration and Android packaging with Capacitor. University profiles and cloud data.',result:'Open the published app and explore its entry flow. The image is a real capture of the profile screen without personal information.',link:'https://punto-u-app.vercel.app',linkType:'visit',media:'punto',status:'Published web app'},
-      {id:'cel',title:'Faceted Cel Lighting',type:'Materials & lighting',description:'From smooth surfaces to crisp facets. Light bands and edges that change the character of a scene.',tags:['GLSL / Godot','Cel shading','3D'],challenge:'Create stylized lighting that keeps shapes easy to read.',contribution:'A material with faceted normals, lighting bands, tinted shadows and silhouette highlights. Demonstration scene in Godot.',result:'Original video of the material in a ruins scene. The laboratory compares continuous and stylized lighting on the same geometry.',link:'#lab',linkType:'lab',media:'cel',status:'Visual demo'}
     ]
   }
 };

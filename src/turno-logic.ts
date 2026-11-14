@@ -10,11 +10,11 @@ export const SLA: Record<Sev, number> = { 'Crítica': 2, 'Mayor': 8, 'Menor': 24
 export const H = 60 * 60 * 1000;
 
 export const sample = (now = Date.now()): Incident[] => [
- { id: 'INC-232', line: 'L1', lot: '4468', defect: 'Torque fuera de rango en rueda', sev: 'Crítica', status: 'doing', owner: 'R. Garza', action: 'Recalibrar la llave 3', photo: '', at: now - 2.6 * H },
- { id: 'INC-231', line: 'L2', lot: '4471', defect: 'Burbuja en pintura de cofre', sev: 'Mayor', status: 'open', owner: '', action: '', photo: '', at: now - 1.4 * H },
- { id: 'INC-229', line: 'L3', lot: '4459', defect: 'Fuga en sello de parabrisas', sev: 'Mayor', status: 'doing', owner: 'L. Treviño', action: 'Cambiar lote de sellador', photo: 'demo', at: now - 5 * H },
- { id: 'INC-226', line: 'L1', lot: '4450', defect: 'Rayón en puerta trasera', sev: 'Menor', status: 'closed', owner: 'A. Cantú', action: 'Pulido y reinspección', photo: 'demo', at: now - 6.5 * H, closedAt: now - 4.9 * H },
- { id: 'INC-221', line: 'L2', lot: '4437', defect: 'Burbuja en pintura del cofre', sev: 'Mayor', status: 'closed', owner: 'M. Salinas', action: 'Repintado y limpieza de pistola', photo: 'demo', at: now - 30 * H, closedAt: now - 25 * H },
+ { id: 'INC-232', line: 'L1', lot: '4420', defect: 'Torque fuera de rango en rueda', sev: 'Crítica', status: 'doing', owner: 'R. Garza', action: 'Recalibrar la llave 3', photo: '', at: now - 2.6 * H },
+ { id: 'INC-231', line: 'L2', lot: '4424', defect: 'Burbuja en pintura de cofre', sev: 'Mayor', status: 'open', owner: '', action: '', photo: '', at: now - 1.4 * H },
+ { id: 'INC-229', line: 'L3', lot: '4422', defect: 'Fuga en sello de parabrisas', sev: 'Mayor', status: 'doing', owner: 'L. Treviño', action: 'Cambiar lote de sellador', photo: 'demo', at: now - 5 * H },
+ { id: 'INC-226', line: 'L1', lot: '4411', defect: 'Rayón en puerta trasera', sev: 'Menor', status: 'closed', owner: 'A. Cantú', action: 'Pulido y reinspección', photo: 'demo', at: now - 6.5 * H, closedAt: now - 4.9 * H },
+ { id: 'INC-221', line: 'L2', lot: '4412', defect: 'Burbuja en pintura del cofre', sev: 'Mayor', status: 'closed', owner: 'M. Salinas', action: 'Repintado y limpieza de pistola', photo: 'demo', at: now - 30 * H, closedAt: now - 25 * H },
 ];
 
 // Líneas y personas de la planta: cada quien las cambia por las suyas.

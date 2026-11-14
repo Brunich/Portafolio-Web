@@ -48,5 +48,16 @@ Videos y fotos personales de Bruno (WhatsApp, 28-09-2026). `bohemian-rhapsody.mp
 ## La Casa del Ángel
 Capturas de la página pública https://la-casa-del-angel.vercel.app (12-10-2026): página completa recortada en `casa-angel-web-recorrido.webp` (escritorio) y `casa-angel-movil-recorrido.webp` (celular).
 
+## IA Rogue, ficha propia (`rogue/`, 13-11-2026)
+Capturas reales del juego en `IA Rogue DEFINITIVE/tmp/portafolio_v3/` (2560×1440 PNG, sin HUD ni retoque). Sólo se escalan a 1600×900 y 800×450 (Lanczos, sin recorte: se conserva el 16:9) y se guardan en WebP (calidad 84 y 80) y AVIF (calidad 62) con Pillow. No se tocó nada dentro de la carpeta del juego.
+- templo-tarde-alto: templo_tarde_alto.png (portada de la ficha y de la portada)
+- templo-tarde-agua-baja: templo_tarde_agua_baja.png
+- pueblo-dia-calle-r4: pueblo_dia_calle_r4.png
+- cementerio-tarde-oeste-bajo: cementerio_tarde_oeste_bajo.png
+- costa-tarde-mirador: costa_tarde_mirador.png
+- portal-cerca-tarde: portal_transitdoorreturn_cerca_tarde.png
+- agua-tarde-cascada-horizonte / agua-tarde-cascada-epica / agua-dia-templo-hombro: las tres cámaras sobre la misma agua.
+Quedan fuera las demás de la carpeta (variantes de día, `descartes_*` y `contacto.png`).
+
 ## Retrato
 12-10-2026: en bruno-retrato se reconstruyó con Codex sólo el fondo izquierdo (la mancha donde se difuminó a otra persona). La cara, los lentes y la ropa quedaron idénticos al recorte anterior (comparado píxel a píxel). Se sirve en AVIF y WebP, con JPG de respaldo.

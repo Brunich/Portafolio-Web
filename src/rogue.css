@@ -1,0 +1,44 @@
+/* IA Rogue: las capturas conservan su color; el marco es tinta y el pie va aparte, nunca encima de la foto. */
+.rg-fig{margin:0;border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden;background:var(--surface)}
+.rg-fig picture{display:block}
+.rg-fig img{display:block;width:100%;height:auto;aspect-ratio:16/9;background:#171815}
+.rg-cap{display:flex;flex-wrap:wrap;padding:8px 12px;border-top:1px solid var(--line-strong);font:500 12px/1.4 var(--mono);color:var(--muted)}
+.rg-cap span+span::before{content:'/';padding-inline:.6em;color:var(--line)}
+.rg-cap span:first-child{color:var(--text)}
+
+/* Ficha */
+.rg-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:clamp(24px,5vw,72px);margin-top:16px;padding:24px 0 32px;border-top:1px solid var(--line-strong)}
+.rg-head h1{margin-top:14px;font-size:clamp(44px,5.4vw,84px);line-height:1;font-weight:650;font-stretch:115%;letter-spacing:-.025em}
+.rg-head .pitch{margin-top:6px;font-size:21px}
+.rg-head p:not(.pitch):not(.facts){max-width:62ch;margin-top:14px;font-size:17px;color:var(--muted)}
+.rg-cover{margin-bottom:clamp(48px,6vw,88px)}
+.rg-section{padding-bottom:clamp(48px,6vw,88px)}
+.rg-section-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:8px clamp(24px,5vw,72px);align-items:baseline;margin-bottom:20px;padding-top:14px;border-top:1px solid var(--line-strong)}
+.rg-section-head h2{font-size:clamp(26px,2.6vw,36px);line-height:1.08;font-weight:620;font-stretch:112%}
+.rg-section-head p{max-width:60ch;color:var(--muted)}
+.rg-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.rg-grid.rg-three{grid-template-columns:repeat(3,minmax(0,1fr))}
+/* Con cinco lugares, el pueblo abre la serie a todo el ancho */
+.rg-grid:not(.rg-three)>.rg-fig:first-child:nth-last-child(odd){grid-column:1/-1}
+.rg-more{margin:0 0 8px}
+
+/* Bloque C de la portada: portada a la izquierda, texto y miniaturas a la derecha */
+.gd-feature{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(0,1fr);gap:16px clamp(24px,3.5vw,48px);align-items:start}
+.gd-cover{display:block}
+.gd-cover:hover .rg-cap span:first-child{color:var(--accent)}
+.gd-copy{display:grid;align-content:start;gap:0;padding-top:12px;border-top:1px solid var(--line-strong)}
+.gd-copy h3{margin-top:14px;font-size:clamp(30px,3.2vw,46px);line-height:1.04;font-weight:620;font-stretch:115%;letter-spacing:-.02em}
+.gd-copy>p:not(.pitch):not(.facts){margin-top:12px;font-size:15.5px;color:var(--muted)}
+.gd-copy .inline-link{justify-self:start;margin-top:16px}
+.gd-thumbs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:18px}
+.gd-thumbs a{display:block}
+.gd-thumbs .rg-cap{padding:5px 8px;font-size:11px}
+.gd-thumbs .rg-cap span:not(:first-child){display:none}
+.gd-thumbs a:hover .rg-cap span{color:var(--accent)}
+
+/* El templo de noche con y sin pixel art: misma toma, mismo instante */
+.gd-pixel{position:relative}
+.gd-pixel .pano-pixel{top:12px;right:12px}
+
+@media(max-width:980px){.gd-feature{grid-template-columns:1fr}.rg-head,.rg-section-head{grid-template-columns:1fr}}
+@media(max-width:760px){.rg-grid,.rg-grid.rg-three{grid-template-columns:1fr}.rg-head .pitch{font-size:19px}.rg-head p:not(.pitch):not(.facts){font-size:16px}}
