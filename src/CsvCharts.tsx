@@ -18,7 +18,7 @@ type Ink = { bg: string; text: string; muted: string; line: string; accent: stri
 const norm = (c: string, fb: string) => { try { const x = document.createElement('canvas').getContext('2d')!; x.fillStyle = '#000'; x.fillStyle = c; return x.fillStyle as string; } catch { return fb; } };
 function readInk(): Ink {
  const cs = getComputedStyle(document.documentElement), g = (n: string, fb: string) => norm(cs.getPropertyValue(n).trim() || fb, fb);
- return { bg: g('--surface', '#f6f4ee'), text: g('--text', '#1c1d1a'), muted: g('--muted', '#5d5f58'), line: g('--line', '#cdc8bb'), accent: g('--accent', '#c4461b') };
+ return { bg: g('--surface', '#f6f4ee'), text: g('--text', '#1c1d1a'), muted: g('--muted', '#5d5f58'), line: g('--line', '#cdc8bb'), accent: g('--accent', '#1d5a6e') };
 }
 const hex = (c: string): [number, number, number] => { const m = /^#?([0-9a-f]{6})/i.exec(c); const n = m ? parseInt(m[1], 16) : 0; return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
 const mix = (a: string, b: string, t: number) => { const x = hex(a), y = hex(b); return '#' + x.map((v, i) => Math.round(v + (y[i] - v) * t).toString(16).padStart(2, '0')).join(''); };

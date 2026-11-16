@@ -153,6 +153,21 @@ html[data-motion=paused] .ld-preview *{animation-play-state:paused!important}
 .ld-preview-fit .ld-bubble p{font-size:max(13px,min(2.8cqi,17px))}
 .ld-preview-fit .ld-preview-btn{font-size:max(12.5px,min(2.6cqi,16px))}
 .ld-preview-fit .ld-preview-chip{width:max(52px,8cqi);height:max(52px,8cqi);font-size:max(13px,2cqi)}
+/* Las envolturas no cuentan hasta que el marco es alto; así 1366 y el celular quedan como estaban */
+.ldp-wallet,.ldp-chat{display:contents}
+.ldp-where,.ld-preview .ld-bubble time{display:none}
+@container (min-height:680px) and (min-width:520px){
+ .ld-preview-fit .ld-preview{justify-content:center;gap:min(6cqb,48px)}
+ .ldp-wallet,.ldp-chat{display:grid;gap:10px;width:100%}
+ .ldp-wallet{max-width:min(78cqi,62cqb,520px)}
+ .ldp-wallet .ld-pass{max-width:none}
+ .ldp-chat{max-width:min(70cqi,460px);margin-left:min(28%,160px);animation:ld-pop 8s infinite both}
+ .ldp-chat .ld-bubble{max-width:none;margin:0;animation:none}
+ .ldp-where{display:block;font:500 12px/1 var(--mono,'JetBrains Mono Variable',monospace);color:var(--p-soft)}
+ .ld-preview .ld-bubble time{display:block;margin-top:4px;text-align:right;font:500 11px var(--mono,'JetBrains Mono Variable',monospace);color:var(--p-soft)}
+}
+html[data-motion=paused] .ldp-chat{animation-play-state:paused!important}
+@media(prefers-reduced-motion:reduce){.ldp-chat{animation:none!important;opacity:1}}
 @media(max-width:600px){.ld-preview{min-height:0;gap:10px;padding:16px}.ld-preview-chip{display:none}.ld-preview .ld-stamps{grid-template-columns:repeat(8,1fr);gap:5px;margin:12px 0 2px}.ld-preview .ld-stamps span{border-width:1.5px}.ld-preview .ld-bubble{margin-left:0;max-width:92%}.ld-preview .ld-bubble p{font-size:11.5px}}
 @media(prefers-reduced-motion:reduce){.ld-preview *{animation:none!important}.ld-preview .ld-stamps span.got{background:var(--p-text);border:2px solid var(--p-text)}.ld-preview .ld-bubble,.ld-preview-foot b{opacity:1}}
 

@@ -1,7 +1,7 @@
 /* Las demos de fábrica comparten la hoja de proceso del sitio: leen los tokens globales y no redefinen colores por app. */
 /* Sellito (club) es un producto de cliente con marca propia y conserva su paleta. */
 html.is-app body::before{display:none}
-.ax{--ax-r:var(--radius,3px);--ax-body:var(--font,'Archivo Variable',sans-serif);--display:var(--font,'Archivo Variable',sans-serif);
+.ax{--ax-r:var(--radius,3px);--ax-body:var(--font,'DM Sans Variable',sans-serif);--display:var(--font,'DM Sans Variable',sans-serif);
  min-height:100vh;display:flex;flex-direction:column;background:var(--bg,#efece4);color:var(--text,#1c1d1a);font-family:var(--ax-body);color-scheme:light dark}
 .ax ::selection{background:var(--text,#1c1d1a);color:var(--bg,#efece4)}
 .ax-wrap{width:min(1180px,calc(100% - 32px));margin-inline:auto}
@@ -11,7 +11,7 @@ html.is-app body::before{display:none}
 .ax-back{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding-right:12px;margin-right:2px;border-right:1px solid var(--line,#cdc8bb);color:var(--text,#1c1d1a);font:600 12px var(--mono,'JetBrains Mono Variable',monospace);text-transform:uppercase;letter-spacing:.04em;text-decoration:none;flex:none}
 .ax-back:hover span{text-decoration:underline;text-underline-offset:3px}
 .ax-name{display:flex;flex-direction:column;line-height:1.15;min-width:0}
-.ax-name strong{font-family:var(--font,'Archivo Variable',sans-serif);font-size:18px;font-weight:700;letter-spacing:0}
+.ax-name strong{font-family:var(--font,'DM Sans Variable',sans-serif);font-size:18px;font-weight:700;letter-spacing:0}
 .ax-name small{font-family:var(--mono,'JetBrains Mono Variable',monospace);font-size:11.5px;color:var(--muted,#5d5f58);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ax-badge{margin-left:auto;font-family:var(--mono,'JetBrains Mono Variable',monospace);font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted,#5d5f58);border:1px solid var(--line,#cdc8bb);border-radius:var(--ax-r);padding:4px 10px;white-space:nowrap}
 .ax-lang{display:flex}
@@ -20,7 +20,7 @@ html.is-app body::before{display:none}
 .ax-main{flex:1;padding-bottom:40px}
 .ax-title{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
 .ax .ax-stage{background:none;border:0;padding-top:30px}
-.ax .case-demo-head h2{font-family:var(--font,'Archivo Variable',sans-serif)}
+.ax .case-demo-head h2{font-family:var(--font,'DM Sans Variable',sans-serif)}
 .ax-foot{border-top:1px solid var(--line,#cdc8bb);padding-block:20px 28px;font-size:13px;color:var(--muted,#5d5f58)}
 .ax-foot .ax-wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 20px}
 .ax a:focus-visible,.ax button:focus-visible{outline:2px solid var(--text,#1c1d1a);outline-offset:3px}

@@ -1,9 +1,9 @@
 /* Estante (inventario con la cámara): almacén de consumibles de la planta, en formato de lista de existencias */
 .inv{display:grid;gap:18px;padding:clamp(16px,3vw,28px);border-radius:var(--radius,3px);background:var(--surface,#f6f4ee);border:1px solid var(--line,#cdc8bb)}
-.inv button,.inv-photo{min-height:40px;padding:8px 14px;border-radius:var(--radius,3px);border:1px solid var(--line,#cdc8bb);background:var(--surface-2,#e6e2d7);color:var(--text,#1c1d1a);font:600 13.5px var(--font,'Archivo Variable',sans-serif);cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:border-color .2s,background .2s}
+.inv button,.inv-photo{min-height:40px;padding:8px 14px;border-radius:var(--radius,3px);border:1px solid var(--line,#cdc8bb);background:var(--surface-2,#e6e2d7);color:var(--text,#1c1d1a);font:600 13.5px var(--font,'DM Sans Variable',sans-serif);cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:border-color .2s,background .2s}
 .inv button:hover,.inv-photo:hover{border-color:var(--line-strong,#1c1d1a)}
 .inv button:disabled{opacity:.5;cursor:default}
-.inv input{min-height:40px;border:1px solid var(--line,#cdc8bb);border-radius:var(--radius,3px);background:var(--surface,#f6f4ee);color:var(--text,#1c1d1a);padding:8px 12px;font:500 14px var(--font,'Archivo Variable',sans-serif)}
+.inv input{min-height:40px;border:1px solid var(--line,#cdc8bb);border-radius:var(--radius,3px);background:var(--surface,#f6f4ee);color:var(--text,#1c1d1a);padding:8px 12px;font:500 14px var(--font,'DM Sans Variable',sans-serif)}
 .inv-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:0}
 .inv-kpis div{padding:4px 0 4px 14px;border-left:2px solid var(--line-strong,#1c1d1a)}
 .inv-kpis dt{font-family:var(--mono,'JetBrains Mono Variable',monospace);font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted,#5d5f58)}
@@ -20,7 +20,7 @@
 .inv-video.on video{opacity:1}
 .inv-idle{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:8px;text-align:center;color:var(--muted,#5d5f58);padding:20px;font-size:13.5px}
 .inv-idle p{margin:0}
-.inv-laser{position:absolute;left:10%;right:10%;top:50%;height:2px;background:var(--accent,#c4461b);animation:inv-laser 2.2s ease-in-out infinite}
+.inv-laser{position:absolute;left:10%;right:10%;top:50%;height:2px;background:var(--accent,#1d5a6e);animation:inv-laser 2.2s ease-in-out infinite}
 @keyframes inv-laser{0%,100%{transform:translateY(-38px)}50%{transform:translateY(38px)}}
 .inv-flash{position:absolute;left:12px;right:12px;bottom:12px;padding:10px 14px;border-radius:var(--radius,3px);background:var(--ok,#3d7a4b);color:var(--bg,#efece4);font-weight:700;font-size:14px;animation:inv-flash 2.4s ease both}
 .inv-flash.bad{background:var(--bad,#a8322a);color:var(--bg,#efece4)}
@@ -29,7 +29,7 @@
 .inv-manual{display:flex;gap:8px}.inv-manual input{flex:1;min-width:0}
 .inv-hint{margin:0;font-size:12.5px;color:var(--muted,#5d5f58)}
 .inv-err{margin:0;font-size:13px;color:var(--bad,#a8322a)}
-.inv-new{display:grid;gap:8px;padding:12px;border-radius:var(--radius,3px);border:1px solid var(--accent,#c4461b);background:var(--surface-2,#e6e2d7);animation:inv-in .3s ease both}
+.inv-new{display:grid;gap:8px;padding:12px;border-radius:var(--radius,3px);border:1px solid var(--accent,#1d5a6e);background:var(--surface-2,#e6e2d7);animation:inv-in .3s ease both}
 .inv-new strong{font-size:14px}.inv-new code{font-size:12.5px;color:var(--text,#1c1d1a)}.inv-new small{color:var(--muted,#5d5f58);font-weight:400}
 .inv-new div{display:flex;gap:8px}
 .inv-log{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:13px}
@@ -81,10 +81,13 @@ html[data-motion=paused] .inv *{animation:none!important}
 }
 
 /* Vista previa: un celular escanea y el número sube */
-.ivp{height:100%;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:clamp(16px,4%,40px);padding:clamp(20px,5%,44px);background:var(--surface-2,#e6e2d7)}
+.ivp{box-sizing:border-box;height:100%;padding:clamp(20px,5%,44px);background:var(--surface-2,#e6e2d7)}
+.ivp-grid{box-sizing:border-box;height:100%;display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"phone list";align-items:center;gap:clamp(16px,4%,40px)}
+.ivp-phone{grid-area:phone}.ivp-list{grid-area:list}
+.ivp-modes,.ivp-order{display:none}
 .ivp-phone{position:relative;width:clamp(110px,20vw,160px);aspect-ratio:9/17;border-radius:var(--radius,3px);border:5px solid var(--line,#cdc8bb);background:var(--surface,#f6f4ee);overflow:hidden;box-shadow:none}
 .ivp-phone svg{position:absolute;left:12%;right:12%;top:30%;width:76%;height:auto;background:#fff;border-radius:var(--radius,3px);padding:4px}
-.ivp-phone i{position:absolute;left:8%;right:8%;top:42%;height:2px;background:var(--accent,#c4461b);animation:inv-laser 2.2s ease-in-out infinite}
+.ivp-phone i{position:absolute;left:8%;right:8%;top:42%;height:2px;background:var(--accent,#1d5a6e);animation:inv-laser 2.2s ease-in-out infinite}
 .ivp-phone em{position:absolute;left:8px;right:8px;bottom:10px;padding:6px 8px;border-radius:var(--radius,3px);background:var(--ok,#3d7a4b);color:var(--bg,#efece4);font:700 11px var(--mono,'JetBrains Mono Variable',monospace);font-style:normal;animation:ivp-pop 4s ease infinite}
 .ivp-list{display:grid;gap:8px}
 .ivp-list div{display:grid;grid-template-columns:minmax(0,1fr) 46px;gap:10px;align-items:center;padding:8px 12px;border-radius:var(--radius,3px);border:1px solid var(--line,#cdc8bb);background:var(--surface,#f6f4ee);font-size:13px}
@@ -107,11 +110,32 @@ html[data-motion=paused] .ivp *{animation-play-state:paused!important}
 .ivp-list b small{font-size:max(9.5px,min(1.6cqi,11.5px))}
 .ivp-list>small{font-size:max(11px,min(1.8cqi,13px))}
 @container (max-height:420px){.ivp-list div:nth-of-type(n+5){display:none}}
-@media(max-width:600px){.ivp{padding:14px;gap:12px}.ivp-phone{width:92px}.ivp-list{gap:6px}.ivp-list div{padding:6px 10px;font-size:12px}.ivp-list div:nth-of-type(4){display:none}.ivp-list b{font-size:16px}}
+/* Marco alto (1440×900 y mayores): arriba el modo en que se escanea y abajo el pedido armado en lugar del aviso */
+@container (min-height:600px) and (min-width:480px){
+ .ivp-grid{grid-template-rows:auto minmax(0,1fr) auto;grid-template-areas:"modes modes" "phone list" "order order";row-gap:max(16px,2.6cqb)}
+ .ivp-modes{grid-area:modes;display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line,#cdc8bb);border-radius:var(--radius,3px);background:var(--surface,#f6f4ee);overflow:hidden}
+ .ivp-modes span{padding:11px 8px;text-align:center;font-weight:600;font-size:14px;color:var(--muted,#5d5f58)}
+ .ivp-modes span+span{border-left:1px solid var(--line,#cdc8bb)}
+ .ivp-modes .on{background:var(--ok,#3d7a4b);color:var(--bg,#efece4)}
+ .ivp-list>small{display:none}
+ .ivp-list div{padding-block:12px}
+ /* Celular un poco más angosto para que los nombres largos quepan en un renglón */
+ .ivp-phone{width:min(38cqi,260px)}
+ .ivp-phone em{text-wrap:balance}
+ .ivp-order{grid-area:order;display:grid;gap:10px;padding:14px 16px;border:1px solid var(--line-strong,#1c1d1a);border-radius:var(--radius,3px);background:var(--surface,#f6f4ee)}
+ .ivp-order p{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin:0;padding-bottom:8px;border-bottom:1px solid var(--line,#cdc8bb)}
+ .ivp-order strong{font-size:15px}
+ .ivp-order p span{font:500 11.5px var(--mono,'JetBrains Mono Variable',monospace);color:var(--muted,#5d5f58)}
+ .ivp-order ul{display:grid;grid-template-columns:1fr 1fr;gap:6px 28px;margin:0;padding:0;list-style:none}
+ .ivp-order li{display:flex;justify-content:space-between;gap:10px;font-size:13.5px}
+ .ivp-order li span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .ivp-order li b{font:700 13.5px var(--mono,'JetBrains Mono Variable',monospace)}
+}
+@media(max-width:600px){.ivp{padding:14px}.ivp-grid{gap:12px}.ivp-phone{width:92px}.ivp-list{gap:6px}.ivp-list div{padding:6px 10px;font-size:12px}.ivp-list div:nth-of-type(4){display:none}.ivp-list b{font-size:16px}}
 /* Buscar, abrir un producto (nombre, historial, borrar) y deshacer */
 .inv-find{display:flex;align-items:center;gap:8px;padding:0 12px;min-height:44px;border-radius:var(--radius,3px);background:var(--surface,#f6f4ee);border:1px solid var(--line,#cdc8bb);color:var(--muted,#5d5f58)}
 .inv-find:focus-within{border-color:var(--text,#1c1d1a)}
-.inv-find input{flex:1;min-width:0;min-height:42px;border:0;background:transparent;color:var(--text,#1c1d1a);font:500 14px var(--font,'Archivo Variable',sans-serif);outline:none}
+.inv-find input{flex:1;min-width:0;min-height:42px;border:0;background:transparent;color:var(--text,#1c1d1a);font:500 14px var(--font,'DM Sans Variable',sans-serif);outline:none}
 .inv-undo{margin:0;display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:var(--radius,3px);background:var(--surface-2,#e6e2d7);border:1px solid var(--line,#cdc8bb);font-size:13.5px}
 .inv-name{display:block;min-width:0;min-height:44px;padding:0;border:0;background:none;color:inherit;text-align:left;cursor:pointer}
 .inv-name strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -119,9 +143,9 @@ html[data-motion=paused] .ivp *{animation-play-state:paused!important}
 .inv-products li.open{background:var(--surface-2,#e6e2d7);border-color:var(--line-strong,#1c1d1a)}
 .inv-detail{grid-column:1/-1;display:grid;gap:10px;padding-top:8px;border-top:1px solid var(--line,#cdc8bb)}
 .inv-detail label{display:grid;gap:4px;font-size:12px;color:var(--muted,#5d5f58)}
-.inv-detail label input{min-height:44px;padding:8px 12px;border-radius:var(--radius,3px);border:1px solid var(--line,#cdc8bb);background:var(--surface,#f6f4ee);color:var(--text,#1c1d1a);font:500 14px var(--font,'Archivo Variable',sans-serif)}
+.inv-detail label input{min-height:44px;padding:8px 12px;border-radius:var(--radius,3px);border:1px solid var(--line,#cdc8bb);background:var(--surface,#f6f4ee);color:var(--text,#1c1d1a);font:500 14px var(--font,'DM Sans Variable',sans-serif)}
 .inv-kind{margin:0;font:600 11px var(--mono,'JetBrains Mono Variable',monospace);letter-spacing:.06em;text-transform:uppercase;color:var(--text,#1c1d1a)}
-.inv-delete{justify-self:start;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:8px 14px;border-radius:var(--radius,3px);border:1px solid color-mix(in srgb,var(--bad,#a8322a) 33.3%,transparent);background:transparent;color:var(--bad,#a8322a);font:600 13px var(--font,'Archivo Variable',sans-serif);cursor:pointer}
+.inv-delete{justify-self:start;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:8px 14px;border-radius:var(--radius,3px);border:1px solid color-mix(in srgb,var(--bad,#a8322a) 33.3%,transparent);background:transparent;color:var(--bad,#a8322a);font:600 13px var(--font,'DM Sans Variable',sans-serif);cursor:pointer}
 .inv-hint .pl-link{padding-inline:2px;min-height:0;display:inline;color:var(--text,#1c1d1a);text-decoration:underline}
 @media(min-width:981px){.inv-scan{position:sticky;top:96px}}
 .inv .inv-name{border:0;background:none;padding:0;border-radius:0;box-shadow:none;font:inherit;justify-content:flex-start}
@@ -132,13 +156,13 @@ html[data-motion=paused] .ivp *{animation-play-state:paused!important}
 .inv-kpis dt svg{vertical-align:-2px;margin-right:4px}
 
 /* Lo que se escaneó con el QR va arriba, con botones grandes para el pulgar */
-.inv-picked{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px 20px;padding:18px 20px;border-radius:var(--radius,3px);background:var(--surface-2,#e6e2d7);border:1.5px solid var(--accent,#c4461b);animation:inv-in .3s ease-out}
+.inv-picked{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px 20px;padding:18px 20px;border-radius:var(--radius,3px);background:var(--surface-2,#e6e2d7);border:1.5px solid var(--accent,#1d5a6e);animation:inv-in .3s ease-out}
 .inv-picked-name{display:grid;gap:2px;min-width:0}
 .inv-picked-name small{font-size:12px;color:var(--muted,#5d5f58);text-transform:uppercase;letter-spacing:.06em}
-.inv-picked-name strong{font:700 clamp(20px,3vw,26px)/1.15 var(--font,'Archivo Variable',sans-serif);overflow-wrap:anywhere}
+.inv-picked-name strong{font:700 clamp(20px,3vw,26px)/1.15 var(--font,'DM Sans Variable',sans-serif);overflow-wrap:anywhere}
 .inv-picked-name span{color:var(--muted,#5d5f58);font-size:14px}
 .inv-picked-actions{display:flex;gap:8px;flex-wrap:wrap}
-.inv-picked-actions button{display:inline-flex;align-items:center;gap:8px;min-height:52px;padding:0 20px;border-radius:var(--radius,3px);border:1.5px solid var(--text,#1c1d1a);background:var(--surface,#f6f4ee);color:var(--text,#1c1d1a);font:700 16px var(--font,'Archivo Variable',sans-serif);cursor:pointer}
+.inv-picked-actions button{display:inline-flex;align-items:center;gap:8px;min-height:52px;padding:0 20px;border-radius:var(--radius,3px);border:1.5px solid var(--text,#1c1d1a);background:var(--surface,#f6f4ee);color:var(--text,#1c1d1a);font:700 16px var(--font,'DM Sans Variable',sans-serif);cursor:pointer}
 .inv-picked{position:relative}
 .inv-picked-actions .inv-picked-close{--k:transparent;position:absolute;top:8px;right:8px;min-height:40px;padding:0 10px;background:transparent;color:var(--muted,#5d5f58)}
 .inv-picked-name{padding-right:36px}
@@ -152,7 +176,7 @@ html[data-motion=paused] .ivp *{animation-play-state:paused!important}
 .inv-code-big p{margin:0;font-size:13px;color:var(--muted,#5d5f58)}
 .inv-qr svg,.inv-bc svg{display:block;width:100%;height:auto}
 .inv-sheet figure{grid-template-columns:minmax(0,1fr) 84px;gap:8px;align-items:center;place-items:initial}
-.inv-sheet figcaption{display:grid;gap:4px;color:var(--muted,#5d5f58);font:600 13px/1.25 var(--font,'Archivo Variable',sans-serif)}
+.inv-sheet figcaption{display:grid;gap:4px;color:var(--muted,#5d5f58);font:600 13px/1.25 var(--font,'DM Sans Variable',sans-serif)}
 .inv-sheet figcaption code{font:500 11px var(--mono,'JetBrains Mono Variable',monospace);color:var(--muted,#5d5f58)}
 @media(max-width:700px){.inv-how{grid-template-columns:1fr}.inv-picked-actions{width:100%}.inv-picked-actions button:not(.inv-picked-close){flex:1;justify-content:center}.inv-code-big{grid-template-columns:110px minmax(0,1fr)}}
 /* En el celular el nombre pasa a dos renglones y el código baja: antes quedaba cortado en tres letras */
