@@ -89,18 +89,40 @@
 html[data-motion=paused] .pl *{animation:none!important}
 @media(max-width:900px){.pl-files,.pl-split{grid-template-columns:minmax(0,1fr)}.pl-summary{grid-template-columns:1fr;justify-items:center}.pl-kpis{grid-template-columns:repeat(2,1fr);width:100%}}
 
-/* Vista previa en la lista de proyectos: tres anillos de OEE */
-.plp{height:100%;display:grid;align-content:center;gap:18px;padding:clamp(20px,5%,44px);background:var(--surface-2,#e6e2d7)}
-.plp-rings{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(10px,3%,28px);justify-items:center}
-.plp-rings>div{display:grid;justify-items:center;gap:6px;font:700 13px var(--font,'Archivo Variable',sans-serif)}
-.plp-rings .pl-ring{width:min(120px,24vw)!important;height:min(120px,24vw)!important}
-.plp-flow{display:flex;justify-content:center;align-items:center;gap:10px;font-size:12px;color:var(--muted,#5d5f58)}
-.plp-flow span{padding:6px 10px;border-radius:var(--radius,3px);border:1px solid var(--line,#cdc8bb);background:var(--surface-2,#e6e2d7)}
+/* Vista previa en la portada: OEE por línea, de qué se compone y lo que no cuadró.
+   Todo se mide contra el marco (cq) para que llene lo que le toque, sea el inicio o una parada. */
+.plp{--ring:min(24cqi,26cqb);--g:var(--accent,#1d5a6e);container-type:size;height:100%;display:flex;flex-direction:column;justify-content:space-evenly;gap:min(4cqb,28px);padding:min(6cqi,44px);background:var(--surface-2,#e6e2d7);color:var(--text,#1c1d1a)}
+.plp-rings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:min(4cqi,28px)}
+.plp-rings>div{display:grid;justify-items:center;align-content:start;gap:min(1.6cqb,10px)}
+.plp-rings>.warn{--g:var(--warn,#a87a12)}
+.plp-rings .pl-ring{width:var(--ring);height:var(--ring)}
+.plp .pl-ring b{font-size:calc(var(--ring) * .27);color:var(--g)}
+.plp .pl-ring small{font-size:max(10px,calc(var(--ring) * .085))}
+.plp-name{font:600 max(13px,min(2.4cqi,16px)) var(--display,var(--font))}
+.plp-parts{display:grid;gap:5px;width:100%;margin:0}
+.plp-parts div{display:grid;grid-template-columns:auto minmax(0,1fr) 3ch;align-items:center;gap:8px;font:500 max(10.5px,min(1.9cqi,12.5px)) var(--mono,'JetBrains Mono Variable',monospace);color:var(--muted,#5d5f58)}
+.plp-parts dt{min-width:5.5ch}
+.plp-parts dd{margin:0;text-align:right}
+.plp-parts dd:has(i){height:5px;background:var(--line,#cdc8bb)}
+.plp-parts i{display:block;height:100%;width:var(--w);background:var(--g)}
+.plp-flow{display:flex;justify-content:center;align-items:center;gap:10px;font-size:max(12px,min(2cqi,14px));color:var(--muted,#5d5f58)}
+.plp-flow span{padding:6px 10px;border-radius:var(--radius,3px);border:1px solid var(--line,#cdc8bb)}
 .plp-flow i{width:22px;height:1px;background:var(--line-strong,#1c1d1a)}
+.plp-ex{border-top:1px solid var(--line-strong,#1c1d1a)}
+.plp-ex p{margin:0;padding:8px 0 4px;font:600 max(11px,min(1.9cqi,13px)) var(--mono,'JetBrains Mono Variable',monospace);text-transform:uppercase;letter-spacing:.05em}
+.plp-ex ul{list-style:none;margin:0;padding:0}
+.plp-ex li{display:grid;gap:1px;padding:7px 0 7px 10px;border-bottom:1px solid var(--line,#cdc8bb);box-shadow:inset 2px 0 0 var(--bad,#a8322a)}
+.plp-ex b{font-size:max(12.5px,min(2.2cqi,15px));font-weight:600;line-height:1.3}
+.plp-ex span{font:500 max(10.5px,min(1.7cqi,12px)) var(--mono,'JetBrains Mono Variable',monospace);color:var(--muted,#5d5f58)}
+/* La lista se recorta según el alto: cinco en una parada alta, dos en el inicio a 1440;
+   en marcos más bajos (el inicio en 768) sólo caben los anillos y su desglose */
+@container (max-height:560px){.plp-ex li:nth-child(n+4){display:none}}
+@container (max-height:470px){.plp-ex li:nth-child(n+3){display:none}}
+@container (max-height:380px){.plp-ex{display:none}}
+@media(min-width:981px){@container (max-height:380px){.plp-rings{--ring:min(24cqi,36cqb)}}}
 .plp .pl-arc{animation:plp-loop 6s cubic-bezier(.65,0,.35,1) infinite}
 @keyframes plp-loop{0%{stroke-dashoffset:100}30%,85%{stroke-dashoffset:var(--o)}100%{stroke-dashoffset:100}}
 html[data-motion=paused] .plp *{animation-play-state:paused!important}
-.plp{--good:var(--ok,#3d7a4b);--mid:var(--warn,#a87a12);--low:var(--bad,#a8322a)}
 html[data-motion=paused] .plp .pl-arc{animation:none!important;stroke-dashoffset:var(--o)}
 /* Columnas que no se reconocen: se eligen de una lista */
 div.pl-miss{display:grid;gap:8px;align-items:stretch}
@@ -190,3 +212,12 @@ html[data-motion=paused] .pl-day-bar i{animation:none}
 .pl .pl-icon:hover{color:var(--bad,#a8322a);border-color:var(--line,#cdc8bb)}
 /* En celular las tablas se deslizan dentro de su tarjeta, sin ensanchar la página */
 .pl,.pl-out,.pl-history{grid-template-columns:minmax(0,1fr)}
+
+/* Móvil: el desglose por línea (10 px) se quita; quedan el flujo, los tres anillos y su nombre */
+@media(max-width:760px){
+ .plp{--ring:min(27cqi,40cqb)}
+ .plp-flow span{font-size:13px}
+ .plp .pl-ring small{font-size:12px;letter-spacing:.04em}
+ .plp-parts{display:none}
+ .plp-name{font-size:14px}
+}

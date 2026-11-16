@@ -1,159 +1,164 @@
-/* Portada: barra, hoja de portada, proyectos, perfil, motion y contacto.
-   Todo se arma con filetes de 1 px: tinta para separar bloques, gris para separar filas. */
+/* Portada: barra, inicio con tres accesos, índice, un proyecto por parada, juego, otros, CV, motion y contacto.
+   Filetes de 1 px: tinta para separar bloques, gris para separar filas. */
+
+/* Alto de cada parada en escritorio: la pantalla menos la barra (74 px). Lo que sobra lo absorbe el medio, no los márgenes. */
+:root{--zone:max(694px,calc(100svh - 74px));--foot:64px}
 
 /* Barra superior */
 .topbar{position:sticky;top:0;z-index:40;background:var(--bg);border-bottom:1px solid var(--line-strong)}
 .topbar-inner{display:flex;align-items:center;gap:24px;min-height:73px}
 .brand{display:inline-flex;align-items:center;min-height:44px}
-.brand-name{display:grid;gap:3px}
-.brand-name b{font:650 19px/1.1 var(--font);font-stretch:115%;letter-spacing:-.01em}
-.brand-name small{font:500 11.5px/1.2 var(--mono);color:var(--muted)}
+.brand-name{display:grid;gap:2px}
+.brand-name b{font:600 19px/1.1 var(--display);letter-spacing:-.01em}
+.brand-name small{font-size:12.5px;line-height:1.2;color:var(--muted)}
 .topnav{display:flex;gap:2px;margin-left:auto}
-.topnav a{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;font-size:14px;font-weight:500}
+.topnav a{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;font-size:14.5px;font-weight:500}
 .topnav a:hover{color:var(--accent)}
 .topbar-tools{display:flex;align-items:center;gap:10px}
 .icon-button{display:grid;place-items:center;width:44px;height:44px;border:1px solid var(--line);border-radius:var(--radius);background:transparent;color:var(--muted)}
 .icon-button:hover{border-color:var(--line-strong);color:var(--text)}
 .language-control{display:flex;align-items:center;font:500 12.5px/1 var(--mono)}
-.language-control button{min-width:36px;min-height:44px;padding:0 4px;border:0;background:none;color:var(--muted);font:inherit}
+.language-control button{min-width:44px;min-height:44px;padding:0 4px;border:0;background:none;color:var(--muted);font:inherit}
 .language-control button+button::before{content:'/';margin-right:8px;color:var(--line)}
 .language-control button[aria-pressed=true]{color:var(--text);text-decoration:underline;text-underline-offset:5px}
 .topbar-cta{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border:1px solid var(--line-strong);border-radius:var(--radius);font-weight:600;font-size:14px}
 .topbar-cta:hover{background:var(--text);color:var(--bg)}
 
-/* Portada: una hoja con cajetín arriba, el texto a la izquierda y el visor de apps a la derecha */
-.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.12fr);grid-template-areas:"sheet sheet" "copy work";margin-block:clamp(24px,3vw,40px) clamp(64px,8vw,112px);border:1px solid var(--line-strong);background:var(--bg)}
-.hero-sheet{grid-area:sheet;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:0;border-bottom:1px solid var(--line-strong)}
-.hero-sheet div{padding:10px 16px 11px;border-left:1px solid var(--line)}
-.hero-sheet div:first-child{border-left:0}
-.hero-sheet dt{font:500 10.5px/1.3 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.hero-sheet dd{margin:3px 0 0;font:500 13px/1.35 var(--mono)}
-.hero-copy{grid-area:copy;display:flex;flex-direction:column;justify-content:center;padding:clamp(32px,5vw,72px) clamp(24px,4vw,56px)}
-.hero h1{font-size:clamp(36px,3.7vw,58px);line-height:1.04;font-weight:650;font-stretch:112%;letter-spacing:-.025em;max-width:14ch;overflow-wrap:break-word}
-.hero-copy>p{max-width:40ch;margin-top:28px;font-size:18px;color:var(--muted)}
-.hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:40px}
-.hero-workbench{grid-area:work;min-width:0;display:grid;align-content:center;gap:14px;padding:clamp(20px,3vw,36px);border-left:1px solid var(--line-strong);background:var(--surface)}
-.hero-label{font:500 11px/1.3 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-
-/* Encabezado de sección: cajetín mono a la izquierda, título ancho a la derecha */
-.section-space,.about-section{padding-block:clamp(56px,6vw,88px)}
-.section-heading{margin-bottom:clamp(36px,5vw,64px);padding-top:14px;border-top:1px solid var(--line-strong)}
-.section-heading>div{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,3fr);column-gap:32px}
-.section-heading .kicker{grid-row:1/span 4;margin:8px 0 0}
-.section-heading h2,.about-copy h2{font-size:clamp(32px,3.6vw,54px);line-height:1.04;font-weight:620;font-stretch:118%;letter-spacing:-.02em}
-.section-heading>div>:not(.kicker){grid-column:2}
-.section-heading p{max-width:60ch;margin-top:16px;font-size:17px;color:var(--muted)}
-
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 
-/* Índice de proyectos: una columna por bloque, con su letra */
-.projects-intro{display:grid;align-content:center}
-.project-index{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line-strong)}
-.pi-group{padding:12px 16px 4px 0}
-.pi-group+.pi-group{padding-left:16px;border-left:1px solid var(--line)}
-.pi-head{display:block;padding-bottom:8px;font:500 11.5px/1.4 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.pi-group ol{list-style:none;margin:0;padding:0}
-.pi-group li{border-top:1px solid var(--line)}
-.pi-group button{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px;padding:8px 0;border:0;background:none;text-align:left}
-.pi-group strong{font:600 clamp(16px,1.35vw,19px)/1.2 var(--font);font-stretch:108%}
-.pi-group svg{color:var(--muted)}
-.pi-group button:hover strong,.pi-group button:hover svg{color:var(--accent)}
+/* Inicio: el titular y una línea de datos a la izquierda; a la derecha la vista grande y tres accesos */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:clamp(32px,5vw,80px);align-items:center;padding-block:clamp(32px,6vh,64px)}
+.hero h1{max-width:15ch;font-size:clamp(40px,3.9vw,56px);line-height:1.04;overflow-wrap:break-word}
+.hero-intro{max-width:36ch;margin-top:24px;font-size:18px;color:var(--muted)}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
+.hero-data{max-width:60ch;margin-top:32px;padding-top:14px;border-top:1px solid var(--line);font-size:14px;line-height:1.55;color:var(--muted)}
+.hero-data span{display:block}
 
-/* Cajetín de cada bloque (A–D): letra y nombre en mono, una frase que dice qué los une */
-.group-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,3fr);column-gap:32px;padding-top:12px;border-top:1px solid var(--line-strong)}
-.group-head .kicker{margin:3px 0 0;color:var(--text)}
-.group-head p{max-width:72ch;color:var(--muted)}
-.gamedev>.group-head,.others-list>.group-head{margin-bottom:clamp(24px,3vw,40px)}
+.hx{min-width:0;display:grid;grid-template-rows:minmax(0,1fr) auto}
+.hx-label{display:none}
+.hx-view{position:relative;display:block;min-height:300px;overflow:hidden;border:1px solid var(--line-strong);border-radius:var(--radius) var(--radius) 0 0;background:var(--surface-2)}
+.hx-frame{position:absolute;inset:0}
+.hx-frame>*{height:100%}
+.hx-list{list-style:none;margin:0;padding:0;border:1px solid var(--line-strong);border-top:0;border-radius:0 0 var(--radius) var(--radius)}
+.hx-list li{display:grid;grid-template-columns:minmax(0,1fr) 76px;min-height:64px;border-top:1px solid var(--line)}
+.hx-list li:first-child{border-top:0}
+.hx-list li.on{background:var(--surface);box-shadow:inset 3px 0 0 var(--text)}
+.hx-open{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:16px;align-content:center;padding:9px 16px 9px 18px}
+.hx-name{font:600 17px/1.25 var(--display)}
+.hx-line{grid-row:2;font-size:14px;line-height:1.4;color:var(--muted)}
+.hx-go{grid-row:1/span 2;grid-column:2;align-self:center;display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--accent)}
+.hx-open:hover .hx-go{text-decoration:underline;text-underline-offset:4px}
+.hx-page{display:flex;align-items:center;justify-content:center;gap:4px;border-left:1px solid var(--line);font-size:13px;color:var(--muted)}
+.hx-page:hover{color:var(--accent)}
+.hx-open:focus-visible,.hx-page:focus-visible{outline-offset:-3px}
 
-/* Datos llanos del proyecto: tecnología / qué se prueba / estado */
-.facts{display:flex;flex-wrap:wrap;margin-top:18px;padding-top:10px;border-top:1px solid var(--line);font:500 12.5px/1.6 var(--mono);color:var(--muted)}
-.facts span+span::before{content:'/';padding-inline:.6em;color:var(--line)}
-.facts span:last-child{color:var(--text)}
+/* Índice: título a la izquierda, once filas a la derecha; la fila baja a su parada y la columna final abre la app */
+.projects-intro{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2.1fr);gap:clamp(32px,5vw,80px);align-items:center;padding-block:clamp(32px,6vh,56px)}
+.pi-top h2{font-size:40px;line-height:1.08}
+.pi-top p{max-width:30ch;margin-top:16px;font-size:17px;color:var(--muted)}
+.project-index{list-style:none;margin:0;padding:0;border-top:1px solid var(--line-strong)}
+.project-index li{display:grid;grid-template-columns:minmax(0,1fr) 150px;align-items:stretch;border-bottom:1px solid var(--line)}
+.project-index button{display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:center;gap:12px;min-height:clamp(44px,calc((100svh - 300px) / 11),56px);padding:0 16px 0 0;border:0;background:none;text-align:left}
+.pi-n{font:500 13px var(--mono);color:var(--muted)}
+.project-index strong{font:600 18px/1.2 var(--display)}
+.pi-kind{font-size:13px;color:var(--muted);text-align:right}
+.project-index button:hover strong{color:var(--accent)}
+.pi-open{display:flex;align-items:center;justify-content:space-between;gap:6px;min-height:44px;padding:0 4px 0 16px;border-left:1px solid var(--line);font-size:13.5px;font-weight:600;color:var(--accent);white-space:nowrap}
+.pi-open:hover{text-decoration:underline;text-underline-offset:4px}
 
-/* Proyectos en filas */
-#projects{padding-top:0}
-.rows{display:grid;gap:clamp(56px,7vw,104px);margin-top:clamp(56px,7vw,104px)}
-.row{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:clamp(32px,5vw,72px);align-items:center}
+/* Un proyecto por parada: el medio a un lado (55 %) y la lectura al otro, alternando */
+.row{display:grid;grid-template-columns:minmax(0,1.22fr) minmax(0,1fr);gap:clamp(40px,5vw,80px);align-items:center;padding-block:48px}
+.row.flip{grid-template-columns:minmax(0,1fr) minmax(0,1.22fr)}
 .row.flip .project-media{order:2}
-.project-media{position:relative;display:block;aspect-ratio:16/10.5;overflow:hidden;border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--surface-2)}
-.project-media>*:first-child{height:100%}
+.project-media{position:relative;display:block;aspect-ratio:16/11;overflow:hidden;border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--surface-2)}
+.hold,.hold>*{height:100%}
 .media-open{position:absolute;right:0;bottom:0;display:grid;place-items:center;width:44px;height:44px;background:var(--text);color:var(--bg);opacity:0;transition:opacity .15s}
 .project-media:hover .media-open,.project-media:focus-visible .media-open{opacity:1}
-.project-info{min-width:0;max-width:480px;padding-top:12px;border-top:1px solid var(--line-strong)}
-.row-num{margin-right:14px;font:500 12px var(--mono);color:var(--muted)}
-.row-num i{margin-left:6px;font-style:normal}
+/* En Casa el celular va abajo a la derecha: la flecha se pasa a la otra esquina para no montarse en él */
+.media-casa .media-open{right:auto;left:0}
+.project-info{min-width:0;max-width:500px}
+.group-line{margin-bottom:28px;padding-bottom:12px;border-bottom:1px solid var(--line-strong);font-size:14px;color:var(--muted)}
+.row-meta{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;font-size:13px;color:var(--muted)}
+.row-num{font:500 13px var(--mono);color:var(--text)}
+.row-meta em{font-style:normal;color:var(--text)}
+.project-info h3,.gd-copy h3{margin-top:14px;font-size:36px;line-height:1.08}
+.project-info h3 a:hover,.gd-copy h3 a:hover{color:var(--accent)}
+.project-info .pitch,.gd-copy .pitch{margin-top:10px;font-size:20px;line-height:1.35}
+.lead{margin-top:14px;font-size:17px;line-height:1.6;color:var(--muted)}
+.figures{display:flex;flex-wrap:wrap;gap:16px 36px;margin:24px 0 0}
+.figures dt{font:600 28px/1 var(--mono);color:var(--accent)}
+.figures dd{max-width:17ch;margin:6px 0 0;font-size:13px;line-height:1.4;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:22px 0 0;padding:0;list-style:none}
+.chips li{padding:3px 8px;border:1px solid var(--line);border-radius:var(--radius);font-size:13px;line-height:1.4;color:var(--muted)}
+.project-links{display:flex;flex-wrap:wrap;align-items:center;gap:8px 24px;margin-top:28px}
+
+/* Piezas compartidas con las fichas: clase, frase y datos llanos */
 .project-kind{display:inline-flex;flex-wrap:wrap;gap:0 8px;font:500 12px/1.5 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .project-kind em{font-style:normal;color:var(--text)}
 .project-kind em::before{content:'/ ';color:var(--line)}
-.project-info h3{margin-top:18px;font-size:clamp(30px,3.2vw,46px);line-height:1.04;font-weight:620;font-stretch:115%;letter-spacing:-.02em}
-.project-info h3 a:hover{color:var(--accent)}
 .pitch{margin-top:12px;font-size:19px;font-weight:500;line-height:1.35}
-.project-info>p:not(.pitch):not(.facts){margin-top:12px;font-size:15.5px;color:var(--muted)}
-.project-links{display:flex;flex-wrap:wrap;align-items:center;gap:8px 22px;margin-top:24px}
-.row.has-head{row-gap:clamp(20px,3vw,36px)}
-.row.has-head>.group-head{grid-column:1/-1}
-.rows+.rows{margin-top:clamp(72px,9vw,128px)}
-/* Bloque A: filas cortas, imagen chica a la izquierda y la ficha resumida al lado */
-.rows-compact{gap:0}
-.row.compact{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:clamp(24px,3.5vw,48px);align-items:start;padding-block:clamp(20px,2.4vw,32px);border-bottom:1px solid var(--line)}
-.row.compact .project-media{aspect-ratio:16/10}
-.row.compact .project-info{max-width:none;padding-top:10px}
-.row.compact .project-info h3{margin-top:10px;font-size:clamp(26px,2.4vw,34px)}
-.row.compact .pitch{font-size:17px}
-.row.compact .facts{margin-top:14px}
-.row.compact .project-links{margin-top:16px}
+.facts{display:flex;flex-wrap:wrap;margin-top:18px;padding-top:10px;border-top:1px solid var(--line);font:500 12.5px/1.6 var(--mono);color:var(--muted)}
+.facts span+span::before{content:'/';padding-inline:.6em;color:var(--line)}
+.facts span:last-child{color:var(--text)}
 .vibe-shot{display:block;width:100%;height:auto!important}
-
-/* Punto U: dos capturas de celular, derechas y con marco */
 .phones{height:100%;display:flex;align-items:center;justify-content:center;gap:clamp(12px,3vw,28px);padding:clamp(16px,4%,32px)}
 .phones img{height:100%;width:auto!important;max-width:46%;object-fit:cover;object-position:top;border:1px solid var(--line-strong);border-radius:var(--radius)}
 
-/* D · Otros trabajos: lista de texto, una fila por trabajo (título, una línea, enlace) */
-.paged .others-list{display:flex;flex-direction:column;justify-content:center;padding-block:0}
-.ol-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--line-strong)}
-.ol-list li{border-bottom:1px solid var(--line)}
-.ol-list li>*{display:grid;grid-template-columns:minmax(150px,1fr) minmax(0,2.4fr) minmax(0,1.1fr) 22px;align-items:baseline;gap:6px 24px;padding:16px 4px}
-.ol-list strong{font:600 19px/1.25 var(--font);font-stretch:110%}
-.ol-list span{color:var(--muted)}
-.ol-list em{font:500 11.5px/1.5 var(--mono);font-style:normal;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
-.ol-list em em{color:var(--text)}
-.ol-list em em::before{content:' / ';color:var(--line)}
-.ol-list svg{align-self:center;color:var(--muted)}
-.ol-list a:hover strong,.ol-list a:hover>svg{color:var(--accent)}
+/* Otros trabajos: tres piezas con imagen y una línea con Android y GitHub */
+.others{padding-block:clamp(40px,6vh,64px)}
+.others-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:8px clamp(32px,5vw,80px);align-items:baseline;padding-bottom:24px}
+.others-top h2,.about-copy h2,.motion-copy h2,.contact-top h2,.gd-side h3{font-size:40px;line-height:1.08}
+.others-top p{max-width:52ch;font-size:17px;color:var(--muted)}
+.others-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin:0;padding:0;list-style:none}
+.others-grid a{display:grid;gap:0}
+.others-media{position:relative;display:block;height:clamp(220px,calc(var(--zone) - 400px),400px);overflow:hidden;border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--surface-2)}
+.others-media>*{height:100%}
+.others-media .vibe-shot{height:100%!important;object-fit:cover;object-position:6% center}
+.others-kind{margin-top:14px;font-size:13px;color:var(--muted)}
+.others-kind em{font-style:normal;color:var(--text)}
+.others-kind em::before{content:' · '}
+.others-grid strong{margin-top:4px;font:600 22px/1.2 var(--display)}
+.others-pitch{margin-top:4px;font-size:15.5px;line-height:1.5;color:var(--muted)}
+.others-grid a:hover strong{color:var(--accent)}
+.others-more{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 24px;margin-top:28px;padding-top:14px;border-top:1px solid var(--line);font-size:15px;color:var(--muted)}
+.others-more strong{margin-right:10px;color:var(--text)}
 
-/* Perfil */
-.about-grid{display:grid;grid-template-columns:minmax(200px,260px) minmax(0,1fr);gap:clamp(32px,6vw,88px);align-items:start;padding-top:24px;border-top:1px solid var(--line-strong)}
+/* CV: retrato de 280 px alineado arriba con el título; experiencia, cursos y herramientas en tres columnas */
+.about-grid{display:grid;grid-template-columns:280px minmax(0,1fr);gap:clamp(32px,5vw,72px);align-items:start;padding-block:clamp(40px,6vh,64px)}
 .portrait{margin:0;border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden;background:var(--surface)}
 .portrait picture{display:block}
 .portrait img{display:block;width:100%;height:auto;aspect-ratio:4/5;object-fit:cover}
 .portrait figcaption{display:grid;gap:2px;padding:10px 12px;border-top:1px solid var(--line-strong)}
 .portrait figcaption strong{font-size:14px;font-weight:600}
-.portrait figcaption span{font:500 12px var(--mono);color:var(--muted)}
-.about-copy>p{max-width:62ch;margin-top:18px;font-size:17px;color:var(--muted)}
-.about-copy .inline-link{margin-top:10px}
-/* Experiencia, cursos y herramientas en tres columnas cortas, dentro de la misma parada del CV */
-.cv-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px 32px;margin-top:32px}
-.cv-summary h3{padding-bottom:8px;border-bottom:1px solid var(--line-strong);font:500 11.5px/1.4 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.portrait figcaption span{font-size:13px;color:var(--muted)}
+.about-copy>p{max-width:64ch;margin-top:16px;font-size:17px;color:var(--muted)}
+.about-copy .inline-link{margin-top:8px}
+.cv-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px 32px;margin-top:28px}
+.cv-summary h3{padding-bottom:8px;border-bottom:1px solid var(--line-strong);font:600 15px/1.3 var(--display)}
 .cv-summary ul{list-style:none;margin:0;padding:0}
-.cv-summary li{display:grid;grid-template-columns:40px minmax(0,1fr);gap:10px;padding-block:10px;border-bottom:1px solid var(--line)}
+.cv-summary li{display:grid;grid-template-columns:40px minmax(0,1fr);gap:10px;padding-block:9px;border-bottom:1px solid var(--line)}
 .cv-summary li>a{position:relative;display:block;padding-right:22px}
 .cv-summary strong{display:block;font-size:14.5px;font-weight:600;line-height:1.35}
-.cv-summary small{display:block;margin-top:2px;font:500 12px/1.45 var(--mono);color:var(--muted)}
+.cv-summary small{display:block;margin-top:2px;font-size:13px;line-height:1.45;color:var(--muted)}
 .cv-summary a svg{position:absolute;top:3px;right:0;color:var(--muted)}
 .cv-summary a:hover strong,.cv-summary a:hover svg{color:var(--accent)}
 .cv-summary .cv-tools li{grid-template-columns:minmax(0,1fr)}
-.year{font:500 12px/1.75 var(--mono);color:var(--muted)}
-.languages-line{margin-top:20px;font-size:14.5px;color:var(--muted)}
+.year{font:500 12.5px/1.75 var(--mono);color:var(--muted)}
+.languages-line{margin-top:18px;font-size:14.5px;color:var(--muted)}
 
-/* Motion */
-.motion-grid{display:grid;max-width:1080px}
+/* Motion: título a la izquierda (1/3) y el video a la derecha (2/3) */
+.motion-section{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:clamp(32px,5vw,72px);align-items:center;padding-block:clamp(40px,6vh,64px)}
+.motion-copy p{max-width:36ch;margin-top:16px;font-size:17px;color:var(--muted)}
 .motion-main{margin:0;border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden;background:var(--surface)}
 .motion-main video{display:block;width:100%;height:auto;aspect-ratio:16/9;background:#171815}
-.motion-main figcaption{display:flex;justify-content:space-between;gap:12px;padding:12px 16px;border-top:1px solid var(--line-strong);font-size:14px;font-weight:600}
+.motion-main figcaption{display:flex;justify-content:space-between;gap:12px;padding:10px 16px;border-top:1px solid var(--line-strong);font-size:14px;font-weight:600}
 .motion-main figcaption span{font:500 12.5px var(--mono);color:var(--muted)}
 
-/* Contacto: una tabla de canales */
-.contact-section{padding-block:clamp(64px,8vw,112px)}
+/* Contacto: una tabla de canales y, debajo, el pie del sitio dentro de la misma parada */
+.contact-section{padding-block:clamp(40px,6vh,64px)}
+.contact-top{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px clamp(32px,5vw,80px);align-items:end;padding-bottom:28px}
+.contact-top h2{max-width:16ch}
+.contact-top p{max-width:40ch;font-size:17px;color:var(--muted)}
 .contact-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:32px;border-top:1px solid var(--line-strong)}
 .contact-links>a{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:16px;min-height:76px;padding:14px 4px;border-bottom:1px solid var(--line)}
 .contact-links>a>span{font-size:18px;font-weight:600}
@@ -162,61 +167,148 @@
 .contact-links>a:hover>span,.contact-links>a:hover>svg{color:var(--accent)}
 .contact-links>.contact-about{grid-column:1/-1}
 
-.site-footer{display:flex;justify-content:space-between;gap:20px;padding-block:18px 40px;border-top:1px solid var(--line-strong);font:500 12px var(--mono);color:var(--muted)}
+.site-footer{display:flex;justify-content:space-between;align-items:center;gap:20px;padding-block:18px 40px;border-top:1px solid var(--line-strong);font:500 12.5px var(--mono);color:var(--muted)}
 
-/* Portada por zonas (escritorio): cada zona ocupa la pantalla */
+/* Portada por zonas (escritorio): cada parada mide exactamente la pantalla bajo la barra */
 html.paged{scroll-behavior:auto}
-.paged main [data-zone]{min-height:calc(100svh - 74px);scroll-margin-top:74px}
-.paged .hero{min-height:calc(100svh - 74px - 2 * clamp(24px,3vw,40px));margin-block:clamp(24px,3vw,40px)}
-.paged .hero[data-zone]{min-height:calc(100svh - 74px - 2 * clamp(24px,3vw,40px))}
-.paged #projects{padding-block:0}
-.paged .rows{gap:0;margin-top:0}
-.paged .row{padding-block:clamp(24px,4vh,48px)}
-.paged .projects-intro{gap:clamp(18px,3vh,36px);padding-block:clamp(24px,4vh,48px)}
-.paged .projects-intro .section-heading{margin-bottom:0}
-.paged .about-section{padding-block:0}
-.paged .about-grid{align-content:center;align-items:center;padding-block:clamp(24px,4vh,48px)}
-/* Las filas cortas del bloque A no piden pantalla entera: caben dos o tres por parada */
-.paged .row.compact[data-zone]{min-height:0}
-.paged .rows-compact .row{padding-block:clamp(14px,2vh,24px)}
-.paged #contact{display:flex;flex-direction:column;justify-content:center}
+.paged main [data-zone]{min-height:var(--zone);scroll-margin-top:74px}
+.paged .hero{height:var(--zone);align-items:stretch}
+.paged .hero-copy{align-self:center}
+.paged .hx-view{min-height:0}
+.paged .projects-intro,.paged .others,.paged .about-grid,.paged .motion-section{height:var(--zone)}
+.paged .about-grid{align-content:center}
+/* En pantallas de 768 el CV no cabe con el aire de las demás paradas: se aprietan las filas, no el margen */
+@media(max-height:820px){.paged .cv-summary{margin-top:20px}.paged .cv-summary li{padding-block:6px}.paged .cv-summary .cv-tools small{margin-top:0}.paged .about-copy>p{margin-top:12px}}
+.paged .row{height:var(--zone);padding-block:clamp(28px,5vh,48px);align-items:stretch}
+.paged .row .project-media{aspect-ratio:auto;height:100%}
+.paged .row .project-info{align-self:center}
+.paged .others{display:flex;flex-direction:column;justify-content:center}
+/* Contacto y pie comparten la última parada: no queda un paso de 60 px para ver el pie */
+.paged #contact{min-height:calc(var(--zone) - var(--foot));height:calc(var(--zone) - var(--foot));display:flex;flex-direction:column;justify-content:center}
+.paged .site-footer{height:var(--foot);padding-block:0}
 
 @media(max-width:980px){
- .row,.row.flip,.row.compact{grid-template-columns:1fr;gap:24px}.row.flip .project-media{order:0}
- .row.compact{gap:16px}
+ .hero,.projects-intro,.row,.row.flip,.motion-section,.others-top,.contact-top{grid-template-columns:minmax(0,1fr)}
+ .row.flip .project-media{order:0}
+ .row{gap:24px}
  .project-info{max-width:none}
+ .hx-view{aspect-ratio:16/11;min-height:0}
  .about-grid{grid-template-columns:1fr}.portrait{max-width:260px}
- .project-index button{grid-template-columns:40px minmax(0,1fr) 20px}.pi-kind{display:none}
- .hero{grid-template-columns:minmax(0,1fr);grid-template-areas:"sheet" "copy" "work"}
- .hero-sheet{grid-template-columns:repeat(2,minmax(0,1fr))}
- .hero-sheet div:nth-child(3){border-left:0}
- .hero-sheet div:nth-child(n+3){border-top:1px solid var(--line)}
- .hero-workbench{border-left:0;border-top:1px solid var(--line-strong)}
+ .others-grid{grid-template-columns:minmax(0,1fr)}
 }
+/* Índice plegable y miniaturas del inicio: sólo existen en móvil */
+@media(min-width:761px){.pi-toggle,.hx-thumb{display:none}}
+
+/* Móvil (referencia 390; revisado de 360 a 430): plan propio y no el escritorio encogido.
+   Texto corrido a 16 px, nada bajo 13, toques de 44 o más y margen de 20. */
 @media(max-width:760px){
  .topnav{display:none}
- .topbar-inner{gap:10px;min-height:64px}
- .topbar-tools{margin-left:auto;gap:6px}
+ .topbar-inner{gap:8px;min-height:56px}
+ .topbar-tools{margin-left:auto;gap:4px}
  .brand-name b{font-size:17px}
+ .brand-name small{display:none}
+ .language-control button{min-width:44px;padding:0}
+ .language-control button+button::before{content:none}
+ .language-control button+button{box-shadow:inset 1px 0 0 var(--line)}
  .topbar-cta{padding:0 12px;font-size:13px}
- .hero{margin-top:16px}
- .hero-copy{padding:28px 20px 32px}
- .hero h1{font-size:clamp(34px,10vw,48px)}
- .hero-copy>p{font-size:16.5px;margin-top:20px}
- .hero-actions{margin-top:28px}
- .hero-workbench{padding:16px}
- .section-heading>div,.group-head{grid-template-columns:1fr}
- .section-heading .kicker{grid-row:auto;margin:0 0 12px}
- .section-heading>div>:not(.kicker){grid-column:1}
- .group-head .kicker{margin-bottom:8px}
- .project-index{grid-template-columns:repeat(2,minmax(0,1fr))}.pi-group:nth-child(3){padding-left:0;border-left:0}.pi-group:nth-child(n+3){border-top:1px solid var(--line-strong)}
- .ol-list li>*{grid-template-columns:minmax(0,1fr) 22px}.ol-list li>*>span,.ol-list li>*>em{grid-column:1}.ol-list li>*>svg{grid-row:1;grid-column:2}
- .section-heading p{font-size:16px}
- .project-media,.row.compact .project-media{aspect-ratio:4/3}
- .row .project-info>p:not(.pitch):not(.facts){display:none}
- .row .project-links{margin-top:18px}
- .cv-summary{grid-template-columns:1fr}
+
+ /* Primera pantalla: titular, dos botones y las tres apps en filas de 72 px tocables enteras */
+ .hero{display:flex;flex-direction:column;gap:0;padding-block:24px 28px}
+ .hero-copy{display:contents}
+ .hero h1{order:1;max-width:none;font-size:34px;line-height:1.08}
+ .hero-intro{order:2;max-width:none;margin-top:14px;font-size:16px}
+ .hero-actions{order:3;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
+ .hero-actions .button{min-height:48px;padding:0 10px}
+ .hx{order:4;display:block;margin-top:24px}
+ .hx-label{display:block;margin:0 0 8px;font:600 13px/1.3 var(--font);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+ .hx-view,.hx-page,.hx-go svg{display:none}
+ .hx-list{border:1px solid var(--line-strong);border-radius:var(--radius)}
+ .hx-list li{grid-template-columns:minmax(0,1fr);min-height:72px}
+ .hx-open{grid-template-columns:56px minmax(0,1fr) 20px;column-gap:12px;align-items:center;min-height:72px;padding:8px 14px 8px 12px}
+ .hx-open::after{content:'';grid-column:3;grid-row:1/span 2;width:9px;height:9px;justify-self:end;border:solid var(--accent);border-width:2px 2px 0 0;transform:rotate(45deg)}
+ .hx-thumb{display:block;grid-row:1/span 2;width:56px;height:56px;overflow:hidden;border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--surface-2)}
+ .hx-thumb>div{width:320px;height:320px;transform:scale(.175);transform-origin:0 0}
+ .hx-name,.hx-line{grid-column:2}
+ .hx-name{font-size:17px}
+ .hx-line{font-size:13px}
+ .hx-go{display:none}
+ .hero-data{order:5;max-width:none;margin-top:16px;padding-top:0;border-top:0;font-size:13px}
+
+ /* Proyectos: título, índice plegado y un proyecto por parada */
+ .projects-intro{gap:16px;padding-block:32px 8px}
+ .pi-top h2,.others-top h2,.about-copy h2,.motion-copy h2,.contact-top h2,.gd-side h3{font-size:28px}
+ .pi-top p{max-width:none;margin-top:10px;font-size:16px}
+ .pi-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:48px;padding:0 14px;border:1px solid var(--line-strong);border-radius:var(--radius);background:transparent;font:600 15px var(--font)}
+ .pi-toggle::after{content:'';width:9px;height:9px;margin-top:-4px;border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(45deg)}
+ .pi-toggle[aria-expanded=true]::after{margin-top:4px;transform:rotate(225deg)}
+ .project-index{display:none;margin-top:-8px}
+ .project-index.open{display:block}
+ .project-index li{grid-template-columns:minmax(0,1fr) 48px}
+ .project-index button{grid-template-columns:32px minmax(0,1fr);gap:8px;min-height:48px;padding:0}
+ .project-index strong{font-size:17px}
+ .pi-kind{display:none}
+ .pi-open{justify-content:center;min-height:48px;padding:0;border-left:1px solid var(--line);font-size:0}
+ .row,.row.flip{gap:18px;padding-block:28px;border-top:1px solid var(--line)}
+ .project-media{aspect-ratio:4/3;max-height:290px}
+ .media-open{display:none}
+ .group-line{margin-bottom:16px;padding-bottom:10px;font-size:14px}
+ .project-info h3,.gd-copy h3{margin-top:8px;font-size:26px}
+ .project-info h3 a,.gd-copy h3 a{display:inline-block;padding-block:8px;margin-block:-8px}
+ .project-info .pitch,.gd-copy .pitch{margin-top:8px;font-size:17px}
+ .lead{margin-top:10px;font-size:16px}
+ .figures{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:12px;margin-top:18px}
+ .figures dt{font-size:22px}
+ .figures dd{max-width:none;margin-top:4px}
+ .chips{display:none}
+ .project-links{display:grid;gap:4px;margin-top:20px}
+ .project-links .button{width:100%;min-height:48px}
+ .project-links .inline-link{justify-content:center}
+
+ /* Juego: miniaturas en fila con pie legible */
+ .gd-stop{padding-block:32px 24px}
+ .gd-thumbs .rg-cap{font-size:12px}
+
+ /* Otros trabajos: tres filas de 72 px con miniatura */
+ .others{padding-block:36px 28px}
+ .others-top{padding-bottom:16px}
+ .others-top p{font-size:16px}
+ .others-grid{gap:0;border-top:1px solid var(--line-strong)}
+ .others-grid li{border-bottom:1px solid var(--line)}
+ .others-grid a{grid-template-columns:56px minmax(0,1fr);column-gap:14px;align-items:center;min-height:72px;padding:8px 0}
+ .others-media{grid-row:1/span 3;width:56px;height:56px}
+ .others-media .hold{width:340px;height:340px;transform:scale(.165);transform-origin:0 0}
+ .others-media .phones{padding:0;gap:0}
+ .others-media .phones img{max-width:100%;height:100%;width:100%!important}
+ .others-media .phones img+img{display:none}
+ .others-kind{margin:0;font-size:13px}
+ .others-grid strong{margin-top:0;font-size:18px}
+ .others-pitch{margin-top:0;font-size:14px;line-height:1.4}
+ .others-more{margin-top:20px;font-size:15px}
+
+ /* CV: retrato de 96 px junto al nombre */
+ .about-grid{gap:20px;padding-block:36px}
+ .portrait{display:grid;grid-template-columns:96px minmax(0,1fr);align-items:center;gap:14px;max-width:none;border:0;background:none;overflow:visible}
+ .portrait img{width:96px;height:120px;border:1px solid var(--line-strong);border-radius:var(--radius)}
+ .portrait figcaption{padding:0;border:0}
+ .portrait figcaption strong{font:600 20px/1.2 var(--display)}
+ .portrait figcaption span{font-size:14px}
+ .about-copy>p{margin-top:12px;font-size:16px}
+ .cv-summary{grid-template-columns:1fr;gap:20px;margin-top:20px}
+ .cv-summary li{grid-template-columns:44px minmax(0,1fr)}
+ .cv-summary li>a{min-height:44px}
+ .cv-summary strong{font-size:15px}
+ .year{font-size:13px}
+ .languages-line{font-size:15px}
+
+ /* Motion y contacto */
+ .motion-section{gap:16px;padding-block:36px}
+ .motion-copy p{max-width:none;font-size:16px}
+ .motion-main figcaption{padding:10px 14px;font-size:15px}
+ .contact-section{padding-block:36px 28px}
+ .contact-top{gap:12px;padding-bottom:16px}
+ .contact-top p{max-width:none;font-size:16px}
  .contact-links{grid-template-columns:1fr}
- .site-footer{flex-direction:column;gap:6px}
+ .contact-links>a{min-height:56px;padding:8px 2px}
+ .contact-links>a>span{font-size:17px}
+ .site-footer{flex-direction:column;align-items:flex-start;gap:4px;padding-block:18px 32px}
 }
-@media(max-width:420px){.brand-name small{display:none}.topbar .icon-button{display:none}.hero-sheet dd{font-size:12px}}

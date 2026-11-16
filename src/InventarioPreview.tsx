@@ -10,7 +10,7 @@ export default function InventarioPreview({ lang }: { lang: 'es' | 'en' }) {
    <i/><em>+1 {SAMPLE[0].name}</em>
   </div>
   <div className="ivp-list">
-   {SAMPLE.slice(0, 4).map((p, i) => <div key={p.code} className={p.stock < p.min ? 'low' : ''}><span>{p.name}</span><b>{i === 0 ? p.stock + 1 : p.stock}<small>{es ? 'mín' : 'min'} {p.min}</small></b></div>)}
+   {SAMPLE.slice(0, 6).map((p, i) => <div key={p.code} className={p.stock < p.min ? 'low' : ''}><span>{p.name}</span><b>{i === 0 ? p.stock + 1 : p.stock}<small>{es ? 'mín' : 'min'} {p.min}</small></b></div>)}
    <small>{es ? `${shopping(SAMPLE).length} productos bajo el mínimo → lista de reposición` : `${shopping(SAMPLE).length} products below minimum → reorder list`}</small>
   </div>
  </div>;

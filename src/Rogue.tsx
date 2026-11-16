@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { ArrowLeft, ArrowRight } from '@phosphor-icons/react';
+import { useEffect, useRef, useState } from 'react';
+import { ArrowLeft, ArrowRight, X } from '@phosphor-icons/react';
 import type { Lang } from './content';
 import './rogue.css';
 
@@ -37,6 +37,23 @@ export function Caption({ s, lang }: { s: Shot; lang: Lang }) {
  return <figcaption className="rg-cap"><span>{s.place[L]}</span><span>{s.cam[L]}</span><span>{s.hour[L]}</span></figcaption>;
 }
 
+// Cada captura se toca para verla a pantalla completa. Se usa <dialog> modal: el navegador
+// atrapa el foco, Esc lo cierra y devuelve el foco al botón que lo abrió.
+function Lightbox({ shot, lang, onClose }: { shot: Shot | null; lang: Lang; onClose: () => void }) {
+ const ref = useRef<HTMLDialogElement>(null);
+ useEffect(() => {
+  const d = ref.current;
+  if (!d) return;
+  if (shot && !d.open) d.showModal();
+  if (!shot && d.open) d.close();
+ }, [shot]);
+ const es = lang === 'es';
+ return <dialog ref={ref} className="rg-lightbox" aria-label={shot ? shot.place[es ? 0 : 1] : ''} onClose={onClose} onClick={e => { if (e.target === ref.current) onClose(); }}>
+  {shot && <figure className="rg-fig"><ShotImg s={shot} lang={lang} sizes="96vw" eager/><Caption s={shot} lang={lang}/></figure>}
+  <button type="button" className="rg-close" onClick={onClose} aria-label={es ? 'Cerrar' : 'Close'} autoFocus><X size={22} aria-hidden="true"/></button>
+ </dialog>;
+}
+
 export const rogueText = (es: boolean) => ({
  kind: es ? 'Juego · Godot 4' : 'Game · Godot 4',
  pitch: es ? 'Un roguelike 3D donde una IA busca su libertad.' : 'A 3D roguelike where an AI looks for its freedom.',
@@ -46,9 +63,11 @@ export const rogueText = (es: boolean) => ({
 
 export function RoguePage({ lang, next }: { lang: Lang; next: { slug: string; title: string; id: string } }) {
  const es = lang === 'es', t = rogueText(es);
+ const [open, setOpen] = useState<Shot | null>(null);
+ const fig = (s: Shot, sizes: string) => <figure key={s.file} className="rg-fig"><button type="button" className="rg-open" onClick={() => setOpen(s)} aria-label={`${es ? 'Ver a pantalla completa' : 'View full screen'}: ${s.place[es ? 0 : 1]}, ${s.cam[es ? 0 : 1]}`}><ShotImg s={s} lang={lang} sizes={sizes}/></button><Caption s={s} lang={lang}/></figure>;
  useEffect(() => { const d = location.hash && document.getElementById(location.hash.slice(1)); if (d) d.scrollIntoView(); else scrollTo(0, 0); }, []);
  // La rejilla va a dos columnas en escritorio: cada foto pide la mitad del ancho útil.
- const half = '(min-width: 760px) 610px, 100vw', third = '(min-width: 760px) 410px, 100vw';
+ const half = '(min-width: 760px) 610px, 50vw', third = '(min-width: 760px) 410px, 85vw';
  return <main id="main" className="case case-rogue" aria-label="IA Rogue">
   <div className="wrap">
    <a className="case-back" href="/#graphics" data-title={es ? 'Proyectos' : 'Projects'}><ArrowLeft size={18}/>{es ? 'Todos los proyectos' : 'All projects'}</a>
@@ -59,14 +78,15 @@ export function RoguePage({ lang, next }: { lang: Lang; next: { slug: string; ti
    <figure className="rg-cover rg-fig"><ShotImg s={COVER} lang={lang} sizes="(min-width: 1360px) 1240px, 100vw" eager/><Caption s={COVER} lang={lang}/></figure>
    <section id="lugares" className="rg-section" aria-labelledby="rg-lugares">
     <div className="rg-section-head"><h2 id="rg-lugares">{es ? 'Lugares' : 'Places'}</h2><p>{es ? 'Pueblo, cementerio, templo, costa y portal: zonas del mismo mundo.' : 'Village, graveyard, temple, coast and portal: areas of the same world.'}</p></div>
-    <div className="rg-grid">{PLACES.map(s => <figure key={s.file} className="rg-fig"><ShotImg s={s} lang={lang} sizes={half}/><Caption s={s} lang={lang}/></figure>)}</div>
+    <div className="rg-grid">{PLACES.map(s => fig(s, half))}</div>
    </section>
    <section id="agua" className="rg-section" aria-labelledby="rg-agua">
     <div className="rg-section-head"><h2 id="rg-agua">{es ? 'La misma agua, tres cámaras' : 'The same water, three cameras'}</h2><p>{es ? 'La cascada y el templo comparten lago. Son tres de las cámaras del juego sobre esa misma agua.' : 'The waterfall and the temple share a lake. These are three of the game’s cameras on that same water.'}</p></div>
-    <div className="rg-grid rg-three">{WATER.map(s => <figure key={s.file} className="rg-fig"><ShotImg s={s} lang={lang} sizes={third}/><Caption s={s} lang={lang}/></figure>)}</div>
+    <div className="rg-grid rg-three" tabIndex={0} role="group" aria-label={es ? 'Tres cámaras sobre la misma agua, desliza para verlas' : 'Three cameras on the same water, swipe to see them'}>{WATER.map(s => fig(s, third))}</div>
    </section>
    <p className="rg-more"><a className="inline-link" href="/#graphics" data-title="Game dev">{es ? 'El personaje en tres estilos, en la portada' : 'The character in three styles, on the home page'}<ArrowRight size={18}/></a></p>
   </div>
+  <Lightbox shot={open} lang={lang} onClose={() => setOpen(null)}/>
   <nav data-c data-zone={es ? 'Siguiente' : 'Next'} className={`case-next wrap project-${next.id}`} aria-label={es ? 'Siguiente proyecto' : 'Next project'}><a href={`/proyectos/${next.slug}`} data-title={next.title}><span>{es ? 'Siguiente proyecto' : 'Next project'}</span><strong>{next.title}</strong><ArrowRight size={26}/></a></nav>
  </main>;
 }

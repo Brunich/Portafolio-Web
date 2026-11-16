@@ -1,9 +1,6 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-// La intro de la primera visita se salta: se prueba aparte.
-test.beforeEach(async ({ page }) => { await page.addInitScript(() => sessionStorage.setItem('bruno-intro', '1')); });
-
 test('portfolio has working bilingual navigation, project pages and CV', async ({ page, request }) => {
  // El servidor de Punto U se simula arriba: esta prueba revisa la página, no el estado de Supabase.
  await page.route('**/*supabase.co/**', r => r.fulfill({ status: 200, body: '' }));
@@ -13,7 +10,7 @@ test('portfolio has working bilingual navigation, project pages and CV', async (
   await expect(page.locator('html')).toHaveAttribute('lang','en');
   await expect(page.getByRole('link', {name:'View projects',exact:true})).toBeVisible();
   await page.getByRole('button', { name:'Cambiar a español' }).click();
-  await page.locator('.ol-list a[href="/proyectos/punto-u"]').click(); // Punto U va en la lista de «Otros trabajos»
+  await page.locator('.others-grid a[href="/proyectos/punto-u"]').click(); // Punto U va en «Otros trabajos»
   await expect(page).toHaveURL(/\/proyectos\/punto-u$/);
   await expect(page.getByRole('heading',{level:1})).toHaveText('Punto U');
   await expect(page.getByRole('heading',{name:'Cómo funciona'})).toBeVisible();
@@ -45,33 +42,35 @@ test('landing stays a summary: heavy demos live on their own pages', async ({pag
  await expect(page.locator('.dw-workbench')).toHaveCount(0);
  await expect(page.locator('.ld-stage')).toHaveCount(0);
  await expect(page.locator('.sh')).toHaveCount(0);
- // Cuatro bloques en orden: planta (A), negocio pequeño (B), juego (C) y la lista corta (D).
- await expect(page.locator('#projects .group-head .kicker')).toHaveText(['A · Turno en planta','B · Negocio pequeño']);
+ // Índice de once, un proyecto por parada en este orden y tres tarjetas de «Otros trabajos».
+ await expect(page.locator('.project-index li')).toHaveCount(11);
  const order = await page.locator('#projects .row').evaluateAll(rows=>rows.map(r=>r.id));
- expect(order).toEqual(['p-turno','p-csv','p-planta','p-spc','p-inventario','p-casa','p-club']);
- await expect(page.locator('#projects .group-head').first()).toContainText('INC-232');
- await expect(page.locator('.ol-list li')).toHaveCount(5);
- await expect(page.locator('.ol-list .other-card, .ol-list img')).toHaveCount(0); // lista de texto, sin tarjetas
- // Sin cifras de vitrina ni lemas de folleto.
- await expect(page.locator('.project-metrics')).toHaveCount(0);
- for (const old of ['Que vuelvan, sin quitarles tiempo.','Útiles para el mercado.','Todas se pueden probar.','Hobby profesional','Hablemos de tu proyecto','Tráiler de IA Rogue']) await expect(page.locator('main')).not.toContainText(old);
- // «En desarrollo» sólo donde es cierto: la lista corta, el juego y la versión Android en los datos de cada fila.
+ expect(order).toEqual(['p-turno','p-planta','p-spc','p-inventario','p-csv','p-casa','p-club']);
+ await expect(page.locator('#p-turno .group-line')).toContainText('misma planta');
+ await expect(page.locator('#p-turno .row-num')).toHaveText('01 / 07');
+ await expect(page.locator('.others-grid li')).toHaveCount(3);
+ // Sin lemas viejos de folleto.
+ for (const old of ['Todas se pueden probar.','Hobby profesional','Hablemos de tu proyecto','Tráiler de IA Rogue']) await expect(page.locator('main')).not.toContainText(old);
+ // «En desarrollo» sólo donde es cierto: otros trabajos, el juego, la línea de Android y los datos de cada fila.
  const withDev = await page.evaluate(()=>[...document.querySelectorAll('main *')]
   .filter(el=>el.children.length===0 && /en desarrollo|in development/i.test(el.textContent ?? ''))
-  .map(el=>el.closest('.ol-list, #graphics, .facts') ? 'ok' : (el.parentElement?.className ?? el.tagName)));
+  .map(el=>el.closest('.others-grid, .others-more, #graphics, .facts') ? 'ok' : (el.parentElement?.className ?? el.tagName)));
  expect(withDev.length).toBeGreaterThan(0);
  for (const c of withDev) expect(c).toBe('ok');
  // El límite cuida que no vuelvan los apartados largos.
  expect(await page.evaluate(()=>document.documentElement.scrollHeight)).toBeLessThan(15000);
- await page.locator('.hs-tabs button').nth(1).click();
- await page.locator('.hs-pos0 .ha-nav').getByRole('button',{name:'Completo'}).click();
- await expect(page.locator('.hs-pos0 .ha-csv-full')).toBeVisible();
+ // Tres accesos en el inicio: pasar encima cambia la vista grande, la fila abre la app y la flecha lleva a la ficha.
+ const access = page.locator('.hx-list > li');
+ await expect(access).toHaveCount(3);
+ await access.nth(1).hover();
+ await expect(access.nth(1)).toHaveClass(/\bon\b/);
+ await expect(access.nth(1).locator('.hx-page')).toHaveAttribute('href','/proyectos/entrega-de-turno');
+ await expect(access.nth(2).locator('.hx-open')).toHaveAttribute('href',/la-casa-del-angel\.vercel\.app/);
  // Lo interno abre en la misma pestaña con el telón; la app trae su «volver» a la ficha.
- await page.locator('.hs-pos0 .ha-nav').getByRole('link',{name:'Abrir'}).click();
- await expect(page).toHaveURL(/\/proyectos\/analizador-csv\/app$/);
- await expect(page.locator('#demo')).toBeInViewport();
+ await access.nth(0).locator('.hx-open').click();
+ await expect(page).toHaveURL(/\/proyectos\/planta\/app$/);
  await page.locator('.ax-back').click();
- await expect(page).toHaveURL(/\/proyectos\/analizador-csv$/);
+ await expect(page).toHaveURL(/\/proyectos\/planta$/);
  await expect(page.locator('html')).not.toHaveClass(/is-app/);
 });
 
@@ -87,8 +86,7 @@ test('internal links stay in the tab; external ones open a new one and say so', 
   await page.goto(path);
   const bad = await page.evaluate(()=>[...document.querySelectorAll<HTMLAnchorElement>('main a[href], footer a[href]')].filter(a=>{
    const out = new URL(a.href).origin !== location.origin && a.protocol.startsWith('http');
-   // El «Abrir» del visor de la portada aún trae target; la navegación lo ignora (lo prueba la prueba anterior).
-   return out ? a.target !== '_blank' || !/noopener/.test(a.rel) || !/noreferrer/.test(a.rel) || !a.querySelector('.sr-only') : a.target === '_blank' && a.pathname.startsWith('/proyectos/') && !a.closest('.ha-nav');
+   return out ? a.target !== '_blank' || !/noopener/.test(a.rel) || !/noreferrer/.test(a.rel) || !a.querySelector('.sr-only') : a.target === '_blank' && a.pathname.startsWith('/proyectos/');
   }).map(a=>a.href));
   expect(bad, path).toEqual([]);
  }
@@ -126,7 +124,7 @@ test('shift handover: an incident cannot be closed without evidence, and the han
 test('game block: cover, three thumbnails, pixel toggle and the IA Rogue page', async ({page})=>{
  await page.goto('/');
  const block=page.locator('#graphics');
- await expect(block.locator('.group-head .kicker')).toHaveText('C · Juego');
+ await expect(block.locator('.gd-stop h3')).toHaveText('IA Rogue');
  await expect(block.locator('.gd-thumbs a')).toHaveCount(3);
  const pixel=block.locator('.gd-pixel img');
  await pixel.scrollIntoViewIfNeeded();
@@ -223,13 +221,10 @@ test('stamp card from the NFC chip: one stamp a day, and the reward resets it',a
  await expect(page.getByLabel('Enlace del chip')).toHaveValue(/\/sello\?n=Caf%C3%A9\+Prueba&m=8/);
 });
 
-test('first visit shows the intro and it gets out of the way',async({browser})=>{
- const page=await browser.newPage();
+test('the first visit opens straight on the start, with no intro in between',async({page})=>{
  await page.goto('/');
- await expect(page.locator('#intro')).toBeVisible();
- await expect(page.locator('#intro')).toHaveCount(0,{timeout:6000});
+ await expect(page.locator('#intro')).toHaveCount(0);
  await expect(page.getByRole('heading',{level:1})).toContainText('Desarrollo web');
- await page.close();
 });
 
 test('on desktop each wheel step moves one zone, and the index jumps to a project',async({page})=>{
@@ -257,7 +252,7 @@ test('the three-styles character fits whole in one wheel stop, even on a small l
  await expect(page.locator('main [data-zone].zone-in')).toHaveAttribute('data-zone','Game dev');
  await page.waitForTimeout(1200);
  await page.mouse.move(700,400);
- // La parada de Game dev ahora es más alta: se avanza hasta llegar a la del personaje
+ // Se avanza hasta la parada del personaje (una rueda desde Game dev, con margen por si el telón tarda)
  for(let i=0;i<4;i++){
   if(await page.locator('main [data-zone].zone-in').getAttribute('data-zone')==='Tres estilos')break;
   await page.mouse.wheel(0,120);

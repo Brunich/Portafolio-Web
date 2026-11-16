@@ -83,7 +83,7 @@ function compute(t: Table, p: ColumnProfile[], c: Config): Point[] {
 function draw(pts: Point[], c: Config, colors: string[], K: Ink, xName: string, yName: string, es: boolean): string {
  const W = 880, H = 500, L = c.kind === 'hbar' ? 170 : 70, R = 30, T = 70, B = c.kind === 'hbar' ? 40 : 86;
  const iw = W - L - R, ih = H - T - B;
- const font = `font-family="Archivo Variable, Archivo, Segoe UI, Arial, sans-serif"`;
+ const font = `font-family="DM Sans Variable, DM Sans, Segoe UI, Arial, sans-serif"`;
  let body = '';
  const title = `<text x="${L}" y="36" ${font} font-size="22" font-weight="700" fill="${K.text}">${esc(c.title)}</text><text x="${L}" y="58" ${font} font-size="13" fill="${K.muted}">${esc(c.kind === 'scatter' ? `${yName} contra ${xName}` : c.kind === 'hist' ? (es ? `Número de filas por rango de ${xName}` : `Rows per ${xName} range`) : `${c.y < 0 || c.agg === 'count' ? (es ? 'Filas' : 'Rows') : `${AGGS.find(a => a[0] === c.agg)![es ? 1 : 2]} de ${yName}`} · ${xName}`)}</text>`;
  if (!pts.length) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}"><rect width="${W}" height="${H}" rx="3" fill="${K.bg}" stroke="${K.line}"/>${title}<text x="${W / 2}" y="${H / 2}" ${font} text-anchor="middle" fill="${K.muted}" font-size="15">${es ? 'No hay números en esa columna.' : 'No numbers in that column.'}</text></svg>`;

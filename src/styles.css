@@ -1,19 +1,21 @@
 /* Base del sitio: tokens, elementos y componentes compartidos. La distribución de cada página
    vive en layout.css (portada) y pages.css (proyectos y páginas sueltas). */
 
-/* Hoja de proceso: papel e tinta, un solo acento. Las demos leen estos mismos nombres. */
+/* Papel y tinta con un acento petróleo: sólo en botones, enlaces y cifras, nunca en superficies grandes.
+   Las demos leen estos mismos nombres. */
 :root{
  --bg:#efece4;--surface:#f6f4ee;--surface-2:#e6e2d7;--line:#cdc8bb;--line-strong:#1c1d1a;
- --text:#1c1d1a;--muted:#5d5f58;--accent:#c4461b;--accent-ink:#ffffff;
+ --text:#1c1d1a;--muted:#5d5f58;--accent:#1d5a6e;--accent-ink:#ffffff;
  --ok:#357044;--warn:#856010;--bad:#a8322a;
- --font:'Archivo Variable',system-ui,sans-serif;--mono:'JetBrains Mono Variable',ui-monospace,monospace;--radius:3px;
+ --font:'DM Sans Variable',system-ui,sans-serif;--display:'Bricolage Grotesque Variable','DM Sans Variable',system-ui,sans-serif;
+ --mono:'JetBrains Mono Variable',ui-monospace,monospace;--radius:3px;
  /* Las demos aún piden estos nombres viejos; apuntan a los de arriba mientras se migran */
- --k-ok:var(--ok);--k-warn:var(--warn);--k-bad:var(--bad);--display:var(--font);--serif:var(--font);
+ --k-ok:var(--ok);--k-warn:var(--warn);--k-bad:var(--bad);--serif:var(--font);
  color-scheme:light;font-synthesis:none
 }
 @media(prefers-color-scheme:dark){:root{
  --bg:#171815;--surface:#1f201c;--surface-2:#282a25;--line:#3a3c35;--line-strong:#ece9df;
- --text:#ece9df;--muted:#a4a69c;--accent:#e0633a;--accent-ink:#171815;
+ --text:#ece9df;--muted:#a4a69c;--accent:#7dbccb;--accent-ink:#171815;
  --ok:#7fb58c;--warn:#d3a53c;--bad:#e07a6f;color-scheme:dark
 }}
 /* Las demos que esperan el color de su proyecto reciben el acento */
@@ -21,7 +23,7 @@
 
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:84px;overflow-x:clip}
-body{margin:0;min-width:320px;overflow-x:clip;background:var(--bg);color:var(--text);font:400 16px/1.6 var(--font)}
+body{margin:0;min-width:320px;overflow-x:clip;background:var(--bg);color:var(--text);font:400 16px/1.6 var(--font);font-optical-sizing:auto}
 button,input,textarea,select{font:inherit}
 button,a{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 button{cursor:pointer;color:inherit}
@@ -30,7 +32,7 @@ a{color:inherit;text-decoration:none}
 :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 ::selection{background:var(--text);color:var(--bg)}
 h1,h2,h3,h4,p{margin:0}
-h1,h2,h3,h4{font-family:var(--font);font-weight:600;letter-spacing:-.01em;text-wrap:balance}
+h1,h2,h3,h4{font-family:var(--display);font-weight:600;letter-spacing:-.01em;text-wrap:balance}
 p{line-height:1.6}
 svg{vertical-align:middle;flex-shrink:0}
 img{display:block;max-width:100%}
@@ -38,7 +40,7 @@ section{scroll-margin-top:84px}
 
 .wrap{width:calc(100% - 112px);max-width:1240px;margin-inline:auto}
 @media(max-width:1100px){.wrap{width:calc(100% - 64px)}}
-@media(max-width:760px){.wrap{width:calc(100% - 32px)}}
+@media(max-width:760px){.wrap{width:calc(100% - 40px)}}
 
 .skip-link{position:fixed;left:16px;top:-100px;z-index:100;padding:12px 16px;background:var(--text);color:var(--bg)}
 .skip-link:focus{top:16px}

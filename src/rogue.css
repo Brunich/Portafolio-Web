@@ -7,20 +7,32 @@
 .rg-cap span:first-child{color:var(--text)}
 
 /* Ficha */
-.rg-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:clamp(24px,5vw,72px);margin-top:16px;padding:24px 0 32px;border-top:1px solid var(--line-strong)}
-.rg-head h1{margin-top:14px;font-size:clamp(44px,5.4vw,84px);line-height:1;font-weight:650;font-stretch:115%;letter-spacing:-.025em}
-.rg-head .pitch{margin-top:6px;font-size:21px}
-.rg-head p:not(.pitch):not(.facts){max-width:62ch;margin-top:14px;font-size:17px;color:var(--muted)}
-.rg-cover{margin-bottom:clamp(48px,6vw,88px)}
-.rg-section{padding-bottom:clamp(48px,6vw,88px)}
+.rg-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:clamp(24px,5vw,72px);align-items:start;margin-top:12px;padding:28px 0 32px;border-top:1px solid var(--line-strong)}
+.rg-head .project-kind{font:500 13px/1.5 var(--font);letter-spacing:0;text-transform:none}
+.rg-head h1{margin-top:12px;font:600 clamp(40px,5vw,64px)/1 var(--display);letter-spacing:-.01em}
+.rg-head .pitch{margin-top:0;font-size:21px;line-height:1.4}
+.rg-head p:not(.pitch):not(.facts){max-width:62ch;margin-top:12px;font-size:17px;line-height:1.6;color:var(--muted)}
+.rg-head .facts{margin-top:16px;font:400 15px/1.5 var(--font)}
+.rg-head .facts{gap:4px 18px}.rg-head .facts span+span::before{content:none}
+.rg-cover{margin-bottom:clamp(40px,5vw,64px)}
+.rg-section{padding-bottom:clamp(40px,5vw,64px)}
 .rg-section-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:8px clamp(24px,5vw,72px);align-items:baseline;margin-bottom:20px;padding-top:14px;border-top:1px solid var(--line-strong)}
-.rg-section-head h2{font-size:clamp(26px,2.6vw,36px);line-height:1.08;font-weight:620;font-stretch:112%}
+.rg-section-head h2{font:600 clamp(26px,2.6vw,36px)/1.1 var(--display)}
 .rg-section-head p{max-width:60ch;color:var(--muted)}
 .rg-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
 .rg-grid.rg-three{grid-template-columns:repeat(3,minmax(0,1fr))}
 /* Con cinco lugares, el pueblo abre la serie a todo el ancho */
 .rg-grid:not(.rg-three)>.rg-fig:first-child:nth-last-child(odd){grid-column:1/-1}
 .rg-more{margin:0 0 8px}
+/* La foto es un botón: se toca para verla a pantalla completa */
+.rg-open{display:block;width:100%;padding:0;border:0;background:none;cursor:zoom-in;color:inherit}
+.rg-open:focus-visible{outline:2px solid var(--accent);outline-offset:-4px}
+.rg-lightbox{width:min(96vw,1500px,calc((100vh - 200px)*1.7778));max-width:none;max-height:96vh;margin:auto;padding:0;border:0;background:transparent;overflow:visible}
+.rg-lightbox::backdrop{background:#171815ee}
+.rg-lightbox .rg-fig img{max-height:calc(96vh - 48px);object-fit:contain}
+.rg-close{position:absolute;top:-52px;right:0;display:grid;place-items:center;width:48px;height:48px;border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--bg);color:var(--text);cursor:pointer}
+.rg-close:hover{border-color:var(--accent);color:var(--accent)}
+.rg-close:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 /* Bloque C de la portada: portada a la izquierda, texto y miniaturas a la derecha */
 .gd-feature{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(0,1fr);gap:16px clamp(24px,3.5vw,48px);align-items:start}
@@ -41,4 +53,30 @@
 .gd-pixel .pano-pixel{top:12px;right:12px}
 
 @media(max-width:980px){.gd-feature{grid-template-columns:1fr}.rg-head,.rg-section-head{grid-template-columns:1fr}}
-@media(max-width:760px){.rg-grid,.rg-grid.rg-three{grid-template-columns:1fr}.rg-head .pitch{font-size:19px}.rg-head p:not(.pitch):not(.facts){font-size:16px}}
+/* Móvil: la portada va primero, «Lugares» en dos columnas y el agua en carrusel con imán */
+@media(max-width:760px){
+ .case-rogue>.wrap{display:flex;flex-direction:column;width:calc(100% - 40px)}
+ .case-rogue .case-back{order:0;align-self:flex-start}
+ .case-rogue .rg-cover{order:1;margin:8px 0 0}
+ .case-rogue .rg-head{order:2;margin-top:20px;padding:20px 0 28px;gap:12px}
+ .case-rogue .rg-section{order:3;padding-bottom:36px}
+ .case-rogue .rg-more{order:4}
+ .rg-head h1{font-size:34px}
+ .rg-head .pitch{font-size:18px}
+ .rg-head p:not(.pitch):not(.facts){font-size:16px}
+ .rg-section-head{gap:6px;margin-bottom:14px}
+ .rg-section-head h2{font-size:28px}
+ .rg-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .rg-grid:not(.rg-three)>.rg-fig:first-child:nth-last-child(odd){grid-column:auto}
+ .rg-grid .rg-cap span:not(:first-child){display:none}
+ .rg-grid .rg-cap{padding:6px 8px;font-size:12px}
+ .rg-grid.rg-three{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;margin-inline:-20px;padding-inline:20px;scroll-padding-inline:20px;scrollbar-width:none}
+ .rg-grid.rg-three::-webkit-scrollbar{display:none}
+ .rg-grid.rg-three>.rg-fig{flex:0 0 85%;scroll-snap-align:start}
+ .rg-grid.rg-three .rg-cap span:not(:first-child){display:inline}
+ .rg-grid.rg-three:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+ .rg-more .inline-link{min-height:48px}
+ .rg-lightbox{width:100vw;max-width:100vw;max-height:100vh}
+ .rg-lightbox .rg-fig{border-inline:0}
+ .rg-close{top:-56px;right:12px}
+}

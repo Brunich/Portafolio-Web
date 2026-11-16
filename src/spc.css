@@ -67,8 +67,11 @@ html[data-motion=paused] .spc-chart circle{animation:none;opacity:1}
 /* Celular: la gráfica conserva un tamaño que se lee y se desliza de lado */
 @media(max-width:700px){.spc-charts figure{overflow-x:auto;overscroll-behavior-x:contain}.spc-chart.k-x{min-width:660px}.spc-chart.k-r{min-width:660px}.spc-charts figcaption{position:sticky;left:0}}
 /* Vista previa (portada y cabecera del caso) */
-.spcp{display:grid;place-items:center;height:100%;padding:7% 6%}
-.spcp svg{width:100%;height:auto;overflow:visible}
+/* Las dos gráficas se reparten el marco: individuos arriba y rango móvil abajo, como en la app */
+.spcp{display:grid;grid-template-rows:minmax(0,1.9fr) minmax(0,1fr);gap:4%;height:100%;padding:6% 5%}
+.spcp svg{width:100%;height:100%;overflow:visible}
+.spcp .ttl{fill:var(--text,#1c1d1a);text-transform:uppercase;letter-spacing:.05em}
+.spcp .base{stroke:var(--line,#cdc8bb);stroke-width:1}
 .spcp .zone{fill:color-mix(in srgb,var(--text,#1c1d1a) 7.1%,transparent)}
 .spcp .lim{stroke:var(--text,#1c1d1a);stroke-width:1.4;stroke-dasharray:6 5}
 .spcp .cl{stroke:var(--muted,#5d5f58);stroke-width:1.4}
@@ -105,3 +108,6 @@ html[data-motion=paused] .spcp .ln{animation:none;stroke-dashoffset:0}
 .spc-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* En celular las tablas se deslizan dentro de su tarjeta, sin ensanchar la página */
 .spc,.spc-features,.spc-studies{grid-template-columns:minmax(0,1fr)}
+
+/* Móvil: las etiquetas de la gráfica a 13 px */
+@media(max-width:760px){.spcp text{font-size:13px}}

@@ -4,20 +4,23 @@
 .cc-gauge svg{width:100%;height:100%;transform:rotate(-90deg)}
 .cc-track{fill:none;stroke:var(--line,#cdc8bb);stroke-width:10}
 .cc-arc{fill:none;stroke:var(--text,#1c1d1a);stroke-width:10;stroke-linecap:butt;stroke-dasharray:100;animation:cc-arc 8s cubic-bezier(.65,0,.35,1) infinite}
-@keyframes cc-arc{0%,8%{stroke-dashoffset:100;stroke:var(--bad,#a8322a)}30%,40%{stroke-dashoffset:32;stroke:var(--bad,#a8322a)}60%,90%{stroke-dashoffset:2;stroke:var(--ok,#3d7a4b)}100%{stroke-dashoffset:100;stroke:var(--bad,#a8322a)}}
+/* El anillo es lo resuelto: vacío con los 7 encontrados, 6 de 7 (86 %) al final */
+@keyframes cc-arc{0%,40%{stroke-dashoffset:100;stroke:var(--ok,#3d7a4b)}60%,90%{stroke-dashoffset:14;stroke:var(--ok,#3d7a4b)}100%{stroke-dashoffset:100;stroke:var(--ok,#3d7a4b)}}
 .cc-score{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
 .cc-score b{position:relative;display:block;height:1.05em;font:700 clamp(38px,4.6vw,54px)/1.05 var(--mono,'JetBrains Mono Variable',monospace);overflow:hidden}
 .cc-score b span{display:block;animation:cc-num 8s cubic-bezier(.65,0,.35,1) infinite}
 .cc-before{color:var(--bad,#a8322a)}.cc-after{color:var(--text,#1c1d1a)}
 @keyframes cc-num{0%,45%{transform:translateY(0)}55%,92%{transform:translateY(-100%)}100%{transform:translateY(0)}}
-.cc-score small{font-family:var(--mono,'JetBrains Mono Variable',monospace);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted,#5d5f58)}
+.cc-score small{display:block;height:1.3em;overflow:hidden;font-family:var(--mono,'JetBrains Mono Variable',monospace);font-size:11px;line-height:1.3;letter-spacing:.06em;text-transform:uppercase;color:var(--muted,#5d5f58)}
+.cc-score small span{display:block;animation:cc-num 8s cubic-bezier(.65,0,.35,1) infinite}
 .cc-bars{display:grid;gap:9px;min-width:0}
 .cc-title{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--text,#1c1d1a);margin-bottom:4px}
 .cc-row{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 18px;gap:10px;align-items:center;font-size:12.5px}
 .cc-label{color:var(--muted,#5d5f58);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cc-bar{height:8px;border-radius:var(--radius,3px);background:var(--surface-2,#e6e2d7);overflow:hidden}
 .cc-bar i{display:block;height:100%;width:var(--w);border-radius:var(--radius,3px);background:var(--bad,#a8322a);transform-origin:left;animation:cc-bar 8s cubic-bezier(.65,0,.35,1) infinite;animation-delay:var(--d)}
-@keyframes cc-bar{0%{transform:scaleX(0)}20%,45%{transform:scaleX(1);background:var(--bad,#a8322a)}62%,92%{transform:scaleX(0);background:var(--ok,#3d7a4b)}100%{transform:scaleX(0)}}
+/* Lo mecánico no desaparece: queda en verde como arreglado, igual que la leyenda */
+@keyframes cc-bar{0%{transform:scaleX(0)}20%,45%{transform:scaleX(1);background:var(--bad,#a8322a)}62%,92%{transform:scaleX(1);background:var(--ok,#3d7a4b)}100%{transform:scaleX(0)}}
 .cc-row.stays-rule .cc-bar i{animation-name:cc-stay}
 @keyframes cc-stay{0%{transform:scaleX(0)}20%,92%{transform:scaleX(1);background:var(--warn,#a87a12)}100%{transform:scaleX(0)}}
 .cc-n{text-align:right;font-weight:700;color:var(--text,#1c1d1a)}
@@ -25,4 +28,28 @@
 .cc-legend i{width:10px;height:10px;border-radius:var(--radius,3px);display:inline-block}
 .cc-legend i.fix{background:var(--ok,#3d7a4b)}.cc-legend i.rule{background:var(--warn,#a87a12);margin-left:10px}
 html[data-motion=paused] .cc *{animation-play-state:paused!important}
+/* Medido contra el marco: en una parada alta el medidor va arriba y las barras abajo, ambos a tamaño de lectura */
+.cc-frame{container-type:size;height:100%}
+.cc-frame .cc{gap:min(5cqi,44px);padding:min(7cqi,56px)}
+.cc-frame .cc-gauge{max-width:min(36cqi,300px)}
+.cc-frame .cc-score b{font-size:min(9cqi,72px)}
+.cc-frame .cc-score small{font-size:max(11px,min(1.8cqi,13px))}
+.cc-frame .cc-bars{gap:min(2.2cqb,16px)}
+.cc-frame .cc-row{font-size:max(12.5px,min(2.3cqi,16px));grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 2ch}
+.cc-frame .cc-bar{height:max(8px,1.4cqi)}
+.cc-frame .cc-legend{font-size:max(11.5px,min(1.9cqi,14px))}
+@container (max-aspect-ratio:1.15/1){.cc-frame .cc{grid-template-columns:minmax(0,1fr);align-content:center}.cc-frame .cc-gauge{max-width:min(40cqi,34cqb)}}
 @media(max-width:560px){.cc{grid-template-columns:1fr;gap:14px}.cc-gauge{max-width:140px}}
+
+/* Móvil: medidor más chico, tres filas y letra de 13 px; la leyenda se quita */
+@media(max-width:760px){
+ .cc-frame .cc{gap:8px;padding:14px;align-content:center}
+ .cc-frame .cc-gauge{max-width:min(34cqb,104px)}
+ .cc-frame .cc-score b{font-size:30px}
+ /* El rótulo baja fuera del anillo: dentro de 104 px se encimaba con el número */
+ .cc-frame .cc-gauge{margin-bottom:18px}
+ .cc-frame .cc-score small{position:absolute;top:calc(100% + 4px);left:-40px;right:-40px;font-size:12px}
+ .cc-frame .cc-row{font-size:13px}
+ .cc-frame .cc-bars{gap:6px}
+ .cc-frame .cc-bars>div:nth-of-type(n+4),.cc-legend{display:none}
+}
