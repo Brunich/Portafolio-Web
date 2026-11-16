@@ -126,18 +126,33 @@ html[data-motion=paused] .sh *{animation:none!important}
 .shp-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:var(--radius,3px) 0 0 var(--radius,3px);background:var(--s)}
 .shp-card em{font:700 9px var(--mono,'JetBrains Mono Variable',monospace);font-style:normal;letter-spacing:.08em;color:var(--s)}
 .shp-card code{position:absolute;right:10px;top:8px;font:600 9.5px var(--mono,'JetBrains Mono Variable',monospace);color:var(--muted,#5d5f58)}
-.shp-card b{font:600 12px/1.25 var(--font,'Archivo Variable',sans-serif);color:var(--text,#1c1d1a)}
+.shp-card b{font:600 12px/1.25 var(--font,sans-serif);color:var(--text,#1c1d1a)}
 .shp-sla{height:3px;border-radius:var(--radius,3px);background:var(--surface-2,#e6e2d7);overflow:hidden}
 .shp-sla i{display:block;height:100%;width:60%;background:var(--s)}
 /* Sin animación cada tarjeta queda en su columna, para que el tablero se lea igual quieto */
 .shp-card.k0{top:22%}.shp-card.k1{top:40%;animation-delay:-3s;transform:translateX(calc(100% + 26px))}.shp-card.k2{top:22%;animation-delay:-6s;transform:translateX(calc(200% + 52px))}
-@keyframes shp-move{0%,18%{transform:translateX(0)}30%,52%{transform:translateX(calc(100% + 26px))}64%,86%{transform:translateX(calc(200% + 52px))}100%{transform:translateX(calc(200% + 52px));opacity:0}}
+@keyframes shp-move{0%,18%{transform:translateX(0);opacity:1}30%,52%{transform:translateX(calc(100% + 26px))}64%,86%{transform:translateX(calc(200% + 52px));opacity:1}100%{transform:translateX(calc(200% + 52px));opacity:0}}
 .shp-log{position:absolute;left:clamp(18px,4%,32px);right:clamp(18px,4%,32px);bottom:clamp(14px,3%,24px);margin:0;padding:10px 12px;list-style:none;border-radius:var(--radius,3px);background:var(--surface,#f6f4ee);border:1px solid var(--line,#cdc8bb);font:500 11px/1.6 var(--mono,'JetBrains Mono Variable',monospace);color:var(--text,#1c1d1a)}
 .shp-log time{color:var(--muted,#5d5f58);margin-right:8px}
 .shp-log li{animation:shp-type 9s steps(28) calc(var(--i) * 3s) infinite;white-space:nowrap;overflow:hidden}
 @keyframes shp-type{0%{clip-path:inset(0 100% 0 0)}12%,100%{clip-path:inset(0 0 0 0)}}
 html[data-motion=paused] .shp *{animation-play-state:paused!important}
-@media(max-width:600px){.shp-card em{white-space:nowrap;letter-spacing:0}.shp-log li:nth-child(3){display:none}.shp-card code{display:none}.shp-card b{font-size:11px}.shp-log{font-size:10px;line-height:1.5;padding:8px 10px}.shp-log time{display:none}}
+/* La letra crece con el marco: en una parada grande el tablero se lee como el de la app, no como miniatura */
+.shp{container-type:size;--lf:max(11px,min(1.9cqi,13.5px));--lp:min(1.8cqi,14px)}
+/* Las columnas bajan hasta la bitácora en lugar de cortarse a dos tercios */
+.shp-cols{bottom:calc(clamp(14px,3%,24px) + var(--lf) * 4.8 + var(--lp) * 2 + 14px)}
+.shp-card.still{animation:none;transform:translateX(calc(200% + 52px))}
+.shp-card.s0{top:58%}.shp-card.s1{top:73%}
+@container (max-height:600px){.shp-card.s1{display:none}}
+@container (max-height:450px){.shp-card.still{display:none}}
+.shp-col span{font-size:max(10.5px,min(1.8cqi,13px))}
+.shp-card{gap:min(.9cqb,7px);padding:min(1.6cqi,12px) min(1.8cqi,14px) min(1.6cqi,12px) min(2cqi,16px)}
+.shp-card em{font-size:max(9px,min(1.6cqi,11.5px))}
+.shp-card code{font-size:max(9.5px,min(1.6cqi,11.5px));top:min(1.6cqi,12px);right:min(1.8cqi,14px)}
+.shp-card b{font-size:max(12px,min(2.6cqi,17px))}
+.shp-sla{height:max(3px,.7cqb)}
+.shp-log{font-size:var(--lf);padding:var(--lp) min(2cqi,16px)}
+@media(max-width:600px){.shp-card em{white-space:nowrap;letter-spacing:0}.shp-log li:nth-child(2){display:none}.shp-card code{display:none}.shp-card b{font-size:11px}.shp-log{font-size:10px;line-height:1.5;padding:8px 10px}.shp-log time{display:none}}
 /* Filtros por línea y severidad */
 .sh-filters{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:2px}
 .sh-filters>span{width:1px;height:22px;background:var(--line,#cdc8bb);margin:0 4px}
@@ -227,3 +242,16 @@ html[data-motion=paused] .shp *{animation-play-state:paused!important}
 .sh-history summary em{font-style:normal;color:var(--bad,#a8322a)}
 .sh-history pre{margin:0;padding:0 14px 12px;white-space:pre-wrap;font:12.5px/1.5 var(--mono,'JetBrains Mono Variable',monospace);color:var(--text,#1c1d1a)}
 @media(max-width:700px){.sh-setup{grid-template-columns:1fr}}
+
+/* Móvil: tres columnas y tarjetas a 13 px; la severidad se lee por la barra de color y se quita la etiqueta de 9 px */
+@media(max-width:760px){
+ /* El marco del celular mide menos de 300 px; con el mínimo de escritorio la bitácora quedaba debajo del borde */
+ .shp{min-height:0}
+ .shp-col span{font:600 13px var(--font);letter-spacing:0;text-transform:none}
+ .shp-cols{bottom:38%}
+ .shp-card em{display:none}
+ .shp-card b{font-size:13px}
+ .shp-log{font-size:12px;line-height:1.45}
+ /* A este ancho la segunda entrada no cabe en un renglón: parte en dos en vez de cortarse */
+ .shp-log li{white-space:normal}
+}

@@ -3,7 +3,7 @@
 // Va en un iframe escondido y no en una ventana nueva, para que el navegador no lo bloquee.
 export const esc = (s: string | number) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
 
-const CSS = `@page{margin:14mm}*{box-sizing:border-box}body{margin:0;font:12.5px/1.45 Archivo,'Helvetica Neue',Arial,sans-serif;color:#1c1d1a;background:#fff}
+const CSS = `@page{margin:14mm}*{box-sizing:border-box}body{margin:0;font:12.5px/1.45 'DM Sans Variable','DM Sans','Helvetica Neue',Arial,sans-serif;color:#1c1d1a;background:#fff}
 header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:2px solid #1c1d1a;padding-bottom:8px;margin-bottom:14px}
 h1{margin:0;font-size:21px;font-weight:700}header p{margin:2px 0 0;color:#4a4c46}header small{color:#4a4c46;text-align:right;font-family:'JetBrains Mono',Consolas,monospace;font-size:10.5px}
 h2{margin:20px 0 6px;padding-bottom:3px;border-bottom:1px solid #1c1d1a;font:700 11px 'JetBrains Mono',Consolas,monospace;text-transform:uppercase;letter-spacing:.08em}

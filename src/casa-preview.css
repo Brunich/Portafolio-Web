@@ -10,10 +10,15 @@
 .cap-phone img{animation:cap-scroll 22s cubic-bezier(.65,0,.35,1) -4s infinite}
 /* Se detiene en cada sección, como alguien que la está leyendo, y regresa arriba. */
 @keyframes cap-scroll{0%,12%{object-position:50% 0}26%,38%{object-position:50% 30%}52%,64%{object-position:50% 62%}78%,88%{object-position:50% 100%}100%{object-position:50% 0}}
-/* En la tarjeta de la portada el marco ya tiene proporción fija: la ventana lo llena entero
-   (si no, sobraban franjas vacías) y el celular se apoya encima, en la orilla derecha. */
-.project-media .cap{display:block}
-.project-media .cap-web{position:absolute;inset:0;aspect-ratio:auto;border:0;border-radius:0}
-.project-media .cap-phone{position:absolute;right:3%;bottom:4%;height:88%;width:auto;margin:0;border-width:5px;border-radius:18px}
+/* En la portada la ventana llena el marco y se queda en la portada real (las terrazas), sin recorrerse.
+   El celular va encima de la foto de la terraza, no de un texto: la captura escala con el ancho,
+   así que su lugar se mide en cqi (la foto ocupa del 53 % al 93 % del ancho y empieza al 11 %). */
+.project-media .cap,.hx .cap{display:block;height:100%;container-type:inline-size}
+.project-media .cap-web,.hx .cap-web{position:absolute;inset:0;aspect-ratio:auto;border:0;border-radius:0}
+.project-media .cap-phone,.hx .cap-phone{position:absolute;left:66cqi;top:calc(26px + 11.4cqi);width:13.6cqi;height:auto;margin:0;border-width:3px;border-radius:12px}
+.project-media .cap img,.hx .cap img{animation:none}
 html[data-motion=paused] .cap img{animation-play-state:paused}
 @media (prefers-reduced-motion:reduce){.cap img{animation:none}}
+
+/* Móvil: la barra de la dirección a 12 px; el celular se quita de la portada porque a ese tamaño no se lee */
+@media(max-width:760px){.cap-dots b{font-size:12px}.project-media .cap-phone,.hx .cap-phone{display:none}}

@@ -26,7 +26,7 @@ import AgentePreview from './AgentePreview';
 import ClubPreview from './ClubPreview';
 import CsvChart from './CsvChart';
 import TurnoPreview from './TurnoPreview';
-import HeroShowcase, { NfcTap } from './HeroShowcase';
+import HeroAccess, { NfcTap, Hold } from './HeroShowcase';
 import './layout.css';
 import './pages.css';
 import { curtain } from './transition';
@@ -36,14 +36,18 @@ import AppShell, { BRANDS } from './AppShell';
 
 type Native = { es: string; en: string; href?: string; android?: boolean };
 
-// La portada va en cuatro bloques: lo que comparte la planta ficticia, lo de negocio pequeño, el juego y una lista corta.
+// La portada sigue la historia de la planta (incidencia, OEE, control, almacén y reporte suelto),
+// luego lo de negocio pequeño, el juego y una fila corta de otros trabajos.
 // 'rogue' no es un proyecto de la lista: sólo marca dónde entra su ficha en la cadena de «siguiente proyecto».
-const PROJECT_ORDER = ['turno', 'csv', 'planta', 'spc', 'inventario', 'casa', 'club', 'rogue', 'vibe', 'punto', 'agente'];
-type Group = { letter: string; ids: string[]; name: [string, string]; line: [string, string] };
-const GROUPS: Group[] = [
- { letter: 'A', ids: ['turno', 'csv', 'planta', 'spc', 'inventario'], name: ['Turno en planta', 'Plant shift'], line: ['Las cinco usan la misma planta ficticia: Líneas 1 a 3, lotes 4411 a 4428 y folios INC-221 a INC-232. La INC-232, en curso en Entrega de turno, aparece en Planta como el paro de la Línea 1; el inventario es el de su almacén de consumibles.', 'All five use the same made-up plant: Lines 1 to 3, batches 4411 to 4428 and tickets INC-221 to INC-232. INC-232, in progress in Shift handover, shows up in Plant as Line 1’s stop; the inventory is its consumables stockroom.'] },
- { letter: 'B', ids: ['casa', 'club'], name: ['Negocio pequeño', 'Small business'], line: ['Para negocios que atienden al cliente de frente. La Casa del Ángel es un trabajo para un cliente real y está en uso; NFC para negocios funciona y se puede adaptar a otro local.', 'For businesses that serve customers face to face. La Casa del Ángel was built for a real client and is in use; NFC for businesses works and can be adapted to another shop.'] },
-];
+const PROJECT_ORDER = ['turno', 'planta', 'spc', 'inventario', 'csv', 'casa', 'club', 'rogue', 'vibe', 'punto', 'agente'];
+const MAIN = ['turno', 'planta', 'spc', 'inventario', 'csv', 'casa', 'club'];
+// El primero de cada grupo lleva una línea que dice qué los une.
+const GROUP_LINE: Record<string, [string, string]> = {
+ turno: ['Cinco apps sobre la misma planta de ejemplo: lotes y folios coinciden.', 'Five apps on the same sample plant: batches and tickets match.'],
+ casa: ['Para negocios que atienden de frente.', 'For businesses that serve customers face to face.'],
+};
+// Cuánto corre cada vista previa antes de quedarse quieta (el cuadro donde se entiende qué hace la app).
+const HOLD: Record<string, number> = { turno: 4500, planta: 3000, spc: 3500, inventario: 2800, csv: 6000, casa: 0, club: 6500, agente: 4000 };
 const OTHER = ['vibe', 'punto', 'agente'];
 const ROGUE = { id: 'rogue', slug: 'ia-rogue', title: 'IA Rogue' };
 type Project = ReturnType<typeof professional>['projects'][number];
@@ -143,37 +147,59 @@ function Home({ lang, paused, projects }: { lang: Lang; paused: boolean; project
  const others = OTHER.map(byId);
  const cv = es ? '/cv/Bruno-Salas-ES.pdf' : '/cv/Bruno-Salas-EN.pdf';
  const jump = (id: string) => () => void glideTo(document.getElementById(id));
+ // En móvil el índice va plegado; en escritorio el botón no se ve y la lista siempre está abierta.
+ const [fold, setFold] = useState(false);
+ const main = MAIN.map(byId);
+ // Índice: los siete proyectos, el juego y los tres de la fila corta, en el orden en que aparecen al bajar.
+ const index: { id: string; title: string; kind: string; to: string; open?: [string, string, boolean] }[] = [
+  ...main.map(x => ({ id: x.id, title: x.title, kind: x.kind, to: `p-${x.id}`, open: openOf(x, es) })),
+  { id: 'rogue', title: 'IA Rogue', kind: es ? 'Juego · Godot 4' : 'Game · Godot 4', to: 'graphics', open: [`/proyectos/${ROGUE.slug}`, es ? 'Ver la ficha' : 'See the page', false] },
+  ...others.map(x => ({ id: x.id, title: x.title, kind: x.kind, to: 'otros', open: openOf(x, es) })),
+ ];
  return <main id="main">
   <section id="home" className="hero wrap" data-zone={es ? 'Inicio' : 'Home'}>
-   <dl className="hero-sheet">{(es
-    ? [['Lugar', 'Monterrey, N. L.'], ['Carrera', 'Ing. en Software · UANL 2023–2028'], ['Idiomas', 'ES / EN / PT'], ['Hoja', '00 · Portada']]
-    : [['Place', 'Monterrey, Mexico'], ['Degree', 'Software Eng. · UANL 2023–2028'], ['Languages', 'ES / EN / PT'], ['Sheet', '00 · Cover']]).map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
-   <div className="hero-copy"><h1>{p.title} {p.accent}</h1><p>{p.intro}</p><div className="hero-actions"><a className="button primary" href="#projects">{c.view}<ArrowDown size={18}/></a><a className="button secondary" href={cv} download>{es ? 'Descargar CV' : 'Download CV'}<DownloadSimple size={18}/></a></div></div>
-   <div className="hero-workbench"><span className="hero-label">{es ? 'Fig. 1 · Tres apps en vivo' : 'Fig. 1 · Three live apps'}</span><HeroShowcase lang={lang} paused={paused}/></div>
+   <div className="hero-copy">
+    <h1>{p.title} {p.accent}</h1>
+    <p className="hero-intro">{p.intro}</p>
+    <div className="hero-actions"><a className="button primary" href="#projects">{c.view}<ArrowDown size={18}/></a><a className="button secondary" href={cv} download>{es ? 'Descargar CV' : 'Download CV'}<DownloadSimple size={18}/></a></div>
+    {/* Dos renglones fijos: lugar y carrera arriba, idiomas abajo; así no queda una palabra sola */}
+    <p className="hero-data"><span>{es ? 'Monterrey, N. L. · Ingeniería en Software, UANL 2023–2028' : 'Monterrey, Mexico · Software Engineering, UANL 2023–2028'}</span> <span>{es ? 'Español, inglés y portugués' : 'Spanish, English and Portuguese'}</span></p>
+   </div>
+   <HeroAccess lang={lang}/>
   </section>
-  <section id="projects" className="wrap section-space"><div className="projects-intro" data-zone={es ? 'Proyectos' : 'Projects'}><div className="section-heading"><div><span className="kicker">01 · {es ? 'Proyectos' : 'Projects'}</span><h2>{p.projectsTitle}</h2><p>{p.projectsIntro}</p></div></div>
-   {/* Índice en cuatro columnas, una por bloque: cabe en una pantalla aunque sean diez proyectos */}
-   <div className="project-index">
-    {GROUPS.map(g => <div key={g.letter} className="pi-group"><span className="pi-head">{g.letter} · {g.name[L]}</span><ol>{g.ids.map(id => { const x = byId(id); return <li key={id} className={`project-${id}`}><button onClick={jump(`p-${id}`)}><strong>{x.title}</strong><ArrowDown size={16}/></button></li>; })}</ol></div>)}
-    <div className="pi-group"><span className="pi-head">C · {es ? 'Juego' : 'Game'}</span><ol><li><button onClick={jump('graphics')}><strong>IA Rogue</strong><ArrowDown size={16}/></button></li></ol></div>
-    <div className="pi-group"><span className="pi-head">D · {es ? 'Otros trabajos' : 'Other work'}</span><ol>{others.map(x => <li key={x.id}><button onClick={jump('otros')}><strong>{x.title}</strong><ArrowDown size={16}/></button></li>)}</ol></div>
-   </div></div>
-   {/* El bloque A va en filas cortas (la descripción larga queda en cada ficha); el B conserva las grandes, ahí está el trabajo para cliente */}
-   {GROUPS.map(g => { const compact = g.letter === 'A'; return <div key={g.letter} className={`rows${compact ? ' rows-compact' : ''}`}>{g.ids.map((id, i) => <ProjectRow key={id} lang={lang} project={byId(id)} flip={!compact && i % 2 === 1} compact={compact} n={i + 1} group={i === 0 ? g : undefined} letter={g.letter} of={g.ids.length}/>)}</div>; })}
+  <section id="projects" className="wrap">
+   <div className="projects-intro" data-zone={es ? 'Proyectos' : 'Projects'}>
+    <header className="pi-top"><h2>{p.projectsTitle}</h2><p>{p.projectsIntro}</p></header>
+    {/* Índice compacto: la fila baja a su parada; a la derecha, el acceso directo a la app */}
+    <button className="pi-toggle" aria-expanded={fold} aria-controls="project-index" onClick={() => setFold(!fold)}>{fold ? (es ? 'Ocultar la lista' : 'Hide the list') : (es ? `Ver los ${index.length} proyectos` : `See all ${index.length} projects`)}</button>
+    <ol id="project-index" className={`project-index${fold ? ' open' : ''}`}>
+     {index.map((x, i) => <li key={x.id}>
+      <button onClick={jump(x.to)}><span className="pi-n">{String(i + 1).padStart(2, '0')}</span><strong>{x.title}</strong><span className="pi-kind">{x.kind}</span></button>
+      {x.open && <a className="pi-open" href={x.open[0]} {...(x.open[2] ? EXT : { 'data-title': x.title })}>{x.open[1]}{x.open[2] ? <Out es={es} size={15}/> : <ArrowRight size={15} aria-hidden="true"/>}</a>}
+     </li>)}
+    </ol>
+   </div>
+   {main.map((x, i) => <ProjectRow key={x.id} lang={lang} paused={paused} project={x} flip={i % 2 === 1} n={i + 1} of={main.length} line={GROUP_LINE[x.id]?.[L]}/>)}
   </section>
   <OriginalScenes lang={lang} paused={paused}/>
-  <section id="otros" className="wrap section-space others-list" data-zone={es ? 'Otros trabajos' : 'Other work'}>
-   <div className="group-head"><span className="kicker">D · {es ? 'Otros trabajos' : 'Other work'}</span><p>{es ? 'Un hackathon, una app para estudiantes, un asistente que todavía estoy armando y las versiones para Android.' : 'A hackathon, a student app, an assistant I am still building and the Android versions.'}</p></div>
-   <ul className="ol-list">
-    {others.map(x => <li key={x.id}><a href={`/proyectos/${x.slug}`} data-title={x.title}><strong>{x.title}</strong><span>{x.pitch}</span><em>{x.kind}{unfinished(x.status)}</em><ArrowRight size={18} aria-hidden="true"/></a></li>)}
-    <li><div><strong>{es ? 'Apps Android' : 'Android apps'}</strong><span>{es ? 'Ya en Android: La Casa del Ángel, Punto U y NFC para negocios. Faltan las de Inventario y Entrega de turno.' : 'Already on Android: La Casa del Ángel, Punto U and NFC for businesses. Inventory and Shift handover still need theirs.'}</span><em>Capacitor · Android</em></div></li>
-    <li><a href={personal.github} {...EXT}><strong>GitHub</strong><span>{es ? 'Juegos, herramientas y pruebas más chicas.' : 'Games, tools and smaller experiments.'}</span><em>github.com/Brunich</em><Out es={es}/></a></li>
+  <section id="otros" className="wrap others" data-zone={es ? 'Otros trabajos' : 'Other work'}>
+   <header className="others-top"><h2>{es ? 'Otros trabajos.' : 'Other work.'}</h2><p>{es ? 'Un hackathon, una app para estudiantes y un asistente que todavía estoy armando.' : 'A hackathon, a student app and an assistant I am still building.'}</p></header>
+   <ul className="others-grid">
+    {others.map(x => <li key={x.id}><a href={`/proyectos/${x.slug}`} data-title={x.title}>
+     <span className={`others-media media-${x.id}`}>{x.id === 'agente' ? <Hold ms={HOLD.agente} instant={paused} className="hold"><Media lang={lang} project={x}/></Hold> : <Media lang={lang} project={x}/>}</span>
+     <span className="others-kind">{x.kind}{unfinished(x.status)}</span>
+     <strong>{x.title}</strong><span className="others-pitch">{x.pitch}</span>
+    </a></li>)}
    </ul>
+   <p className="others-more">
+    <span><strong>{es ? 'Apps Android' : 'Android apps'}</strong>{es ? 'Ya en Android: La Casa del Ángel, Punto U y NFC para negocios. Inventario y Entrega de turno, en desarrollo.' : 'Already on Android: La Casa del Ángel, Punto U and NFC for businesses. Inventory and Shift handover, in development.'}</span>
+    <a className="inline-link" href={personal.github} {...EXT}>{es ? 'Más proyectos en GitHub' : 'More projects on GitHub'}<Out es={es} size={16}/></a>
+   </p>
   </section>
-  <section id="about" className="about-section section-space"><div className="wrap">
+  <section id="about" className="about-section"><div className="wrap">
    <div className="about-grid" data-zone="CV">
     <figure className="portrait"><picture><source srcSet="/media/bruno-retrato.avif" type="image/avif"/><source srcSet="/media/bruno-retrato.webp" type="image/webp"/><img src="/media/bruno-retrato.jpg" alt="Bruno Salas" width="560" height="700" loading="lazy"/></picture><figcaption><strong>Bruno Salas</strong><span>Monterrey, N. L.</span></figcaption></figure>
-    <div className="about-copy"><span className="kicker">02 · CV</span><h2>{p.aboutTitle}</h2><p>{p.about}</p>
+    <div className="about-copy"><h2>{p.aboutTitle}</h2><p>{p.about}</p>
      {/* Resumen en una sola parada: el detalle de cada puesto está en el PDF y el de La Casa del Ángel en su ficha */}
      <div className="cv-summary">
       <div><h3>{c.timelineTitle}</h3><ul>{c.experience.map(e => <li key={e.year}><span className="year">{e.year}</span><span><strong>{e.role}</strong><small>{e.org}</small></span></li>)}</ul></div>
@@ -206,18 +232,29 @@ function Media({ lang, project }: { lang: Lang; project: Project }) {
  }
 }
 
-// Datos llanos en mono (tecnología / qué se prueba / estado) en lugar de cifras de vitrina.
+// Datos llanos en mono (tecnología / qué se prueba / estado): los usa la ficha.
 const Facts = ({ items }: { items: string[] }) => <p className="facts">{items.map(f => <span key={f}>{f}</span>)}</p>;
 
-function ProjectRow({ lang, project, flip, compact = false, n, of, letter, group }: { lang: Lang; project: Project; flip: boolean; compact?: boolean; n: number; of: number; letter: string; group?: Group }) {
- const es = lang === 'es', page = `/proyectos/${project.slug}`;
- return <article id={`p-${project.id}`} data-c data-zone={project.title} className={`row project project-${project.id}${flip ? ' flip' : ''}${compact ? ' compact' : ''}${group ? ' has-head' : ''}`}>
-  {/* El cajetín del bloque va dentro de su primera fila: así la portada por zonas no lo deja suelto entre pantallas */}
-  {group && <div className="group-head"><span className="kicker">{group.letter} · {group.name[es ? 0 : 1]}</span><p>{group.line[es ? 0 : 1]}</p></div>}
-  <a className={`project-media media-${project.id}`} href={page} data-title={project.title} aria-label={`${project.title} — ${es ? 'ver proyecto' : 'view project'}`}><Media lang={lang} project={project}/><span className="media-open"><ArrowRight size={22}/></span></a>
-  <div className="project-info"><span className="row-num">{letter} · {String(n).padStart(2, '0')}<i>/ {String(of).padStart(2, '0')}</i></span><span className="project-kind">{project.kind}{unfinished(project.status)}</span><h3><a href={page} data-title={project.title}>{project.title}</a></h3><p className="pitch">{project.pitch}</p>{!compact && <p>{project.desc}</p>}
-   <Facts items={project.facts}/>
-   <div className="project-links"><a className="button primary" href={page} data-title={project.title}>{es ? 'Ver proyecto' : 'View project'}<ArrowRight size={18}/></a>{project.link.startsWith('http') && <a className="inline-link" href={project.link} {...EXT}>{project.action}<Out es={es}/></a>}</div>
+// A dónde lleva el acceso directo de cada proyecto: su app dentro del sitio o su página publicada.
+function openOf(x: Project, es: boolean): [string, string, boolean] | undefined {
+ if (HAS_APP.includes(x.id)) return [`/proyectos/${x.slug}/app`, es ? 'Abrir la app' : 'Open the app', false];
+ if (x.link.startsWith('http')) return [x.link, x.action, true];
+}
+
+// Un proyecto por parada: número y clase, título, frase, descripción corta, cifras reales, tecnología y botones.
+function ProjectRow({ lang, paused, project, flip, n, of, line }: { lang: Lang; paused: boolean; project: Project; flip: boolean; n: number; of: number; line?: string }) {
+ const es = lang === 'es', page = `/proyectos/${project.slug}`, open = openOf(project, es);
+ return <article id={`p-${project.id}`} data-c data-zone={project.title} className={`row project project-${project.id}${flip ? ' flip' : ''}`}>
+  <a className={`project-media media-${project.id}`} href={page} data-title={project.title} aria-label={`${project.title} — ${es ? 'ver proyecto' : 'view project'}`}><Hold ms={HOLD[project.id] ?? 0} instant={paused} className="hold"><Media lang={lang} project={project}/></Hold><span className="media-open"><ArrowRight size={22}/></span></a>
+  <div className="project-info">
+   {line && <p className="group-line">{line}</p>}
+   <p className="row-meta"><span className="row-num">{String(n).padStart(2, '0')} / {String(of).padStart(2, '0')}</span><span>{project.kind}</span>{unfinished(project.status)}</p>
+   <h3><a href={page} data-title={project.title}>{project.title}</a></h3>
+   <p className="pitch">{project.pitch}</p>
+   <p className="lead">{project.lead}</p>
+   {project.metrics.length > 0 && <dl className="figures">{project.metrics.map(([v, label]) => <div key={label}><dt>{v}</dt><dd>{label}</dd></div>)}</dl>}
+   <ul className="chips" aria-label={es ? 'Tecnología' : 'Technology'}>{project.stack.map(t => <li key={t}>{t}</li>)}</ul>
+   <div className="project-links"><a className="button primary" href={page} data-title={project.title}>{es ? 'Ver proyecto' : 'View project'}<ArrowRight size={18}/></a>{open && <a className="inline-link" href={open[0]} {...(open[2] ? EXT : { 'data-title': project.title })}>{open[1]}{open[2] ? <Out es={es}/> : <ArrowRight size={18} aria-hidden="true"/>}</a>}</div>
   </div>
  </article>;
 }
@@ -376,15 +413,13 @@ const HAS_APP = ['club', 'csv', 'planta', 'spc', 'inventario', 'turno', 'agente'
 // Videos de motion design: hoy el reel del portafolio; el espacio está listo para los que sigan.
 function Motion({ lang }: { lang: Lang }) {
  const es = lang === 'es';
- return <section id="motion" className="wrap section-space motion-section" data-zone="Motion">
-  <div className="section-heading"><div><span className="kicker">03 · Motion design</span><h2>{es ? 'También en movimiento.' : 'In motion, too.'}</h2><p>{es ? 'Videos cortos para presentar un producto, un proyecto o un juego. El reel recorre cinco demos con sus propios datos de ejemplo; cada cuadro sale de código, con el papel y la letra de esta web.' : 'Short videos to present a product, a project or a game. The reel walks through five demos with their own sample data; every frame comes from code, with this site’s paper and type.'}</p></div></div>
-  <div className="motion-grid">
-   <figure className="motion-main"><video src="/media/reel.mp4" poster="/media/reel-poster.jpg" controls playsInline preload="none" width="1920" height="1080" aria-label={es ? 'Reel del portafolio' : 'Portfolio reel'}/><figcaption><strong>{es ? 'Reel del portafolio' : 'Portfolio reel'}</strong><span>50 s · 1080p · 60 fps</span></figcaption></figure>
-  </div>
+ return <section id="motion" className="wrap motion-section" data-zone="Motion">
+  <header className="motion-copy"><h2>{es ? 'También en movimiento.' : 'In motion, too.'}</h2><p>{es ? 'Videos cortos para presentar un producto, un proyecto o un juego. El reel recorre cinco demos con sus datos de ejemplo; cada cuadro sale de código.' : 'Short videos to present a product, a project or a game. The reel walks through five demos with their sample data; every frame comes from code.'}</p></header>
+  <figure className="motion-main"><video src="/media/reel.mp4" poster="/media/reel-portada.jpg" controls playsInline preload="none" width="1920" height="1080" aria-label={es ? 'Reel del portafolio' : 'Portfolio reel'}/><figcaption><strong>{es ? 'Reel del portafolio' : 'Portfolio reel'}</strong><span>50 s · 1080p · 60 fps</span></figcaption></figure>
  </section>;
 }
 
 function Contact({ lang }: { lang: Lang }) {
- const c = copy[lang], es = lang === 'es';
- return <section id="contact" className="contact-section wrap" data-zone={es ? 'Contacto' : 'Contact'}><div className="section-heading"><div><span className="kicker">04 · {es ? 'Contacto' : 'Contact'}</span><h2>{es ? 'Busco prácticas y también tomo encargos.' : 'Looking for an internship, and open to projects.'}</h2><p>{c.contactText}</p></div></div><div className="contact-links"><a href={`mailto:${personal.email}`}><span>Email<small>{personal.email}</small></span><ArrowRight size={22}/></a><a href={personal.github} {...EXT}><span>GitHub<small>Brunich</small></span><Out es={es} size={22}/></a>{personal.linkedIn && <a href={personal.linkedIn} {...EXT}><span>LinkedIn<small>Bruno Salas</small></span><Out es={es} size={22}/></a>}<a href={`https://wa.me/${personal.phone.replace(/\D/g, '')}`} {...EXT}><span>WhatsApp<small>{personal.phone}</small></span><Out es={es} size={22}/></a><a className="contact-about" href="/sobre-mi" data-title={es ? 'Sobre mí' : 'About me'}><span>{es ? 'Sobre mí' : 'About me'}<small>{es ? 'Música y viajes' : 'Music and travel'}</small></span><ArrowRight size={22}/></a></div></section>;
+ const es = lang === 'es';
+ return <section id="contact" className="contact-section wrap" data-zone={es ? 'Contacto' : 'Contact'}><header className="contact-top"><h2>{es ? 'Busco prácticas y también tomo encargos.' : 'Looking for an internship, and open to projects.'}</h2><p>{es ? 'Busco prácticas profesionales y hago páginas y herramientas para negocio. Escríbeme por correo o por WhatsApp.' : 'I am looking for an internship and I build websites and tools for businesses. Write to me by email or WhatsApp.'}</p></header><div className="contact-links"><a href={`mailto:${personal.email}`}><span>Email<small>{personal.email}</small></span><ArrowRight size={22}/></a><a href={personal.github} {...EXT}><span>GitHub<small>Brunich</small></span><Out es={es} size={22}/></a>{personal.linkedIn && <a href={personal.linkedIn} {...EXT}><span>LinkedIn<small>Bruno Salas</small></span><Out es={es} size={22}/></a>}<a href={`https://wa.me/${personal.phone.replace(/\D/g, '')}`} {...EXT}><span>WhatsApp<small>{personal.phone}</small></span><Out es={es} size={22}/></a><a className="contact-about" href="/sobre-mi" data-title={es ? 'Sobre mí' : 'About me'}><span>{es ? 'Sobre mí' : 'About me'}<small>{es ? 'Música y viajes' : 'Music and travel'}</small></span><ArrowRight size={22}/></a></div></section>;
 }

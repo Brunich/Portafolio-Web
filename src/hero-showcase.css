@@ -1,16 +1,3 @@
-/* Visor de la portada: tres apps apiladas como hojas; la de enfrente es la que se usa. */
-.hs{min-width:0;position:relative}
-.hs-stage{position:relative;aspect-ratio:1.25}
-.hs-card{position:absolute;inset:6% 6% 0 0;display:block;overflow:hidden;border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--app-bg,#1c1d1a);transition:transform .5s cubic-bezier(.2,.8,.2,1),opacity .5s}
-.hs-pos0{z-index:3}
-.hs-pos1{z-index:2;transform:translate(3%,-3.5%);pointer-events:none}
-.hs-pos2{z-index:1;transform:translate(6%,-7%);pointer-events:none}
-/* Las de atrás son sólo el canto de la hoja: el color queda para la app de enfrente */
-.hs-card:not(.hs-pos0){background:var(--surface-2);border-color:var(--line)}
-.hs-card:not(.hs-pos0)>*{visibility:hidden}
-/* Cada app con el fondo de su propia marca */
-.hs-card.hs-nfc{--app-bg:#1b1210}.hs-card.hs-chart{--app-bg:#0b1630}.hs-card.hs-planta{--app-bg:#161616}
-
 /* Celular sobre el chip NFC: se usa en la página del proyecto */
 .nt{position:absolute;inset:0;background:#1b1210}
 .nt-tag{position:absolute;left:50%;bottom:11%;width:34%;aspect-ratio:1.55;transform:translateX(-50%) perspective(500px) rotateX(52deg);display:grid;place-items:center;gap:2px;border-radius:6px;background:#f6ebdd;color:#3a2418}
@@ -35,18 +22,5 @@
 @keyframes nt-stamp{0%,32%{transform:scale(0)}40%,80%{transform:scale(1)}90%,100%{transform:scale(0)}}
 @keyframes nt-text{0%,38%{opacity:0;transform:translateY(6px)}46%,80%{opacity:1;transform:none}90%,100%{opacity:0}}
 @keyframes nt-wa{0%,50%{transform:translateY(-160%)}58%,82%{transform:none}92%,100%{transform:translateY(-160%)}}
-
-/* Pestañas: una fila de celdas, como la leyenda de una figura */
-.hs-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:14px;border:1px solid var(--line-strong);border-radius:var(--radius)}
-.hs-tabs button{position:relative;display:flex;align-items:baseline;gap:10px;min-height:48px;padding:10px 12px;border:0;background:transparent;text-align:left;color:var(--muted)}
-.hs-tabs button+button{border-left:1px solid var(--line)}
-.hs-tabs button:hover{color:var(--text)}
-.hs-tabs button[aria-selected=true]{background:var(--bg);color:var(--text)}
-.hs-key{font:500 11.5px var(--mono)}
-.hs-tabs strong{font:600 13.5px/1.25 var(--font)}
-/* Cuánto falta para la siguiente: una línea de tinta que se llena */
-.hs-progress{position:absolute;left:0;bottom:-1px;height:2px;width:100%;background:var(--text);transform-origin:left;animation:hs-progress 5.6s linear both}
-@keyframes hs-progress{from{transform:scaleX(0)}}
-
-@media(max-width:640px){.hs-stage{aspect-ratio:1.02}.hs-card{inset:5% 5% 0 0}.hs-tabs button{flex-direction:column;gap:2px;padding:8px 10px}.hs-tabs strong{font-size:12.5px}.nt-phone{width:36%}.nt-tag{width:44%}}
-@media(prefers-reduced-motion:reduce){.hs-card{transition:none}.hs-progress{display:none}.nt *{animation:none!important}.nt-phone{transform:translate(-50%,8%)}.nt-stamps b.new{transform:none}.nt-screen strong,.nt-screen em{opacity:1}.nt-wa{transform:none}}
+@media(max-width:640px){.nt-phone{width:36%}.nt-tag{width:44%}}
+@media(prefers-reduced-motion:reduce){.nt *{animation:none!important}.nt-phone{transform:translate(-50%,8%)}.nt-stamps b.new{transform:none}.nt-screen strong,.nt-screen em{opacity:1}.nt-wa{transform:none}}

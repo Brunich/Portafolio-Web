@@ -1,41 +1,63 @@
-/* Game dev: las capturas y el modelo conservan su color; alrededor sólo marco neutro. */
-.original-gallery{border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden;background:var(--surface)}
+/* Juego en la portada: las capturas y el modelo conservan su color; alrededor sólo marco neutro. */
+.gd-stop{padding-block:clamp(40px,6vh,64px)}
+.gd-copy .row-meta{margin-bottom:0}
+.gd-copy .lead{font-size:16px}
+
+/* Tres estilos y pixel art: título a la izquierda, la pieza a la derecha */
+.gd-block{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2.4fr);gap:24px clamp(32px,5vw,72px);align-items:center;padding-block:clamp(40px,6vh,64px)}
+.gd-side p{max-width:30ch;margin-top:14px;font-size:17px;color:var(--muted)}
+
+/* Barra del comparador 3D (la usa ModelLab) */
 .original-toolbar{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:14px 18px;border-bottom:1px solid var(--line-strong)}
-.original-toolbar h3{font-size:17px;font-weight:600}
+.original-toolbar h3{font:600 17px/1.3 var(--display)}
 .original-toolbar>div{display:flex;flex-wrap:wrap;justify-content:flex-end}
 .original-toolbar button{min-height:44px;padding:8px 14px;border:1px solid var(--line-strong);margin-left:-1px;border-radius:0;background:transparent;font:500 13px var(--font)}
 .original-toolbar button:first-child{border-radius:var(--radius) 0 0 var(--radius)}
 .original-toolbar button:last-child{border-radius:0 var(--radius) var(--radius) 0}
 .original-toolbar button[aria-pressed=true]{background:var(--text);color:var(--bg)}
 .original-pairs span{opacity:.7;margin:0 2px}
-.lens-toggle{margin-left:8px}
-.original-scene{display:block;width:100%;height:auto;aspect-ratio:8/5;object-fit:contain}
 .original-caption{padding:12px 18px;border-top:1px solid var(--line);font:500 12px var(--mono);color:var(--muted)}
-.original-comparator{position:relative;aspect-ratio:16/9;overflow:hidden;touch-action:pan-y;cursor:ew-resize}
-.original-comparator img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
-.original-comparator input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:ew-resize}
-.original-comparator:focus-within{outline:2px solid var(--accent);outline-offset:-2px}
-.original-split{position:absolute;top:0;bottom:0;border-left:1px solid #ece9df;pointer-events:none}
-.original-split span{position:absolute;top:50%;transform:translate(-50%,-50%);padding:8px 10px;border:1px solid #ece9df;border-radius:var(--radius);background:#1c1d1a;color:#ece9df;line-height:1}
-.original-controls{display:flex;align-items:center;gap:20px;padding:16px 18px}
-.original-controls label{flex:1;font:500 12.5px var(--mono);color:var(--muted)}
-.original-controls input{display:block;width:100%;height:32px;accent-color:var(--accent)}
 .original-side-labels{position:absolute;inset:12px 14px auto;display:flex;justify-content:space-between;pointer-events:none}
 .original-side-labels span{padding:5px 8px;border-radius:var(--radius);background:#1c1d1a;color:#ece9df;font:500 11px var(--mono)}
-.original-lens{position:absolute;z-index:2;border-radius:50%;border:1px solid #ece9df;background-repeat:no-repeat;image-rendering:pixelated;pointer-events:none}
-.original-lens small{position:absolute;left:50%;bottom:-26px;transform:translateX(-50%);white-space:nowrap;padding:3px 8px;border-radius:var(--radius);background:#1c1d1a;color:#ece9df;font:500 11px var(--mono)}
-.original-compare-heading{margin-top:clamp(40px,5vw,64px);padding-top:14px;border-top:1px solid var(--line)}
-.original-compare-heading h3{margin-bottom:8px;font-size:clamp(22px,2.2vw,28px);font-weight:620;font-stretch:112%}
-.original-compare-heading p{max-width:75ch;margin-bottom:20px;color:var(--muted)}
+/* Mientras llega el modelo (2 MB) se ve una toma fija de él, no un lienzo vacío */
+.gd-block .ml-stage:has(.ml-status){background:#262724 url(/media/models/null-poster.jpg) center/cover no-repeat}
+.gd-block .ml-status{place-items:end center;padding-bottom:18px}
 
-.pano-pixel{position:absolute;top:12px;right:12px;z-index:2;display:flex;align-items:center;gap:8px;min-height:36px;padding:6px 12px 6px 8px;border:1px solid #ece9df;border-radius:var(--radius);background:#1c1d1a;color:#ece9df;font:500 12px var(--mono)}
+.pano-pixel{position:absolute;top:12px;right:12px;z-index:2;display:flex;align-items:center;gap:8px;min-height:44px;padding:6px 12px 6px 10px;border:1px solid #ece9df;border-radius:var(--radius);background:#1c1d1a;color:#ece9df;font:500 12px var(--mono)}
 .pano-switch{width:14px;height:14px;border:1px solid #ece9df;border-radius:2px}
-.pano-pixel[aria-pressed=true] .pano-switch{background:var(--accent);border-color:var(--accent)}
+.pano-pixel[aria-pressed=true] .pano-switch{background:#7dbccb;border-color:#7dbccb}
 
-.gamedev-metrics{display:grid;grid-template-columns:repeat(3,1fr);margin:0 0 32px;border-top:1px solid var(--line)}
-.gamedev-metrics div{padding:12px 14px 0;border-left:1px solid var(--line)}
-.gamedev-metrics div:first-child{padding-left:0;border-left:0}
-.gamedev-metrics dt{font:600 22px/1.2 var(--mono)}
-.gamedev-metrics dd{margin:6px 0 0;font-size:13px;line-height:1.5;color:var(--muted)}
-@media(max-width:700px){.gamedev-metrics{grid-template-columns:1fr}.gamedev-metrics div{padding-left:0;border-left:0}}
-@media(max-width:640px){.original-toolbar{align-items:flex-start;flex-direction:column;padding:14px;gap:10px}.original-toolbar>div{justify-content:flex-start}.original-caption,.original-controls{padding:12px 14px}.original-side-labels{inset:8px 8px auto}.original-side-labels span{font-size:9.5px;padding:4px 6px}}
+/* Escritorio por zonas: cada parada del juego mide la pantalla; la pieza se ajusta al alto que queda */
+.paged .gd-stop{height:var(--zone);display:flex;align-items:stretch}
+/* La portada del juego ocupa todo el alto: la foto se recorta un poco a los lados en vez de dejar franjas vacías */
+.paged .gd-stop>.gd-feature{width:100%;grid-template-columns:minmax(0,2.3fr) minmax(0,1fr);align-items:stretch}
+.paged .gd-cover,.paged .gd-cover .rg-fig{height:100%}
+.paged .gd-cover .rg-fig{display:flex;flex-direction:column}
+.paged .gd-cover picture{flex:1;min-height:0}
+.paged .gd-cover img{height:100%;aspect-ratio:auto;object-fit:cover}
+.paged .gd-copy{align-content:center;padding-top:0;border-top:0}
+.paged .gd-copy .row-meta{padding-top:12px;border-top:1px solid var(--line-strong)}
+/* Con alto de sobra (900 o más) la primera miniatura va grande y las otras dos debajo */
+@media(min-height:860px){.paged .gd-thumbs{grid-template-columns:repeat(2,minmax(0,1fr))}.paged .gd-thumbs a:first-child{grid-column:1/-1}}
+.paged .gd-block{height:var(--zone)}
+.paged .gd-block .ml-stage{height:calc(var(--zone) - 2 * clamp(40px,6vh,64px) - 176px)}
+.paged .gd-pixel{justify-self:end;width:min(100%,calc((var(--zone) - 2 * clamp(40px,6vh,64px) - 36px) * 16 / 9))}
+
+@media(max-width:980px){.gd-block{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:640px){.original-toolbar{align-items:flex-start;flex-direction:column;padding:14px;gap:10px}.original-toolbar>div{justify-content:flex-start}.original-caption{padding:12px 14px}.original-side-labels{inset:8px 8px auto}.original-side-labels span{font-size:11px;padding:4px 6px}}
+
+/* Móvil: el visor es un cuadrado y los tres estilos van en un control de tres columnas de 48 px */
+@media(max-width:760px){
+ .gd-block{gap:16px;padding-block:32px}
+ .gd-side p{max-width:none;font-size:16px}
+ .gd-block .ml-stage{aspect-ratio:1}
+ .original-toolbar{padding:12px 14px}
+ .original-toolbar>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%}
+ .original-toolbar button{min-height:48px;padding:4px 6px;font-size:13px;line-height:1.2}
+ .ml-controls{display:grid;gap:2px;padding:10px 14px}
+ .ml-controls label{display:grid;gap:0;font:500 13px var(--font)}
+ .ml-controls input{width:100%;height:44px}
+ .original-caption{font-size:12px}
+ .original-side-labels span{font-size:12px}
+ .gd-pixel .pano-pixel{top:8px;right:8px}
+}

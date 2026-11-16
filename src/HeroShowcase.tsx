@@ -1,17 +1,34 @@
-import { useEffect, useState } from 'react';
-import { WhatsappLogo } from '@phosphor-icons/react';
-import { NfcApp, CsvApp, PlantaApp } from './HeroApps';
-import type { View } from './HeroApps';
+import { useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
+import { ArrowRight, ArrowUpRight, WhatsappLogo } from '@phosphor-icons/react';
+import PlantaPreview from './PlantaPreview';
+import TurnoPreview from './TurnoPreview';
+import CasaPreview from './CasaPreview';
 import './hero-showcase.css';
 
-// Portada: tres apps apiladas que rotan solas. Cada una enseña su resumen, luego su vista completa,
-// y su botón «Abrir» lleva a la herramienta real.
-const SLIDES = [
- { slug: 'club-nfc', title: ['NFC para negocios', 'NFC for businesses'], kind: 'nfc', App: NfcApp },
- { slug: 'analizador-csv', title: ['Analizador CSV', 'CSV Analyzer'], kind: 'chart', App: CsvApp },
- { slug: 'planta', title: ['Planta y OEE', 'Plant & OEE'], kind: 'planta', App: PlantaApp },
-] as const;
-const SUM = 3600, FULL = 3800;
+// Vistas previas que se animan una sola vez: al llegar a la pantalla corren hasta `ms` y se quedan ahí.
+// Con `instant` (o la pausa global) saltan directo a ese cuadro: así el hero nunca se mueve solo.
+export function Hold({ ms, instant = false, className, children }: { ms: number; instant?: boolean; className?: string; children: ReactNode }) {
+ const ref = useRef<HTMLDivElement>(null);
+ useEffect(() => {
+  const el = ref.current;
+  if (!el?.getAnimations) return;
+  const freeze = (t: number) => el.getAnimations({ subtree: true }).forEach(a => { a.currentTime = t; a.pause(); });
+  const still = document.documentElement.dataset.motion === 'paused' || matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (instant || still) { freeze(ms); return; }
+  freeze(0);
+  let timer = 0;
+  const io = new IntersectionObserver(([e]) => {
+   if (!e.isIntersecting) return;
+   io.disconnect();
+   el.getAnimations({ subtree: true }).forEach(a => a.play());
+   timer = window.setTimeout(() => freeze(ms), ms);
+  }, { threshold: .5 });
+  io.observe(el);
+  return () => { io.disconnect(); clearTimeout(timer); };
+ }, [ms, instant]);
+ return <div ref={ref} className={className}>{children}</div>;
+}
 
 // Íconos de línea para cada proyecto: el símbolo NFC clásico, una gráfica y un medidor.
 export function ProjectIcon({ kind }: { kind: string }) {
@@ -23,7 +40,7 @@ export function ProjectIcon({ kind }: { kind: string }) {
  </svg>;
 }
 
-// El celular baja sobre el chip, salen las ondas y en su pantalla cae el sello del día.
+// El celular baja sobre el chip, salen las ondas y en su pantalla cae el sello del día (ficha de NFC).
 export function NfcTap({ lang }: { lang: 'es' | 'en' }) {
  const es = lang === 'es';
  return <div className="nt" aria-hidden="true">
@@ -32,7 +49,7 @@ export function NfcTap({ lang }: { lang: 'es' | 'en' }) {
   <div className="nt-phone">
    <i className="nt-notch"/>
    <div className="nt-screen">
-    <div className="nt-wa"><WhatsappLogo size={15} weight="fill"/><span><b>WhatsApp</b>{es ? '¿Cómo estuvo la comida? Califícanos ★★★★★' : 'How was the food? Rate us ★★★★★'}</span></div>
+    <div className="nt-wa"><WhatsappLogo size={15} weight="fill"/><span><b>WhatsApp</b>{es ? '¿Cómo estuvo la comida? Califícanos' : 'How was the food? Rate us'}</span></div>
     <small>{es ? 'Café Aurora' : 'Aurora Café'}</small>
     <div className="nt-stamps">{Array.from({ length: 6 }, (_, i) => <b key={i} className={i < 3 ? 'on' : i === 3 ? 'new' : ''}/>)}</div>
     <strong>{es ? '+1 sello' : '+1 stamp'}</strong>
@@ -42,35 +59,36 @@ export function NfcTap({ lang }: { lang: 'es' | 'en' }) {
  </div>;
 }
 
-export default function HeroShowcase({ lang, paused }: { lang: 'es' | 'en'; paused: boolean }) {
- const es = lang === 'es', L = es ? 0 : 1;
- const [front, setFront] = useState(0);
- const [view, setView] = useState<View>('sum');
- const [hover, setHover] = useState(false);
- const [hold, setHold] = useState(false);
- // Resumen → completo → la siguiente app. Si la persona toca algo, se queda quieta un rato.
- useEffect(() => {
-  if (paused || hover || hold) return;
-  const id = setTimeout(() => { if (view === 'sum') setView('full'); else { setView('sum'); setFront(f => (f + 1) % SLIDES.length); } }, view === 'sum' ? SUM : FULL);
-  return () => clearTimeout(id);
- }, [front, view, paused, hover, hold]);
- useEffect(() => { if (!hold) return; const id = setTimeout(() => setHold(false), 12000); return () => clearTimeout(id); }, [hold, front, view]);
- const pick = (v: View) => { setView(v); setHold(true); };
+// Tres accesos del hero: cada fila abre la app y la flecha de al lado, su ficha.
+// Pasar el ratón o enfocar una fila cambia la vista grande; nada rota solo.
+type Access = { id: string; slug: string; title: [string, string]; line: [string, string]; href: string; external?: boolean; hold: number; view: (lang: 'es' | 'en') => ReactNode };
+const ACCESS: Access[] = [
+ { id: 'planta', slug: 'planta', title: ['Planta y OEE', 'Plant & OEE'], line: ['Tres reportes, un OEE, cero copiar y pegar.', 'Three reports, one OEE, zero copy-paste.'], href: '/proyectos/planta/app', hold: 3000, view: l => <PlantaPreview lang={l}/> },
+ { id: 'turno', slug: 'entrega-de-turno', title: ['Entrega de turno', 'Shift handover'], line: ['Nada se pierde entre turnos.', 'Nothing gets lost between shifts.'], href: '/proyectos/entrega-de-turno/app', hold: 4500, view: l => <TurnoPreview lang={l}/> },
+ { id: 'casa', slug: 'la-casa-del-angel', title: ['La Casa del Ángel', 'La Casa del Ángel'], line: ['Página y portal para una residencia real.', 'Website and portal for a real residence.'], href: 'https://la-casa-del-angel.vercel.app', external: true, hold: 0, view: l => <CasaPreview lang={l}/> },
+];
 
- return <div className="hs" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
-  <div className="hs-stage">
-   {SLIDES.map((s, i) => {
-    const pos = (i - front + SLIDES.length) % SLIDES.length, App = s.App;
-    return <div key={s.slug} className={`hs-card hs-${s.kind} hs-pos${pos}`} inert={pos !== 0} aria-hidden={pos !== 0 || undefined} role="group" aria-label={s.title[L]}>
-     <App lang={lang} view={pos === 0 ? view : 'sum'} onView={pick} slug={s.slug} key={pos === 0 ? `f${front}` : 'b'}/>
-    </div>;
-   })}
-  </div>
-  <div className="hs-tabs" role="tablist" aria-label={es ? 'Apps destacadas' : 'Featured apps'}>
-   {SLIDES.map((s, i) => <button key={s.slug} role="tab" aria-selected={i === front} onClick={() => { setFront(i); setView('sum'); setHold(true); }} className={`t-${s.kind}`}>
-    <span className="hs-key">1{'abc'[i]}</span><strong>{s.title[L]}</strong>
-    {i === front && !paused && !hover && !hold && <span className="hs-progress" key={front} style={{ animationDuration: `${SUM + FULL}ms` }} aria-hidden="true"/>}
-   </button>)}
-  </div>
+export default function HeroAccess({ lang }: { lang: 'es' | 'en' }) {
+ const es = lang === 'es', L = es ? 0 : 1;
+ const [on, setOn] = useState(0);
+ const a = ACCESS[on];
+ return <div className="hx">
+  <a className={`hx-view media-${a.id}`} href={a.href} tabIndex={-1} aria-hidden="true" {...(a.external ? { target: '_blank', rel: 'noopener noreferrer' } : { 'data-title': a.title[L] })}>
+   <Hold key={a.id + lang} ms={a.hold} instant className="hx-frame">{a.view(lang)}</Hold>
+  </a>
+  {/* Rótulo de la lista: sólo se ve en móvil, donde la vista grande no está */}
+  <p className="hx-label" aria-hidden="true">{es ? 'Pruébalas' : 'Try them'}</p>
+  <ul className="hx-list" aria-label={es ? 'Apps para probar' : 'Apps to try'}>
+   {ACCESS.map((x, i) => <li key={x.id} className={i === on ? 'on' : undefined} onMouseEnter={() => setOn(i)} onFocus={() => setOn(i)}>
+    <a className="hx-open" href={x.href} {...(x.external ? { target: '_blank', rel: 'noopener noreferrer' } : { 'data-title': x.title[L] })}>
+     {/* Miniatura de la vista previa: sólo en móvil, donde no hay vista grande */}
+     <span className="hx-thumb" aria-hidden="true"><Hold ms={x.hold} instant className="hold">{x.view(lang)}</Hold></span>
+     <span className="hx-name">{x.title[L]}</span>
+     <span className="hx-line">{x.line[L]}</span>
+     <span className="hx-go">{x.external ? (es ? 'Abrir la página' : 'Open the website') : (es ? 'Abrir la app' : 'Open the app')}{x.external ? <><ArrowUpRight size={16} aria-hidden="true"/><span className="sr-only">{es ? '(se abre en otra pestaña)' : '(opens in a new tab)'}</span></> : <ArrowRight size={16} aria-hidden="true"/>}</span>
+    </a>
+    <a className="hx-page" href={`/proyectos/${x.slug}`} data-title={x.title[L]} aria-label={`${x.title[L]}: ${es ? 'ficha del proyecto' : 'project page'}`}><span aria-hidden="true">{es ? 'Ficha' : 'Page'}</span><ArrowRight size={16} aria-hidden="true"/></a>
+   </li>)}
+  </ul>
  </div>;
 }
