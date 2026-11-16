@@ -114,9 +114,16 @@
 .others-media{position:relative;display:block;height:clamp(220px,calc(var(--zone) - 400px),400px);overflow:hidden;border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--surface-2)}
 .others-media>*{height:100%}
 .others-media .vibe-shot{height:100%!important;object-fit:cover;object-position:6% center}
+/* El mapa es apaisado (1210×350): se muestra entero el grupo de la izquierda (x 20-400, y 25-315 del original),
+   escalado para caber en el marco y centrado sobre el mismo fondo de la imagen, así no corta nombres a medias */
+@media(min-width:761px){
+ .others-media.media-vibe{container-type:size;background:#111219}
+ .others-media.media-vibe .vibe-shot{--s:min(100cqi / 380,100cqb / 290);position:absolute;left:calc(50% - var(--s) * 210);top:calc(50% - var(--s) * 170);width:calc(var(--s) * 1210)!important;max-width:none;height:auto!important;object-fit:fill}
+}
 .others-kind{margin-top:14px;font-size:13px;color:var(--muted)}
-.others-kind em{font-style:normal;color:var(--text)}
-.others-kind em::before{content:' · '}
+/* El estado va entero: si no cabe, baja completo al segundo renglón */
+.others-kind em{font-style:normal;color:var(--text);white-space:nowrap}
+.others-kind em::before{content:' · ';white-space:normal}
 .others-grid strong{margin-top:4px;font:600 22px/1.2 var(--display)}
 .others-pitch{margin-top:4px;font-size:15.5px;line-height:1.5;color:var(--muted)}
 .others-grid a:hover strong{color:var(--accent)}
@@ -143,6 +150,8 @@
 .cv-summary a svg{position:absolute;top:3px;right:0;color:var(--muted)}
 .cv-summary a:hover strong,.cv-summary a:hover svg{color:var(--accent)}
 .cv-summary .cv-tools li{grid-template-columns:minmax(0,1fr)}
+/* Títulos y listas cortas en renglones parejos: sin «web» o «Vite» solos abajo */
+.cv-summary strong,.cv-summary small{text-wrap:balance}
 .year{font:500 12.5px/1.75 var(--mono);color:var(--muted)}
 .languages-line{margin-top:18px;font-size:14.5px;color:var(--muted)}
 
@@ -297,6 +306,10 @@ html.paged{scroll-behavior:auto}
  .cv-summary li{grid-template-columns:44px minmax(0,1fr)}
  .cv-summary li>a{min-height:44px}
  .cv-summary strong{font-size:15px}
+ /* Herramientas en dos columnas (área | lista): antes cada área ocupaba dos renglones y el CV pasaba de 1380 px */
+ .cv-summary .cv-tools li{grid-template-columns:116px minmax(0,1fr);align-items:baseline;padding-block:8px}
+ .cv-summary .cv-tools strong{font-size:14px}
+ .cv-summary .cv-tools small{margin-top:0}
  .year{font-size:13px}
  .languages-line{font-size:15px}
 

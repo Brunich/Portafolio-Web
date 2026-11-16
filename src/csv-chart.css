@@ -39,6 +39,8 @@ html[data-motion=paused] .cc *{animation-play-state:paused!important}
 .cc-frame .cc-bar{height:max(8px,1.4cqi)}
 .cc-frame .cc-legend{font-size:max(11.5px,min(1.9cqi,14px))}
 @container (max-aspect-ratio:1.15/1){.cc-frame .cc{grid-template-columns:minmax(0,1fr);align-content:center}.cc-frame .cc-gauge{max-width:min(40cqi,34cqb)}}
+/* Marco alto (1440×900): medidor y renglones más holgados para no dejar franjas vacías arriba y abajo */
+@container (min-height:680px){.cc-frame .cc-gauge{max-width:min(44cqi,40cqb,320px)}.cc-frame .cc-bars{gap:min(3.2cqb,26px)}.cc-frame .cc-legend{margin-top:12px}}
 @media(max-width:560px){.cc{grid-template-columns:1fr;gap:14px}.cc-gauge{max-width:140px}}
 
 /* Móvil: medidor más chico, tres filas y letra de 13 px; la leyenda se quita */

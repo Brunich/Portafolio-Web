@@ -13,7 +13,7 @@ export default function TurnoPreview({ lang }: { lang: 'es' | 'en' }) {
   <div className="shp-cols">{cols.map((c, i) => <div key={c} className={`shp-col c${i}`}><span><i/>{c}</span></div>)}</div>
   {cards.map(([id, d, s, ln], i) => <div key={id} className={`shp-card k${i} ${s}`}><em>{s === 'sev-0' ? (es ? 'CRÍTICA' : 'CRITICAL') : (es ? 'MAYOR' : 'MAJOR')} · {ln}</em><code>{id}</code><b>{d}</b><span className="shp-sla"><i/></span></div>)}
   {/* Las cerradas del turno anterior se quedan quietas en su columna, como en el tablero de la demo */}
-  {done.map(([id, d, s, ln, sev], i) => <div key={id} className={`shp-card still s${i} ${s}`}><em>{sev} · {ln}</em><code>{id}</code><b>{d}</b><span className="shp-sla"><i/></span></div>)}
+  <div className="shp-done">{done.map(([id, d, s, ln, sev], i) => <div key={id} className={`shp-card still s${i} ${s}`}><em>{sev} · {ln}</em><code>{id}</code><b>{d}</b><span className="shp-sla"><i/></span></div>)}</div>
   <ol className="shp-log">{log.map((l, i) => <li key={l} style={{ ['--i' as string]: i }}><time>{`0${7 + i}:1${i}:0${i * 3}`}</time>{l}</li>)}</ol>
  </div>;
 }
