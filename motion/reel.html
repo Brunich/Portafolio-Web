@@ -1,17 +1,18 @@
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8"><title>Reel · Bruno Salas</title>
 <style>
-@font-face{font-family:Arc;src:url(../node_modules/@fontsource-variable/archivo/files/archivo-latin-standard-normal.woff2) format('woff2');font-weight:100 900;font-stretch:62.5% 125%}
+@font-face{font-family:Disp;src:url(../node_modules/@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2) format('woff2');font-weight:200 800}
+@font-face{font-family:Sans;src:url(../node_modules/@fontsource-variable/dm-sans/files/dm-sans-latin-wght-normal.woff2) format('woff2');font-weight:100 1000}
 @font-face{font-family:Mono;src:url(../node_modules/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2) format('woff2');font-weight:100 800}
 html,body{margin:0;background:#efece4}canvas{display:block;max-width:100vw;height:auto}
 </style></head><body><canvas id="c" width="1920" height="1080"></canvas>
 <script>
 // Reel del portafolio. Todo sale de render(t): el mismo t da siempre el mismo cuadro, así se exporta a 60 fps.
 // Abrir reel.html lo reproduce; reel.html?t=12.5 congela ese instante.
-// Mismo papel, tinta y acento que la web (src/styles.css); verde, ámbar y rojo sólo marcan estado en los datos.
+// Mismo papel, tinta y acento petróleo que la web (src/styles.css); verde, ámbar y rojo sólo marcan estado en los datos.
 // Cifras y nombres salen de las demos: la planta ficticia (Líneas 1–3, lotes 4411–4428, INC-232), no de vitrina.
 const W = 1920, H = 1080, C = document.getElementById('c'), X = C.getContext('2d');
-const P = { bg: '#efece4', surface: '#f6f4ee', surface2: '#e6e2d7', line: '#cdc8bb', ink: '#1c1d1a', muted: '#5d5f58', acc: '#c4461b', ok: '#357044', warn: '#856010', bad: '#a8322a' };
+const P = { bg: '#efece4', surface: '#f6f4ee', surface2: '#e6e2d7', line: '#cdc8bb', ink: '#1c1d1a', muted: '#5d5f58', acc: '#1d5a6e', accOn: '#7dbccb', ok: '#357044', warn: '#856010', bad: '#a8322a' };
 
 // Tiempo y curvas
 const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -25,12 +26,14 @@ const E = {
  inCubic: k => k * k * k,
  inOutCubic: k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2,
  inOutSine: k => -(Math.cos(Math.PI * k) - 1) / 2,
- outBack: (k, s = 1.6) => 1 + (s + 1) * Math.pow(k - 1, 3) + s * Math.pow(k - 1, 2),
 };
 const A = (h, a) => { const n = parseInt(h.slice(1), 16); return `rgba(${n >> 16},${n >> 8 & 255},${n & 255},${a})`; };
 
-// Texto: Archivo ensanchada para títulos (como la web) y JetBrains Mono para rótulos y datos.
-function setFont(g, o) { g.font = `${o.w ?? 650} ${o.size ?? 40}px ${o.f ?? 'Arc'}`; g.fontStretch = o.st ?? (o.f === 'Mono' ? 'normal' : 'semi-expanded'); g.letterSpacing = `${o.sp ?? 0}px`; }
+// Texto: Bricolage Grotesque 600 para títulos (interletra −0,01 em), DM Sans para el texto y JetBrains Mono sólo para cifras y folios.
+function setFont(g, o) {
+ const f = o.f ?? 'Sans', size = o.size ?? 40, w = f === 'Disp' ? 600 : (o.w ?? (f === 'Mono' ? 500 : 400));
+ g.font = `${w} ${size}px ${f}`; g.letterSpacing = f === 'Disp' ? `${-.01 * size}px` : `${o.sp ?? 0}px`;
+}
 function T(g, s, x, y, o = {}) {
  g.save(); g.globalAlpha *= o.a ?? 1; setFont(g, o); g.fillStyle = o.c ?? P.ink; g.textAlign = o.al ?? 'left'; g.textBaseline = 'alphabetic';
  g.fillText(s, x, y); g.restore();
@@ -56,13 +59,21 @@ function rise(g, s, x, y, k, o = {}, out = 0, stag = .03) {
  g.restore();
 }
 function typed(s, k) { return s.slice(0, Math.round(clamp(k) * s.length)); }
-function caret(g, x, y, size, t, solid, c = P.acc) { if (!solid && (t * 1.7) % 1 > .55) return; g.fillStyle = c; g.fillRect(x + 3, y - size * .8, size * .48, size); }
+function caret(g, x, y, size, t, solid, c = P.ink) { if (!solid && (t * 1.7) % 1 > .55) return; g.fillStyle = c; g.fillRect(x + 3, y - size * .8, size * .12, size); }
 function box(g, x, y, w, h, fill, stroke = P.line, lw = 1) {
  g.beginPath(); g.roundRect(x, y, w, h, 3);
  if (fill) { g.fillStyle = fill; g.fill(); }
  if (stroke) { g.strokeStyle = stroke; g.lineWidth = lw; g.stroke(); }
 }
 function rule(g, x, y, w, c = P.line, h = 1) { g.fillStyle = c; g.fillRect(x, y, w, h); }
+// Flechas de trazo (el texto no las trae en las fuentes de la web): derecha, abajo y diagonal ↗.
+function arrow(g, x, y, c, dir = 'r', s = 7, lw = 1.8) {
+ g.save(); g.translate(x, y); g.strokeStyle = c; g.lineWidth = lw; g.lineCap = 'round'; g.lineJoin = 'round'; g.beginPath();
+ if (dir === 'r') { g.moveTo(-s, 0); g.lineTo(s, 0); g.moveTo(s - s * .75, -s * .75); g.lineTo(s, 0); g.lineTo(s - s * .75, s * .75); }
+ if (dir === 'd') { g.moveTo(0, -s); g.lineTo(0, s); g.moveTo(-s * .75, s - s * .75); g.lineTo(0, s); g.lineTo(s * .75, s - s * .75); }
+ if (dir === 'ne') { g.moveTo(-s * .7, s * .7); g.lineTo(s * .7, -s * .7); g.moveTo(-s * .1, -s * .7); g.lineTo(s * .7, -s * .7); g.lineTo(s * .7, s * .1); }
+ g.stroke(); g.restore();
+}
 
 // Fondo: el papel de la hoja, sin manchas ni grano.
 function backdrop(g) { g.fillStyle = P.bg; g.fillRect(0, 0, W, H); }
@@ -77,74 +88,137 @@ function pointer(g, x, y, press = 0, a = 1) {
  g.fillStyle = P.surface; g.fill(); g.strokeStyle = P.ink; g.lineWidth = 2; g.lineJoin = 'round'; g.stroke(); g.restore();
 }
 
-// Columna izquierda de cada proyecto: rótulo del bloque, título, la frase de la ficha y su línea de hechos.
+// Columna izquierda de cada proyecto, como su fila en la portada: tipo, título, frase, cifras de la ficha y su línea de hechos.
 const HX = 150, HW = 620;
-function projectHead(g, u, { code, group, title, pitch, facts, out = 0 }) {
+function projectHead(g, u, { kind, title, pitch, metrics = [], facts, out = 0 }) {
  const kk = seg(u, .1, .6), a = 1 - out;
  rule(g, HX, 262, 44 * E.outExpo(kk), P.acc, 2);
- T(g, typed(`${code}  ${group}`, kk * 1.4), HX + 60, 270, { size: 16, f: 'Mono', w: 600, c: P.acc, sp: 2.5, a });
+ T(g, typed(kind.toUpperCase(), kk * 1.4), HX + 60, 268, { size: 14, w: 600, c: P.acc, sp: 2, a });
  // Un título largo baja de tamaño antes que irse a tres renglones.
- let to = { size: 76, w: 650, sp: -1.5 }, tl = wrap(g, title, HW + 40, to);
- if (tl.length > 2) { to = { ...to, size: 62 }; tl = wrap(g, title, HW + 40, to); }
+ let to = { f: 'Disp', size: Array.isArray(title) ? 66 : 76 }, tl = Array.isArray(title) ? title : wrap(g, title, HW + 40, to);
+ if (tl.length > 2 && !Array.isArray(title)) { to = { ...to, size: 62 }; tl = wrap(g, title, HW + 40, to); }
  let y = 350;
  tl.forEach((l, i) => { rise(g, l, HX, y, seg(u, .2 + i * .12, 1.0 + i * .12), to, out); y += to.size * 1.1; });
- const po = { size: 27, w: 400, st: 'normal', c: P.ink }, pl = wrap(g, pitch, HW - 40, po);
+ const po = { size: 27, w: 400, c: P.ink }, pl = wrap(g, pitch, HW - 40, po);
  y += 10;
  pl.forEach((l, i) => { const k = E.outCubic(seg(u, .7 + i * .08, 1.2 + i * .08)); T(g, l, HX, y + (1 - k) * 14 - E.inExpo(out) * 20, { ...po, a: k * a }); y += 38; });
+ if (metrics.length) {
+  y += 14; const mw = (HW - 40) / metrics.length; let mh = 0;
+  metrics.forEach(([v, lab], i) => {
+   const k = E.outCubic(seg(u, 1.0 + i * .1, 1.5 + i * .1)), ml = wrap(g, lab, mw - 24, { size: 15 }), x = HX + i * mw;
+   T(g, v, x, y + 38 + (1 - k) * 10, { size: 44, f: 'Mono', w: 600, c: P.acc, a: k * a });
+   ml.forEach((l, j) => T(g, l, x, y + 64 + j * 20 + (1 - k) * 10, { size: 15, c: P.muted, a: k * a }));
+   mh = Math.max(mh, 64 + ml.length * 20);
+  });
+  y += mh + 8;
+ }
  y += 30; rule(g, HX, y - 26, HW - 40, A(P.ink, .25 * E.outCubic(seg(u, 1.0, 1.5)) * a));
- facts.forEach((f, i) => { const k = seg(u, 1.15 + i * .22, 1.6 + i * .22); T(g, typed(f, k), HX, y + i * 30, { size: 16, f: 'Mono', w: 500, c: P.muted, a }); });
+ facts.forEach((f, i) => { const k = seg(u, 1.3 + i * .22, 1.75 + i * .22); T(g, typed(f, k), HX, y + i * 30, { size: 17, w: 400, c: P.muted, a }); });
 }
 
-// ——— 00 · Portada ———
+// ——— Inicio: titular y tres accesos, como la portada de la web ———
+// Tres anillos de OEE: los de la vista previa de Planta (82,8 · 78,6 · 80,7); la más baja va en aviso.
+function ring(g, cx, cy, r, v, k, warn) {
+ g.save(); g.lineWidth = 11; g.strokeStyle = P.line; g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.stroke();
+ g.strokeStyle = warn ? P.warn : P.acc; g.beginPath(); g.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * v / 100 * k); g.stroke(); g.restore();
+ T(g, String(Math.round(v * k)), cx, cy + 12, { size: 38, f: 'Mono', w: 600, al: 'center' });
+ T(g, 'OEE %', cx, cy + 38, { size: 12, c: P.muted, al: 'center', sp: 1, w: 500 });
+}
+function plantView(g, x, y, w, h, u, a) {
+ g.save(); g.globalAlpha *= a;
+ const fl = ['Producción', 'Calidad', 'Detenciones'], fx = x + 40; let cx = fx;
+ fl.forEach((s, i) => { const kk = E.outCubic(seg(u, .55 + i * .1, 1.0 + i * .1)); T(g, s, cx, y + 54, { size: 16, w: 600, c: P.muted, a: kk }); cx += TW(g, s, { size: 16, w: 600 }) + 16; if (i < 2) { rule(g, cx, y + 49, 36 * kk, P.muted); cx += 52; } });
+ [['Línea 1', 82.8], ['Línea 2', 78.6], ['Línea 3', 80.7]].forEach(([n, v], i) => {
+  const cxr = x + w * (1 + i * 2) / 6, k = E.outCubic(seg(u, .9 + i * .14, 2.1 + i * .14));
+  ring(g, cxr, y + 190, 78, v, k, i === 1); T(g, n, cxr, y + 318, { size: 19, f: 'Disp', al: 'center' });
+ });
+ const ke = E.outExpo(seg(u, 2.0, 2.6));
+ g.save(); g.globalAlpha *= ke; g.translate(0, (1 - ke) * 20);
+ rule(g, x + 40, y + 360, w - 80, P.line);
+ T(g, '9 cosas no cuadran', x + 40, y + 410, { size: 26, f: 'Disp', c: P.bad });
+ T(g, 'Lote producido sin inspección de calidad', x + 40, y + 452, { size: 17, c: P.ink }); T(g, 'L3 · lote 4419', x + w - 40, y + 452, { size: 14, f: 'Mono', w: 500, c: P.muted, al: 'right' });
+ T(g, 'Paro: llave de torque descalibrada', x + 40, y + 488, { size: 17, c: P.ink }); T(g, 'L1 · 07:40', x + w - 40, y + 488, { size: 14, f: 'Mono', w: 500, c: P.muted, al: 'right' });
+ g.restore(); g.restore();
+}
+// Entrega de turno: tres columnas y las incidencias donde terminan.
+function turnoView(g, x, y, w, h, u, a) {
+ g.save(); g.globalAlpha *= a;
+ const cw = (w - 80 - 24) / 3, cols = [['Abiertas', P.bad, [['MAYOR', 'INC-229', 'Fuga en sello de parabrisas', P.warn]]], ['En curso', P.warn, [['CRÍTICA', 'INC-232', 'Torque fuera de rango', P.bad]]], ['Cerradas', P.ok, [['MAYOR', 'INC-231', 'Burbuja en pintura de cofre', P.warn], ['MENOR', 'INC-226', 'Rayón en puerta trasera', P.muted], ['MAYOR', 'INC-221', 'Burbuja en pintura del cofre', P.warn]]]];
+ cols.forEach(([n, c, cards], i) => {
+  const k = E.outExpo(seg(u, .1 + i * .1, .7 + i * .1)), cx = x + 40 + i * (cw + 12);
+  g.save(); g.globalAlpha *= k; g.translate(0, (1 - k) * 20);
+  box(g, cx, y + 40, cw, 460, P.surface2, P.line);
+  g.fillStyle = c; g.fillRect(cx + 16, y + 66, 8, 8); T(g, n.toUpperCase(), cx + 32, y + 75, { size: 13, w: 700, sp: 1.5 });
+  T(g, String(cards.length), cx + cw - 16, y + 75, { size: 14, f: 'Mono', w: 700, c, al: 'right' });
+  cards.forEach(([sev, id, d, sc], j) => {
+   const cy = y + 100 + j * 106; box(g, cx + 10, cy, cw - 20, 96, P.surface, P.line); g.fillStyle = sc; g.fillRect(cx + 10, cy, 4, 96);
+   T(g, sev, cx + 26, cy + 26, { size: 11, w: 700, c: sc, sp: 1.2 }); T(g, id, cx + cw - 24, cy + 26, { size: 12, f: 'Mono', w: 600, c: P.muted, al: 'right' });
+   const dl = wrap(g, d, cw - 56, { size: 16, w: 600 }); dl.forEach((l, q) => T(g, l, cx + 26, cy + 56 + q * 21, { size: 16, w: 600 }));
+  });
+  g.restore();
+ });
+ g.restore();
+}
 function sIntro(g, u, t) {
  backdrop(g);
- const full = 'bruno salas', mo = { size: 46, f: 'Mono', w: 500, c: P.muted }, x0 = 960 - TW(g, full, mo) / 2, y0 = 560;
- const kt = seg(u, .65, 1.4), mout = seg(u, 1.6, 1.95);
- if (mout < 1) {
-  const s = typed(full, kt);
-  if (s) rise(g, s, x0, y0, 1, mo, mout, .02);
-  if (mout === 0) caret(g, x0 + TW(g, s, mo), y0, 46, t, kt > 0 && kt < 1);
- }
- const out = seg(u, 4.5, 5.0);
- rise(g, 'Bruno Salas', 150, 470, seg(u, 1.85, 2.7), { size: 196, w: 680, sp: -6, st: 'expanded' }, out, .04);
- rise(g, 'Desarrollo web,', 150, 600, seg(u, 2.2, 2.9), { size: 76, w: 600, sp: -1.5 }, out);
- rise(g, 'datos y automatización.', 150, 690, seg(u, 2.32, 3.05), { size: 76, w: 600, sp: -1.5, c: P.acc }, out);
- // El cajetín de la portada de la web, con los mismos cuatro datos.
- const rows = [['LUGAR', 'Monterrey, N. L.'], ['CARRERA', 'Ing. en Software · UANL 2023–2028'], ['IDIOMAS', 'ES / EN / PT'], ['HOJA', '00 · Portada']];
- const ky = 800, kr = E.outExpo(seg(u, 2.9, 3.6)), cw = (W - 300) / 4;
- rule(g, 150, ky, (W - 300) * kr, A(P.ink, 1 - out));
- rows.forEach(([k, v], i) => {
-  const kc = seg(u, 3.1 + i * .12, 3.7 + i * .12), x = 150 + i * cw;
-  if (i) { g.fillStyle = A(P.line, 1 - out); g.fillRect(x - 16, ky + 18, 1, 62 * kc); }
-  T(g, typed(k, kc * 2), x, ky + 40, { size: 13, f: 'Mono', w: 500, c: P.muted, sp: 2, a: 1 - out });
-  T(g, typed(v, kc), x, ky + 76, { size: 21, w: 500, st: 'normal', a: 1 - out });
+ const out = seg(u, 5.2, 5.7);
+ ['Desarrollo web,', 'datos y', 'automatización.'].forEach((l, i) => rise(g, l, 150, 300 + i * 100, seg(u, .25 + i * .12, 1.0 + i * .12), { f: 'Disp', size: 96 }, out));
+ const io = { size: 28, c: P.muted }, il = wrap(g, 'Estudiante de Ingeniería en Software en la UANL. Hago aplicaciones que puedes probar aquí mismo.', 760, io);
+ il.forEach((l, i) => { const k = E.outCubic(seg(u, 1.0 + i * .1, 1.6 + i * .1)); T(g, l, 150, 610 + i * 40 + (1 - k) * 14, { ...io, a: k * (1 - out) }); });
+ const kb = E.outExpo(seg(u, 1.5, 2.1)); g.save(); g.globalAlpha *= kb * (1 - out); g.translate(0, (1 - kb) * 16);
+ box(g, 150, 740, 200, 52, P.acc, P.acc); T(g, 'Ver proyectos', 178, 772, { size: 17, w: 600, c: '#ffffff' }); arrow(g, 322, 766, '#ffffff', 'd', 7, 1.8);
+ box(g, 366, 740, 200, 52, null, P.ink); T(g, 'Descargar CV', 394, 772, { size: 17, w: 600 }); arrow(g, 538, 766, P.ink, 'd', 7, 1.8);
+ g.restore();
+ const kd = E.outCubic(seg(u, 1.9, 2.5)); g.save(); g.globalAlpha *= kd * (1 - out);
+ rule(g, 150, 842, 700 * kd, P.line);
+ T(g, 'Monterrey, N. L. · Ingeniería en Software, UANL 2023–2028', 150, 880, { size: 17, c: P.muted }); T(g, 'Español, inglés y portugués', 150, 908, { size: 17, c: P.muted });
+ g.restore();
+ // A la derecha, el bloque de accesos: la vista grande arriba y tres filas debajo.
+ const VX = 1000, VY = 170, VW = 790, VH = 540, kv = E.outExpo(seg(u, .3, 1.0)), swap = E.inOutCubic(seg(u, 3.5, 3.9));
+ g.save(); g.globalAlpha *= kv * (1 - out); g.translate((1 - kv) * 60, 0);
+ box(g, VX, VY, VW, VH, P.surface2, P.ink);
+ g.save(); g.beginPath(); g.rect(VX, VY, VW, VH); g.clip();
+ if (swap < 1) plantView(g, VX, VY, VW, VH, u, 1 - swap);
+ if (swap > 0) turnoView(g, VX, VY, VW, VH, u - 3.5, swap);
+ g.restore();
+ const rows = [['Planta y OEE', 'Tres reportes, un OEE, cero copiar y pegar.', 'Abrir la app'], ['Entrega de turno', 'Nada se pierde entre turnos.', 'Abrir la app'], ['La Casa del Ángel', 'Página y portal para una residencia real.', 'Abrir la página']];
+ const on = swap > .5 ? 1 : 0, RH = 76, LY = VY + VH;
+ rows.forEach(([n, line, go], i) => {
+  const kr = E.outExpo(seg(u, 1.1 + i * .12, 1.7 + i * .12)), y = LY + i * RH;
+  g.save(); g.globalAlpha *= kr; g.translate(0, (1 - kr) * 14);
+  box(g, VX, y, VW, RH, i === on ? P.surface : P.bg, P.ink);
+  if (i === on) { g.fillStyle = P.ink; g.fillRect(VX, y, 3, RH); }
+  T(g, n, VX + 24, y + 34, { size: 21, f: 'Disp' }); T(g, line, VX + 24, y + 59, { size: 15, c: P.muted });
+  T(g, go, VX + VW - 100, y + 44, { size: 15, w: 600, c: P.acc, al: 'right' });
+  if (i < 2) arrow(g, VX + VW - 84, y + 39, P.acc, 'r', 6, 1.7); else arrow(g, VX + VW - 84, y + 39, P.acc, 'ne', 6, 1.7);
+  rule(g, VX + VW - 62, y, 1, P.line, RH); T(g, 'Ficha', VX + VW - 52, y + 44, { size: 13, c: P.muted });
+  g.restore();
  });
+ g.restore();
+ const kp = E.inOutCubic(seg(u, 3.0, 3.5)); pointer(g, lerp(1560, 1420, kp), lerp(900, LY + RH + 20, kp), 0, seg(u, 3.0, 3.15) * (1 - out));
 }
 
 // ——— Lo que hay en el portafolio ———
 function sMani(g, u, t) {
  backdrop(g);
- const out = seg(u, 2.95, 3.35), mo = { size: 112, w: 650, sp: -3 };
- rise(g, 'Herramientas para planta', 150, 400, seg(u, .3, 1.0), mo, out);
- rise(g, 'y para negocio pequeño,', 150, 530, seg(u, .45, 1.15), mo, out);
- rise(g, 'y un juego.', 150, 660, seg(u, .6, 1.3), { ...mo, c: P.acc }, out);
- const ks = E.outCubic(seg(u, 1.25, 1.75)), w = TW(g, 'planta', mo), x = 150 + TW(g, 'Herramientas para ', mo);
- if (ks > 0) rule(g, x, 422, w * ks, A(P.acc, 1 - out), 6);
- const note = 'Las demos corren en el navegador con datos de ejemplo.', kn = seg(u, 1.5, 2.5), nm = { size: 20, f: 'Mono', w: 500, c: P.muted };
+ const out = seg(u, 2.75, 3.15);
+ rise(g, 'Útiles para el mercado.', 150, 440, seg(u, .3, 1.0), { f: 'Disp', size: 140 }, out);
+ rise(g, 'Para negocios y manufactura, y un juego.', 150, 560, seg(u, .55, 1.2), { size: 44 }, out);
+ const note = 'Las apps se prueban aquí mismo, con datos de ejemplo.', kn = seg(u, 1.3, 2.3), nm = { size: 22, c: P.muted };
  const s = typed(note, kn);
- T(g, s, 150, 800, { ...nm, a: 1 - out });
- if (kn > 0 && out === 0) caret(g, 150 + TW(g, s, nm), 800, 20, t, kn < 1);
+ T(g, s, 150, 680, { ...nm, a: 1 - out });
+ if (kn > 0 && out === 0) caret(g, 150 + TW(g, s, nm), 680, 22, t, kn < 1);
 }
 
-// ——— A · 01 · Entrega de turno ———
+// ——— 01 · Entrega de turno ———
 const SEVC = { 'CRÍTICA': P.bad, 'MAYOR': P.warn, 'MENOR': P.muted };
 const COLS = [['ABIERTAS', P.bad], ['EN CURSO', P.warn], ['CERRADAS', P.ok]], CX = [860, 1170, 1480], CY = 320;
 // Las cuatro incidencias de la demo, con su línea, lote y responsable.
 const INC = [
  { id: 'INC-232', sev: 'CRÍTICA', title: 'Torque fuera de rango', where: 'L1 · lote 4420', owner: 'R. Garza', ownerAt: 2.05, kf: [[0, 0, 0], [1.3, 0, 0], [2.0, 1, 0]] },
- { id: 'INC-231', sev: 'MAYOR', title: 'Burbuja en pintura', where: 'L2 · lote 4424', owner: null, kf: [[0, 0, 1], [1.45, 0, 1], [1.85, 0, 0]] },
- { id: 'INC-229', sev: 'MAYOR', title: 'Fuga en sello', where: 'L3 · lote 4422', owner: 'L. Treviño', photo: true, kf: [[0, 1, 0], [1.3, 1, 0], [1.7, 1, 1], [2.55, 1, 1], [3.25, 2, 0]] },
- { id: 'INC-226', sev: 'MENOR', title: 'Rayón en puerta', where: 'L1 · lote 4411', owner: 'A. Cantú', photo: true, kf: [[0, 2, 0], [2.55, 2, 0], [2.95, 2, 1]] },
+ { id: 'INC-231', sev: 'MAYOR', title: 'Burbuja en pintura de cofre', where: 'L2 · lote 4424', owner: null, kf: [[0, 0, 1], [1.45, 0, 1], [1.85, 0, 0]] },
+ { id: 'INC-229', sev: 'MAYOR', title: 'Fuga en sello de parabrisas', where: 'L3 · lote 4422', owner: 'L. Treviño', photo: true, kf: [[0, 1, 0], [1.3, 1, 0], [1.7, 1, 1], [2.55, 1, 1], [3.25, 2, 0]] },
+ { id: 'INC-226', sev: 'MENOR', title: 'Rayón en puerta trasera', where: 'L1 · lote 4411', owner: 'A. Cantú', photo: true, kf: [[0, 2, 0], [2.55, 2, 0], [2.95, 2, 1]] },
 ];
 const slotXY = (c, s) => [CX[c] + 14, CY + 56 + s * 112];
 function incPos(kf, u) {
@@ -154,7 +228,7 @@ function incPos(kf, u) {
  }
  const [, c, s] = kf[kf.length - 1], p = slotXY(c, s); return { x: p[0], y: p[1], lift: 0, col: c };
 }
-const LOG = [[2.05, 'INC-232', '→ en curso · R. Garza', P.ink], [3.3, 'INC-229', 'cerrada con evidencia · L. Treviño', P.ok], [4.2, 'INC-231', 'no se cierra: falta la foto de evidencia', P.bad], [5.05, 'TURNO', 'entregado · 2 pendientes', P.ink]];
+const LOG = [[2.05, 'INC-232', 'pasa a en curso · R. Garza', P.ink], [3.3, 'INC-229', 'cerrada con evidencia · L. Treviño', P.ok], [4.2, 'INC-231', 'no se cierra: falta la foto de evidencia', P.bad], [5.05, 'TURNO', 'entregado · 2 pendientes', P.ink]];
 const clockAt = u => { const s = 50396 + Math.floor(u), h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60; return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; };
 function incCard(g, c, x, y, u, o) {
  const w = 272, h = 100, col = SEVC[c.sev];
@@ -162,36 +236,38 @@ function incCard(g, c, x, y, u, o) {
  // Al levantarla se separa del papel con un filete de tinta, no con sombra.
  box(g, 0, 0, w, h, o.err > 0 ? A(P.bad, .1 * o.err) : P.surface, o.lift > .05 ? P.ink : P.line, o.lift > .05 ? 1.5 : 1);
  g.fillStyle = col; g.fillRect(0, 0, 4, h);
- T(g, c.sev, 18, 26, { size: 11, f: 'Mono', w: 700, c: col, sp: 1.5 }); T(g, c.id, w - 14, 26, { size: 12, f: 'Mono', w: 600, c: P.muted, al: 'right' });
- T(g, c.title, 18, 56, { size: 17, w: 600, st: 'normal' });
- T(g, c.where, 18, 84, { size: 11.5, f: 'Mono', w: 500, c: P.muted });
+ T(g, c.sev, 18, 26, { size: 11.5, w: 700, c: col, sp: 1.2 }); T(g, c.id, w - 14, 26, { size: 12, f: 'Mono', w: 600, c: P.muted, al: 'right' });
+ T(g, c.title, 18, 56, { size: 17, w: 600 });
+ T(g, c.where, 18, 84, { size: 13, c: P.muted });
  const showOwner = c.owner && (!c.ownerAt || u >= c.ownerAt);
- if (showOwner) T(g, c.owner, w - 14, 84, { size: 12.5, w: 500, st: 'normal', al: 'right', a: c.ownerAt ? seg(u, c.ownerAt, c.ownerAt + .25) : 1 });
- else T(g, 'sin responsable', w - 14, 84, { size: 11.5, f: 'Mono', w: 600, c: P.bad, al: 'right' });
+ if (showOwner) T(g, c.owner, w - 14, 84, { size: 13.5, w: 500, al: 'right', a: c.ownerAt ? seg(u, c.ownerAt, c.ownerAt + .25) : 1 });
+ else T(g, 'sin responsable', w - 14, 84, { size: 13, w: 600, c: P.bad, al: 'right' });
  if (c.photo) { box(g, w - 120, 72, 16, 12, null, P.ok, 1.5); g.beginPath(); g.arc(w - 112, 78, 2.5, 0, 7); g.fillStyle = P.ok; g.fill(); }
  g.restore();
 }
 function sTurno(g, u, t) {
  backdrop(g);
  const out = seg(u, 6.65, 7.1);
- projectHead(g, u, { code: 'A · 01', group: 'TURNO EN PLANTA', title: 'Entrega de turno', pitch: 'Registro de incidencias de calidad para que el turno que entra sepa qué quedó abierto.', facts: ['React · TypeScript', 'Demo: registrar, asignar y cerrar con foto', 'Funcional · Android en desarrollo'], out });
+ projectHead(g, u, { kind: 'Automatización · calidad', title: 'Entrega de turno', pitch: 'Nada se pierde entre turnos.', metrics: [['3', 'estados por incidencia']], facts: ['React · TypeScript', 'Demo: registrar, asignar y cerrar con foto', 'Funcional · Android en desarrollo'], out });
  const kh = E.outExpo(seg(u, .2, .8)), done = u > 5.05;
  g.save(); g.globalAlpha = kh * (1 - out);
  T(g, clockAt(u), 1790, 262, { size: 50, f: 'Mono', w: 600, al: 'right', c: done ? P.ok : P.ink });
  const pr = clamp((50396 + u - 21600) / 28800); rule(g, 1490, 282, 300, P.line, 3); rule(g, 1490, 282, 300 * pr, P.ink, 3);
- T(g, done ? 'TURNO VESPERTINO · RECIBIDO' : 'MATUTINO → VESPERTINO · 14:00', 1790, 308, { size: 12, f: 'Mono', w: 600, c: P.muted, al: 'right', sp: 1.5 });
+ T(g, done ? 'TURNO VESPERTINO · RECIBIDO' : 'DE MATUTINO A VESPERTINO · 14:00', 1790, 308, { size: 12.5, w: 600, c: P.muted, al: 'right', sp: 1.2 });
  const kb = E.outExpo(seg(u, 4.4, 4.8)), press = Math.sin(Math.PI * seg(u, 4.95, 5.15));
  if (kb > 0) { g.save(); g.globalAlpha *= kb; g.translate(860 + 118, 252); g.scale(1 - press * .04, 1 - press * .04);
   box(g, -118, -26, 236, 52, done ? P.surface : P.acc, done ? P.ok : P.acc, done ? 1.5 : 1);
-  T(g, done ? 'Turno entregado' : 'Entregar turno  →', 0, 7, { size: 17, w: 600, st: 'normal', c: done ? P.ok : '#ffffff', al: 'center' }); g.restore(); }
+  if (done) T(g, 'Turno entregado', 0, 6, { size: 17, w: 600, c: P.ok, al: 'center' });
+  else { T(g, 'Entregar turno', -12, 6, { size: 17, w: 600, c: '#ffffff', al: 'center' }); arrow(g, 76, 0, '#ffffff', 'r', 7, 1.8); }
+  g.restore(); }
  const km = E.inOutCubic(seg(u, 4.45, 4.9)), kl2 = E.inOutCubic(seg(u, 5.3, 5.8));
  const counts = [0, 0, 0], pos = INC.map(c => { const p = incPos(c.kf, u); counts[p.col]++; return p; });
  COLS.forEach(([n, c], i) => {
   const k = E.outExpo(seg(u, .25 + i * .08, .8 + i * .08)), x = CX[i];
   g.save(); g.globalAlpha *= k; g.translate(0, (1 - k) * 30);
   box(g, x, CY, 300, 372, P.surface2, null);
-  g.fillStyle = c; g.fillRect(x + 16, CY + 24, 8, 8); T(g, n, x + 34, CY + 33, { size: 13, f: 'Mono', w: 700, sp: 2 });
-  T(g, String(counts[i]), x + 284, CY + 33, { size: 13, f: 'Mono', w: 700, c, al: 'right' });
+  g.fillStyle = c; g.fillRect(x + 16, CY + 24, 8, 8); T(g, n, x + 34, CY + 33, { size: 13, w: 700, sp: 1.5 });
+  T(g, String(counts[i]), x + 284, CY + 33, { size: 14, f: 'Mono', w: 700, c, al: 'right' });
   rule(g, x + 14, CY + 44, 272, P.line);
   g.restore();
  });
@@ -206,19 +282,19 @@ function sTurno(g, u, t) {
  const KX = 860, KY = 718, kc = E.outExpo(seg(u, .6, 1.1));
  g.save(); g.globalAlpha *= kc; g.translate(0, (1 - kc) * 30);
  box(g, KX, KY, 930, 150, P.surface, P.ink);
- T(g, 'BITÁCORA · MATUTINO', KX + 22, KY + 30, { size: 12, f: 'Mono', w: 600, c: P.muted, sp: 2 }); rule(g, KX + 22, KY + 42, 886);
+ T(g, 'BITÁCORA · MATUTINO', KX + 22, KY + 30, { size: 12.5, w: 700, c: P.muted, sp: 1.5 }); rule(g, KX + 22, KY + 42, 886);
  let ly = KY + 72, lastEnd = 0;
  LOG.forEach(([t0, id, msg, c]) => {
   if (u < t0) return; const k = seg(u, t0, t0 + .35);
   T(g, clockAt(t0), KX + 22, ly, { size: 14, f: 'Mono', w: 500, c: P.muted }); T(g, id, KX + 122, ly, { size: 14, f: 'Mono', w: 700, c: P.acc });
-  const s = typed(msg, k); T(g, s, KX + 214, ly, { size: 14, f: 'Mono', w: 500, c }); lastEnd = KX + 214 + TW(g, s, { size: 14, f: 'Mono', w: 500 }); ly += 22;
+  const s = typed(msg, k); T(g, s, KX + 214, ly, { size: 15, w: 500, c }); lastEnd = KX + 214 + TW(g, s, { size: 15, w: 500 }); ly += 22;
  });
- if (u < 2.05) caret(g, KX + 18, ly, 14, t, false, P.ink); else caret(g, lastEnd, ly - 22, 14, t, false, P.ink);
+ if (u < 2.05) caret(g, KX + 18, ly, 14, t, false); else caret(g, lastEnd, ly - 22, 14, t, false);
  g.restore();
  g.restore();
 }
 
-// ——— A · 02 · Analizador de CSV ———
+// ——— 05 · Analizador de CSV ———
 // Las diez primeras filas de inspecciones_planta_marzo.csv, la muestra del analizador.
 const ROWS = [
  ['Q-1041', '2026-03-02', 'Matutino', 'L1', 'Carrocería', '120'],
@@ -234,27 +310,29 @@ const ROWS = [
 ];
 const BADS = [[4, 1, '2026-03-03'], [5, 4, 'Pintura'], [6, 5, '1120'], [7, 4, 'Pintura']], DUP = 8;
 const COLX = [26, 130, 276, 408, 478, 874], HEAD = ['FOLIO', 'FECHA', 'TURNO', 'LÍNEA', 'ESTACIÓN', 'REVISADAS'];
+// Cifras y folios en mono; el texto, en DM Sans.
+const CELLF = [{ f: 'Mono', size: 15, w: 500 }, { f: 'Mono', size: 15, w: 500 }, { size: 16, w: 450 }, { f: 'Mono', size: 15, w: 500 }, { size: 16, w: 450 }, { f: 'Mono', size: 15, w: 500 }];
 // Rechazadas por línea en el archivo completo (23 filas, sin la repetida): lo que devuelve la consulta.
 const BARS = [['L1', 35], ['L2', 27], ['L3', 101]], ORDER = [1, 2, 0], BMAX = 110;
 const QUERY = 'SELECT linea, SUM(piezas_rechazadas) FROM datos GROUP BY linea ORDER BY 2 DESC';
 function sCSV(g, u, t) {
  backdrop(g);
  const out = seg(u, 6.85, 7.3);
- projectHead(g, u, { code: 'A · 02', group: 'TURNO EN PLANTA', title: 'Analizador de CSV', pitch: 'Revisa y limpia reportes en CSV o Excel, para quien los arma a mano cada semana.', facts: ['TypeScript · React · SQLite en el navegador', 'Demo con tu archivo o uno de ejemplo', 'Funcional · el archivo no sale de tu equipo'], out });
+ projectHead(g, u, { kind: 'Datos', title: 'Analizador de CSV', pitch: 'Tu reporte, limpio en un clic.', metrics: [['9', 'tipos de problema'], ['8', 'tipos de gráfica']], facts: ['TypeScript · React · SQLite en el navegador', 'Demo con tu archivo o uno de ejemplo', 'Funcional · el archivo no sale de tu equipo'], out });
  const X0 = 860, Y0 = 215, CW = 930, CH = 650, kc = E.outExpo(seg(u, .2, .95));
  g.save(); g.globalAlpha = kc * (1 - out); g.translate(0, (1 - kc) * 60);
  box(g, X0, Y0, CW, CH, P.surface, P.ink);
- T(g, 'inspecciones_planta_marzo.csv', X0 + 24, Y0 + 42, { size: 17, f: 'Mono', w: 700 }); T(g, '23 filas · 11 columnas · datos de ejemplo', X0 + 24, Y0 + 64, { size: 13, f: 'Mono', w: 500, c: P.muted });
+ T(g, 'inspecciones_planta_marzo.csv', X0 + 24, Y0 + 42, { size: 19, w: 600 }); T(g, '23 filas · 11 columnas · datos de ejemplo', X0 + 24, Y0 + 66, { size: 14.5, c: P.muted });
  const rowsTop = Y0 + 128, RH = 44, scanY = lerp(rowsTop - 10, rowsTop + RH * 10 + 10, E.inOutCubic(seg(u, 1.25, 2.35)));
  const kd = E.inOutCubic(seg(u, 3.65, 4.05)), fixed = BADS.filter((b, i) => u > 3.2 + i * .12 + .15).length;
  const flaggedBad = BADS.filter(([r]) => scanY > rowsTop + r * RH + RH / 2).length, dupFlag = scanY > rowsTop + DUP * RH + RH / 2 ? 1 : 0;
  const probs = flaggedBad + dupFlag - fixed - (kd > .5 ? 1 : 0), clean = u > 4.0;
  const tA = 1 - E.inOutCubic(seg(u, 4.15, 4.5));
- T(g, clean ? 'lo mecánico, listo' : `${probs} ${probs === 1 ? 'problema' : 'problemas'} en estas filas`, X0 + CW - 24, Y0 + 50, { size: 14, f: 'Mono', w: 700, c: clean ? P.ok : probs ? P.bad : P.muted, al: 'right' });
+ T(g, clean ? 'lo mecánico, listo' : `${probs} ${probs === 1 ? 'problema' : 'problemas'} en estas filas`, X0 + CW - 24, Y0 + 50, { size: 15.5, w: 600, c: clean ? P.ok : probs ? P.bad : P.muted, al: 'right' });
  rule(g, X0 + 18, Y0 + 82, CW - 36, P.ink);
  if (tA > 0) {
   g.save(); g.globalAlpha *= tA; g.translate(0, (1 - tA) * -16);
-  HEAD.forEach((h, c) => T(g, h, X0 + COLX[c], Y0 + 110, { size: 12, f: 'Mono', w: 700, c: P.muted, sp: 1.5, al: c === 5 ? 'right' : 'left' }));
+  HEAD.forEach((h, c) => T(g, h, X0 + COLX[c], Y0 + 110, { size: 12, w: 700, c: P.muted, sp: 1.3, al: c === 5 ? 'right' : 'left' }));
   let y = rowsTop;
   ROWS.forEach((row, r) => {
    const h = r === DUP ? RH * (1 - kd) : RH; if (h < .5) return;
@@ -263,18 +341,18 @@ function sCSV(g, u, t) {
    rule(g, X0 + 18, y + RH - 1, CW - 36, P.line);
    if (r === DUP && dupFlag) { g.fillStyle = A(P.warn, .1); g.fillRect(X0 + 18, y + 3, CW - 36, RH - 6); g.fillStyle = P.warn; g.fillRect(X0 + 18, y + 3, 3, RH - 6); }
    row.forEach((cell, c) => {
-    const bi = BADS.findIndex(b => b[0] === r && b[1] === c);
+    const bi = BADS.findIndex(b => b[0] === r && b[1] === c), cf = CELLF[c];
     let txt = cell, col = r === DUP && dupFlag ? P.warn : P.ink, sy = 1;
-    const cx = X0 + COLX[c], w = TW(g, cell, { size: 15, f: 'Mono', w: 500 }) + 16, bx = c === 5 ? cx - w + 8 : cx - 8;
+    const cx = X0 + COLX[c], w = TW(g, cell, cf) + 16, bx = c === 5 ? cx - w + 8 : cx - 8;
     if (bi >= 0) {
      const flag = scanY > y + RH / 2, ft = 3.2 + bi * .12, kf = seg(u, ft, ft + .3);
      if (kf >= .5) txt = BADS[bi][2];
      sy = Math.abs(Math.cos(Math.PI * kf));
-     const w2 = TW(g, txt, { size: 15, f: 'Mono', w: 500 }) + 16, bx2 = c === 5 ? cx - w2 + 8 : cx - 8;
+     const w2 = TW(g, txt, cf) + 16, bx2 = c === 5 ? cx - w2 + 8 : cx - 8;
      if (kf >= .5) { box(g, bx2, y + 8, w2, 28, A(P.ok, .1), P.ok); col = P.ok; }
      else if (flag) { box(g, bx, y + 8, w, 28, A(P.bad, .08), P.bad); col = P.bad; }
     }
-    g.save(); g.translate(0, y + 22); g.scale(1, Math.max(.02, sy)); T(g, txt, cx, 6, { size: 15, f: 'Mono', w: 500, c: col, al: c === 5 ? 'right' : 'left' }); g.restore();
+    g.save(); g.translate(0, y + 22); g.scale(1, Math.max(.02, sy)); T(g, txt, cx, 6, { ...cf, c: col, al: c === 5 ? 'right' : 'left' }); g.restore();
    });
    g.restore(); y += h;
   });
@@ -285,7 +363,7 @@ function sCSV(g, u, t) {
   if (kbtn > 0) {
    g.save(); g.globalAlpha *= kbtn; g.translate(bx + 150, by + 22); g.scale(1 - press * .04, 1 - press * .04); g.translate(-bx - 150, -by - 22);
    box(g, bx, by, 300, 44, clean ? P.surface : P.acc, clean ? P.ok : P.acc, clean ? 1.5 : 1);
-   T(g, clean ? 'Arreglado' : 'Arreglar lo mecánico', bx + 150, by + 28, { size: 16, w: 600, st: 'normal', c: clean ? P.ok : '#ffffff', al: 'center' });
+   T(g, clean ? 'Arreglado' : 'Arreglar lo mecánico', bx + 150, by + 28, { size: 16.5, w: 600, c: clean ? P.ok : '#ffffff', al: 'center' });
    g.restore();
   }
   const km = E.inOutCubic(seg(u, 2.45, 3.0)), kl = E.inOutCubic(seg(u, 3.35, 3.9));
@@ -297,29 +375,29 @@ function sCSV(g, u, t) {
   g.save(); g.globalAlpha *= cA;
   const kq = seg(u, 5.1, 5.95), q = typed(QUERY, kq), ks = E.outExpo(seg(u, 4.95, 5.3)), qo = { size: 14, f: 'Mono', w: 500 };
   if (ks > 0) { g.save(); g.globalAlpha *= ks; box(g, X0 + 24, Y0 + 96, CW - 48, 48, P.bg, P.line);
-   T(g, 'sql>', X0 + 42, Y0 + 126, { ...qo, w: 700, c: P.acc }); T(g, q, X0 + 90, Y0 + 126, qo); caret(g, X0 + 90 + TW(g, q, qo), Y0 + 126, 14, t, kq > 0 && kq < 1, P.ink); g.restore(); }
-  T(g, 'Piezas rechazadas por línea', X0 + 40, Y0 + 196, { size: 20, w: 600, st: 'normal' });
+   T(g, 'sql>', X0 + 42, Y0 + 126, { ...qo, w: 700, c: P.acc }); T(g, q, X0 + 90, Y0 + 126, qo); caret(g, X0 + 90 + TW(g, q, qo), Y0 + 126, 14, t, kq > 0 && kq < 1); g.restore(); }
+  T(g, 'Piezas rechazadas por línea', X0 + 40, Y0 + 196, { size: 22, f: 'Disp' });
   const base = Y0 + CH - 92, top = 300, slot = i => X0 + 170 + i * 230, kReo = E.inOutCubic(seg(u, 6.05, 6.5));
   for (let v = 0; v <= 100; v += 25) { const yy = base - v / BMAX * top; rule(g, X0 + 70, yy, CW - 110, v ? A(P.line, .9) : P.ink); T(g, String(v), X0 + 58, yy + 5, { size: 12, f: 'Mono', w: 500, c: P.muted, al: 'right' }); }
   BARS.forEach(([l, v], i) => {
    const kb = E.outCubic(seg(u, 4.45 + i * .1, 5.1 + i * .1)), h = v / BMAX * top * kb, x = lerp(slot(i), slot(ORDER.indexOf(i)), kReo), top1 = i === 2 && kReo > 0;
    g.fillStyle = top1 ? P.acc : P.ink; g.fillRect(x, base - h, 150, h);
    T(g, String(Math.round(v * clamp(kb))), x + 75, base - h - 14, { size: 24, f: 'Mono', w: 700, al: 'center', c: top1 ? P.acc : P.ink });
-   T(g, l, x + 75, base + 30, { size: 15, f: 'Mono', w: 600, c: P.muted, al: 'center' });
+   T(g, l, x + 75, base + 30, { size: 16, f: 'Mono', w: 600, c: P.muted, al: 'center' });
   });
   // La barra alta trae una fila rota: el analizador la marca, no la esconde.
   const kn = seg(u, 6.3, 6.8);
-  T(g, typed('L3 incluye Q-1058: 81 rechazadas de 79 revisadas · marcada', kn), X0 + 40, Y0 + CH - 24, { size: 13, f: 'Mono', w: 500, c: P.bad });
+  T(g, typed('L3 incluye Q-1058: 81 rechazadas de 79 revisadas · marcada', kn), X0 + 40, Y0 + CH - 24, { size: 14.5, w: 500, c: P.bad });
   g.restore();
  }
  g.restore();
 }
 
-// ——— A · 03 · Planta ———
+// ——— 02 · Planta ———
 function sPlanta(g, u, t) {
  backdrop(g);
  const out = seg(u, 6.05, 6.5);
- projectHead(g, u, { code: 'A · 03', group: 'TURNO EN PLANTA', title: 'Planta: consolidador y OEE', pitch: 'Junta los reportes de producción, calidad y paros de un turno y saca el OEE de cada línea.', facts: ['React · TypeScript · SheetJS', 'Demo con tres reportes de ejemplo o los tuyos', 'Funcional · reporte en Excel'], out });
+ projectHead(g, u, { kind: 'Automatización · manufactura', title: ['Planta: consolidador', 'y OEE'], pitch: 'Tres reportes, un OEE, cero copiar y pegar.', metrics: [['3', 'reportes cruzados'], ['8', 'reglas de excepción'], ['5', 'hojas en el reporte']], facts: ['React · TypeScript · SheetJS', 'Demo con tres reportes de ejemplo o los tuyos', 'Funcional · reporte en Excel'], out });
  g.save(); g.globalAlpha = 1 - out;
  const M = [1215, 395];
  // Conteos reales de la muestra: 18 lotes (4411–4428), 17 inspecciones, 11 detenciones.
@@ -329,28 +407,30 @@ function sPlanta(g, u, t) {
   if (kl > 0) { g.strokeStyle = P.ink; g.lineWidth = 1.5; g.beginPath(); const x1 = x + w, y1 = y + h / 2, xm = x1 + 30; g.moveTo(x1, y1); const pts = [[xm, y1], [xm, M[1]], [M[0], M[1]]], L = [30, Math.abs(M[1] - y1), M[0] - xm], tot = L[0] + L[1] + L[2]; let rem = tot * kl, px = x1, py = y1; for (let j = 0; j < 3 && rem > 0; j++) { const f = Math.min(1, rem / Math.max(L[j], .01)); px = lerp(px, pts[j][0], f); py = lerp(py, pts[j][1], f); g.lineTo(px, py); rem -= L[j]; px = pts[j][0]; py = pts[j][1]; } g.stroke(); }
   g.save(); g.globalAlpha *= kf; g.translate((1 - kf) * 60, 0);
   box(g, x, y, w, h, P.surface, P.ink);
-  T(g, n, x + 20, y + 40, { size: 15, f: 'Mono', w: 600 }); T(g, s, x + 20, y + 68, { size: 13, f: 'Mono', w: 500, c: P.muted });
+  T(g, n, x + 20, y + 40, { size: 17, w: 600 }); T(g, s, x + 20, y + 68, { size: 14.5, c: P.muted });
   g.restore();
  });
  const km = seg(u, 1.4, 1.6);
- if (km > 0) { g.fillStyle = P.ink; g.fillRect(M[0] - 6, M[1] - 6, 12 * km, 12 * km); T(g, 'cruce por lote', M[0] - 4, M[1] + 32, { size: 12, f: 'Mono', w: 500, c: P.muted, a: km }); }
+ if (km > 0) { g.fillStyle = P.ink; g.fillRect(M[0] - 6, M[1] - 6, 12 * km, 12 * km); T(g, 'cruce por lote', M[0] - 4, M[1] + 32, { size: 13.5, c: P.muted, a: km }); }
  // OEE real de la muestra: 80.7 % de planta; L1 82.8, L2 78.6, L3 80.7.
  const G = { x: 1330, y: 230 }, kg = E.outCubic(seg(u, 1.85, 3.1)), ka = seg(u, 1.6, 1.9);
  if (ka > 0) {
   g.save(); g.globalAlpha *= ka;
   rule(g, M[0] + 6, M[1], (G.x - M[0] - 30) * seg(u, 1.6, 1.85), P.ink, 1.5);
-  T(g, 'OEE DE PLANTA', G.x, G.y + 18, { size: 13, f: 'Mono', w: 600, c: P.muted, sp: 2 });
-  T(g, (80.7 * kg).toFixed(1), G.x - 6, G.y + 160, { size: 150, w: 650, sp: -5, c: P.ink });
-  T(g, '%', G.x + TW(g, (80.7).toFixed(1), { size: 150, w: 650, sp: -5 }) + 4, G.y + 160, { size: 54, w: 500, c: P.muted });
+  T(g, 'OEE DE PLANTA', G.x, G.y + 18, { size: 13, w: 700, c: P.muted, sp: 1.8 });
+  // El punto de la mono ocupa una celda entera: se dibuja con su ancho de aire para que la cifra no se abra.
+  let nx = G.x - 6; const no = { size: 150, f: 'Mono', w: 600 };
+  for (const ch of (80.7 * kg).toFixed(1)) { const dot = ch === '.'; T(g, ch, nx - (dot ? 28 : 0), G.y + 160, { ...no, c: P.ink }); nx += dot ? 22 : TW(g, ch, no) - 6; }
+  T(g, '%', nx + 8, G.y + 160, { size: 54, w: 500, c: P.muted });
   g.restore();
  }
  const kf2 = seg(u, 2.3, 3.0), formula = 'disponibilidad × rendimiento × calidad';
- T(g, typed(formula, kf2), G.x, G.y + 200, { size: 14, f: 'Mono', w: 500, c: P.muted });
+ T(g, typed(formula, kf2), G.x, G.y + 200, { size: 16, c: P.muted });
  [['Línea 1', 82.8], ['Línea 2', 78.6], ['Línea 3', 80.7]].forEach(([l, v], i) => {
   const k = E.outCubic(seg(u, 2.9 + i * .12, 3.7 + i * .12)), y = G.y + 250 + i * 46, bw = 330;
   if (k <= 0) return;
-  T(g, l, G.x, y + 14, { size: 15, w: 500, st: 'normal', a: seg(u, 2.9 + i * .12, 3.1 + i * .12) });
-  rule(g, G.x + 90, y + 4, bw, P.line, 12); g.fillStyle = i === 1 ? P.acc : P.ink; g.fillRect(G.x + 90, y + 4, bw * v / 100 * k, 12);
+  T(g, l, G.x, y + 14, { size: 16, w: 500, a: seg(u, 2.9 + i * .12, 3.1 + i * .12) });
+  rule(g, G.x + 90, y + 4, bw, P.line, 12); g.fillStyle = i === 1 ? P.warn : P.acc; g.fillRect(G.x + 90, y + 4, bw * v / 100 * k, 12);
   T(g, (v * k).toFixed(1), G.x + 90 + bw + 54, y + 15, { size: 15, f: 'Mono', w: 600, al: 'right' });
  });
  // Lo que no cuadra: las 9 excepciones de la muestra, con dos a la vista. El paro de la Línea 1 es la INC-232.
@@ -359,17 +439,17 @@ function sPlanta(g, u, t) {
   const x = 860, y = 620, w = 930, sh = Math.sin(u * 46) * 6 * seg(u, 3.9, 4.0) * (1 - seg(u, 4.0, 4.4));
   g.save(); g.globalAlpha *= kx; g.translate(sh, (1 - kx) * 30);
   box(g, x, y, w, 230, P.surface, P.bad, 1.5); g.fillStyle = P.bad; g.fillRect(x, y, 4, 230);
-  T(g, '9 cosas no cuadran', x + 26, y + 46, { size: 24, w: 650, c: P.bad });
-  T(g, 'EXCEPCIONES', x + w - 24, y + 44, { size: 12, f: 'Mono', w: 600, c: P.muted, al: 'right', sp: 2 }); rule(g, x + 26, y + 66, w - 52);
+  T(g, '9 cosas no cuadran', x + 26, y + 46, { size: 28, f: 'Disp', c: P.bad });
+  T(g, 'EXCEPCIONES', x + w - 24, y + 44, { size: 12.5, w: 700, c: P.muted, al: 'right', sp: 1.5 }); rule(g, x + 26, y + 66, w - 52);
   const lines = [['L3 · lote 4419', 'Lote producido sin inspección de calidad'], ['L3 · lote 4482', 'Inspección de un lote que no aparece en producción'], ['L1 · 07:40 · 25 min', 'Paro: llave de torque descalibrada (INC-232)']];
   lines.forEach(([wh, txt], i) => { const k = seg(u, 4.1 + i * .3, 4.55 + i * .3), yy = y + 104 + i * 42, hot = i === 2;
-   T(g, typed(wh, k * 1.6), x + 26, yy, { size: 14, f: 'Mono', w: 600, c: hot ? P.acc : P.muted }); T(g, typed(txt, k), x + 250, yy, { size: 18, w: hot ? 600 : 450, st: 'normal' }); });
+   T(g, typed(wh, k * 1.6), x + 26, yy, { size: 14.5, f: 'Mono', w: 600, c: hot ? P.ink : P.muted }); T(g, typed(txt, k), x + 250, yy, { size: 19, w: hot ? 600 : 450 }); });
   g.restore();
  }
  g.restore();
 }
 
-// ——— A · 05 · Inventario ———
+// ——— 04 · Inventario ———
 function ean(code12) {
  const d = code12.split('').map(Number); let s = 0; d.forEach((v, i) => s += v * (i % 2 ? 3 : 1)); const all = [...d, (10 - s % 10) % 10];
  const L = ['0001101', '0011001', '0010011', '0111101', '0100011', '0110001', '0101111', '0111011', '0110111', '0001011'];
@@ -382,10 +462,10 @@ const CODE = ean('750100000001');
 // El almacén de consumibles de la misma planta, con las existencias y mínimos de la demo.
 const STOCK = [['Sellador de parabrisas 310 ml', 34, 24], ['Guantes de nitrilo (caja)', 12, 24], ['Thinner para pistola 1 L', 18, 12], ['Lija P400 (paquete)', 6, 8], ['Tapones auditivos (caja)', 4, 6], ['Punta de torque T40', 3, 4]];
 // El pedido lleva cada producto bajo mínimo al doble del mínimo; son 8 y caben 4.
-const ORDERS = ['Guantes de nitrilo (caja)      ×36', 'Lija P400 (paquete)            ×10', 'Tapones auditivos (caja)       ×8', 'Punta de torque T40            ×5'];
+const ORDERS = [['Guantes de nitrilo (caja)', '×36'], ['Lija P400 (paquete)', '×10'], ['Tapones auditivos (caja)', '×8'], ['Punta de torque T40', '×5']];
 function label(g) {
  box(g, -160, -92, 320, 184, P.surface, null);
- T(g, 'Sellador de parabrisas 310 ml', -138, -60, { size: 14, w: 600, st: 'normal' });
+ T(g, 'Sellador de parabrisas 310 ml', -138, -60, { size: 15, w: 600 });
  const m = 2.8, x0 = -133;
  for (let i = 0; i < 95; i++) if (CODE.bits[i] === '1') { const guard = i < 3 || (i >= 45 && i < 50) || i >= 92; g.fillStyle = P.ink; g.fillRect(x0 + i * m, -40, m, guard ? 104 : 92); }
  T(g, CODE.digits[0], x0 - 12, 68, { size: 15, f: 'Mono', w: 500 });
@@ -395,7 +475,7 @@ function label(g) {
 function sInv(g, u, t) {
  backdrop(g);
  const out = seg(u, 5.85, 6.3);
- projectHead(g, u, { code: 'A · 05', group: 'TURNO EN PLANTA', title: 'Inventario con la cámara', pitch: 'Inventario de un almacén de consumibles: entradas, salidas y conteo escaneando con la cámara del celular.', facts: ['React · TypeScript · ZXing', 'Demo con la cámara de tu celular', 'Funcional · Android en desarrollo'], out });
+ projectHead(g, u, { kind: 'Almacén · móvil', title: ['Inventario con', 'la cámara'], pitch: 'La cámara del celular como lector de códigos.', metrics: [['3', 'modos: entrada, salida y conteo']], facts: ['React · TypeScript · ZXing', 'Demo con la cámara de tu celular', 'Funcional · Android en desarrollo'], out });
  g.save(); g.globalAlpha = 1 - out;
  const V = { x: 860, y: 215, w: 500, h: 420 }, LC = [V.x + 250, V.y + 205], kv = E.outExpo(seg(u, .2, .85));
  g.save(); g.globalAlpha *= kv; g.translate(0, (1 - kv) * 60);
@@ -405,7 +485,7 @@ function sInv(g, u, t) {
  const lock = seg(u, 2.0, 2.3), drift = 1 - lock, kL = E.outExpo(seg(u, .5, 1.0));
  g.save(); g.translate(LC[0] + Math.sin(u * 2.3) * 12 * drift, LC[1] + Math.cos(u * 1.9) * 8 * drift); g.rotate(Math.sin(u * 1.7) * .05 * drift); g.scale(.85 + .15 * kL, .85 + .15 * kL); g.globalAlpha *= kL; label(g); g.restore();
  const kz = seg(u, .9, 1.05) * (1 - seg(u, 1.95, 2.05));
- if (kz > 0) { const ly = LC[1] + Math.sin((u - .9) * 6.5) * 70; g.fillStyle = A(P.acc, kz); g.fillRect(LC[0] - 180, ly - 1, 360, 2); }
+ if (kz > 0) { const ly = LC[1] + Math.sin((u - .9) * 6.5) * 70; g.fillStyle = A(P.accOn, kz); g.fillRect(LC[0] - 180, ly - 1, 360, 2); }
  g.restore();
  const kb = E.outCubic(seg(u, 2.0, 2.3)), br = [lerp(V.x + 44, LC[0] - 176, kb), lerp(V.y + 44, LC[1] - 108, kb), lerp(V.w - 88, 352, kb), lerp(V.h - 88, 216, kb)];
  const [bx, by, bw, bh] = br, cl = 30, bc = lock > .5 ? '#7fb58c' : '#ece9df';
@@ -413,11 +493,11 @@ function sInv(g, u, t) {
  [[bx, by, 1, 1], [bx + bw, by, -1, 1], [bx, by + bh, 1, -1], [bx + bw, by + bh, -1, -1]].forEach(([x, y, sx, sy]) => { g.beginPath(); g.moveTo(x, y + sy * cl); g.lineTo(x, y); g.lineTo(x + sx * cl, y); g.stroke(); });
  g.lineCap = 'butt';
  const kc = seg(u, 2.05, 2.5), cs = typed(CODE.digits, kc);
- T(g, cs, V.x, V.y + V.h + 44, { size: 24, f: 'Mono', w: 700 }); if (kc >= 1) T(g, 'leído · EAN-13', V.x + TW(g, CODE.digits, { size: 24, f: 'Mono', w: 700 }) + 18, V.y + V.h + 42, { size: 15, f: 'Mono', w: 600, c: P.ok, a: seg(u, 2.5, 2.7) });
+ T(g, cs, V.x, V.y + V.h + 44, { size: 24, f: 'Mono', w: 700 }); if (kc >= 1) T(g, 'leído · EAN-13', V.x + TW(g, CODE.digits, { size: 24, f: 'Mono', w: 700 }) + 18, V.y + V.h + 42, { size: 16, w: 600, c: P.ok, a: seg(u, 2.5, 2.7) });
  const kp = E.outExpo(seg(u, 2.35, 2.8)) * (1 - E.inExpo(seg(u, 3.95, 4.3))), py = V.y + V.h + 70;
  if (kp > 0) {
   g.save(); g.globalAlpha *= kp; g.translate((1 - kp) * -40, 0); box(g, V.x, py, V.w, 88, P.surface, P.ink);
-  T(g, 'Sellador de parabrisas 310 ml', V.x + 22, py + 38, { size: 19, w: 600, st: 'normal' }); T(g, '+1 entrada', V.x + 22, py + 66, { size: 13, f: 'Mono', w: 600, c: P.ok });
+  T(g, 'Sellador de parabrisas 310 ml', V.x + 22, py + 38, { size: 20, w: 600 }); T(g, '+1 entrada', V.x + 22, py + 66, { size: 15, w: 600, c: P.ok });
   const kr = E.inOutCubic(seg(u, 2.75, 3.1)); g.save(); g.beginPath(); g.rect(V.x + 360, py + 10, 130, 70); g.clip();
   T(g, '34', V.x + V.w - 24, py + 62 - kr * 60, { size: 44, f: 'Mono', w: 600, al: 'right', c: P.muted }); T(g, '35', V.x + V.w - 24, py + 122 - kr * 60, { size: 44, f: 'Mono', w: 600, al: 'right' }); g.restore();
   g.restore();
@@ -425,16 +505,16 @@ function sInv(g, u, t) {
  const ks = E.outExpo(seg(u, 4.2, 4.65));
  if (ks > 0) {
   g.save(); g.globalAlpha *= ks; g.translate(0, (1 - ks) * 40); box(g, V.x, py, V.w, 176, P.surface, P.ink);
-  T(g, 'Pedido al proveedor', V.x + 22, py + 38, { size: 18, w: 600, st: 'normal' });
-  T(g, 'para WhatsApp', V.x + V.w - 22, py + 37, { size: 12, f: 'Mono', w: 600, c: P.ok, al: 'right' });
-  ORDERS.forEach((l, i) => { const k = seg(u, 4.5 + i * .18, 4.75 + i * .18); T(g, typed(l, k), V.x + 22, py + 74 + i * 24, { size: 13.5, f: 'Mono', w: 500 }); });
-  T(g, typed('… y 4 más bajo el mínimo', seg(u, 5.25, 5.6)), V.x + 22, py + 168, { size: 12, f: 'Mono', w: 500, c: P.muted });
+  T(g, 'Pedido al proveedor', V.x + 22, py + 38, { size: 21, f: 'Disp' });
+  T(g, 'para WhatsApp', V.x + V.w - 22, py + 37, { size: 13.5, w: 600, c: P.ok, al: 'right' });
+  ORDERS.forEach(([n, q], i) => { const k = seg(u, 4.5 + i * .18, 4.75 + i * .18), yy = py + 74 + i * 24; T(g, typed(n, k), V.x + 22, yy, { size: 15.5, w: 450 }); if (k >= 1) T(g, q, V.x + V.w - 22, yy, { size: 14.5, f: 'Mono', w: 600, al: 'right' }); });
+  T(g, typed('… y 4 más bajo el mínimo', seg(u, 5.25, 5.6)), V.x + 22, py + 168, { size: 14, c: P.muted });
   g.restore();
  }
  g.restore();
  const Lx = 1400, Ly = 215, Lw = 390;
  const kl = E.outExpo(seg(u, .35, 1.0)); g.save(); g.globalAlpha *= kl; g.translate((1 - kl) * 60, 0);
- box(g, Lx, Ly, Lw, 640, P.surface, P.ink); T(g, 'EXISTENCIAS', Lx + 22, Ly + 38, { size: 12, f: 'Mono', w: 600, c: P.muted, sp: 2 }); T(g, 'hay / mín', Lx + Lw - 22, Ly + 38, { size: 12, f: 'Mono', w: 600, c: P.muted, al: 'right' });
+ box(g, Lx, Ly, Lw, 640, P.surface, P.ink); T(g, 'EXISTENCIAS', Lx + 22, Ly + 38, { size: 12.5, w: 700, c: P.muted, sp: 1.5 }); T(g, 'hay / mín', Lx + Lw - 22, Ly + 38, { size: 13.5, c: P.muted, al: 'right' });
  rule(g, Lx + 22, Ly + 52, Lw - 44);
  let low = 0;
  STOCK.forEach(([n, s0, min], i) => {
@@ -442,10 +522,10 @@ function sInv(g, u, t) {
   const kf = isLow ? seg(u, 3.2 + low * .15, 3.45 + low * .15) : 0; if (isLow) low++;
   g.save(); g.globalAlpha *= kr; g.translate((1 - kr) * 24, 0);
   if (kf > 0) { g.fillStyle = A(P.bad, .07 * kf); g.fillRect(Lx + 12, y - 4, Lw - 24, 84); g.fillStyle = A(P.bad, kf); g.fillRect(Lx + 12, y - 4, 3, 84); }
-  T(g, n, Lx + 26, y + 28, { size: 16, w: 500, st: 'normal' });
+  T(g, n, Lx + 26, y + 28, { size: 16.5, w: 500 });
   const bw2 = 230, fr = clamp(s / (min * 2)) * kr; rule(g, Lx + 26, y + 46, bw2, P.line, 6); g.fillStyle = kf > .3 ? P.bad : P.ink; g.fillRect(Lx + 26, y + 46, Math.max(4, bw2 * fr), 6);
   g.fillStyle = P.muted; g.fillRect(Lx + 26 + bw2 / 2, y + 42, 1.5, 14);
-  T(g, String(s), Lx + Lw - 26, y + 34, { size: 24, f: 'Mono', w: 700, al: 'right', c: kf > .3 ? P.bad : P.ink }); T(g, `mín ${min}`, Lx + Lw - 26, y + 56, { size: 11, f: 'Mono', w: 500, c: P.muted, al: 'right' });
+  T(g, String(s), Lx + Lw - 26, y + 34, { size: 24, f: 'Mono', w: 700, al: 'right', c: kf > .3 ? P.bad : P.ink }); T(g, `mín ${min}`, Lx + Lw - 26, y + 56, { size: 12, f: 'Mono', w: 500, c: P.muted, al: 'right' });
   rule(g, Lx + 22, y + 82, Lw - 44);
   g.restore();
  });
@@ -453,8 +533,8 @@ function sInv(g, u, t) {
  g.restore();
 }
 
-// ——— B · 02 · NFC para negocios ———
-// Tarjeta y menú de ejemplo de la demo: «El Cerro», 8 sellos, premio «Postre de la casa», mesa 7.
+// ——— 07 · NFC para negocios ———
+// Tarjeta y menú de ejemplo de la demo: «El Cerro», 8 sellos (quedan 5), premio «postre de la casa», mesa 7.
 const STAMP = 2.95;
 function nfcGlyph(g, x, y, s, c) { g.save(); g.translate(x, y); g.strokeStyle = c; g.lineWidth = 3 * s / 40; g.lineCap = 'round'; for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(-s * .3, 0, s * (.18 + i * .2), -.9, .9); g.stroke(); } g.restore(); }
 function phone(g, x, y, rot, draw) {
@@ -468,96 +548,98 @@ function check(g, cx, cy, c, lw = 3) { g.beginPath(); g.moveTo(cx - 8, cy); g.li
 function stampCard(g, x, y, u) {
  const w = 254, h = 262, got = u >= STAMP + .1;
  box(g, x, y, w, h, P.surface, P.ink);
- T(g, 'El Cerro', x + 18, y + 38, { size: 20, w: 650 }); T(g, 'TARJETA DE SELLOS', x + 18, y + 58, { size: 10.5, f: 'Mono', w: 600, c: P.muted, sp: 1.5 });
- T(g, `${got ? 6 : 5}/8`, x + w - 18, y + 40, { size: 20, f: 'Mono', w: 700, al: 'right', c: got ? P.acc : P.ink });
+ T(g, 'El Cerro', x + 18, y + 38, { size: 21, f: 'Disp' }); T(g, 'TARJETA DE SELLOS', x + 18, y + 58, { size: 11, w: 700, c: P.muted, sp: 1.2 });
+ T(g, `${got ? 5 : 4}/8`, x + w - 18, y + 40, { size: 20, f: 'Mono', w: 700, al: 'right', c: got ? P.acc : P.ink });
  rule(g, x + 18, y + 72, w - 36);
  for (let i = 0; i < 8; i++) {
   const cx = x + 37 + (i % 4) * 60, cy = y + 112 + Math.floor(i / 4) * 62;
-  const empty = () => { g.beginPath(); g.arc(cx, cy, 21, 0, 7); g.strokeStyle = P.line; g.lineWidth = 1.5; g.stroke(); };
-  if (i < 5) { g.beginPath(); g.arc(cx, cy, 22, 0, 7); g.fillStyle = P.ink; g.fill(); check(g, cx, cy, P.bg); }
-  else if (i === 5) {
+  const empty = (c = P.line) => { g.beginPath(); g.arc(cx, cy, 21, 0, 7); g.strokeStyle = c; g.lineWidth = 1.5; g.stroke(); };
+  if (i < 4) { g.beginPath(); g.arc(cx, cy, 22, 0, 7); g.fillStyle = P.ink; g.fill(); check(g, cx, cy, P.bg); }
+  else if (i === 4) {
    // El sello cae como un golpe de goma: entra grande y girado y se asienta.
    const k = seg(u, STAMP, STAMP + .22);
    if (k <= 0) empty();
    else { const s = lerp(1.9, 1, E.inCubic(k)); g.save(); g.globalAlpha = seg(u, STAMP, STAMP + .05); g.translate(cx, cy); g.scale(s, s); g.rotate((1 - k) * -.35);
     g.beginPath(); g.arc(0, 0, 22, 0, 7); g.fillStyle = P.acc; g.fill(); check(g, 0, 0, '#ffffff'); g.restore(); }
-  } else empty();
+  } else if (i === 7) { g.save(); g.setLineDash([4, 4]); empty(P.acc); g.restore(); }
+  else empty();
  }
- T(g, 'Premio: Postre de la casa', x + 18, y + h - 22, { size: 13.5, w: 500, st: 'normal' });
+ T(g, 'Al llenarla: postre de la casa', x + 18, y + h - 22, { size: 14, w: 500 });
 }
 const ITEMS = [['Al pastor (4)', 'Con piña, cebolla y cilantro.', 89], ['De bistec (4)', 'Con frijoles charros.', 95], ['De nopales (4)', 'Nopal asado con queso fresco.', 79]];
 function menuScreen(g, u) {
- T(g, 'El Cerro', 20, 76, { size: 22, w: 650 }); T(g, 'Menú · Mesa 7', 20, 100, { size: 13, f: 'Mono', w: 500, c: P.muted });
- let px = 16; [['Entradas', 0], ['Tacos', 1], ['Postres', 0]].forEach(([l, on]) => { const w = TW(g, l, { size: 13, w: 600, st: 'normal' }) + 24; box(g, px, 118, w, 30, on ? P.ink : null, on ? P.ink : P.line); T(g, l, px + 12, 138, { size: 13, w: 600, st: 'normal', c: on ? P.bg : P.muted }); px += w + 6; });
+ T(g, 'El Cerro', 20, 76, { size: 23, f: 'Disp' }); T(g, 'Menú · Mesa 7', 20, 100, { size: 14, c: P.muted });
+ let px = 16; [['Entradas', 0], ['Tacos', 1], ['Postres', 0]].forEach(([l, on]) => { const w = TW(g, l, { size: 13.5, w: 600 }) + 24; box(g, px, 118, w, 30, on ? P.ink : null, on ? P.ink : P.line); T(g, l, px + 12, 138, { size: 13.5, w: 600, c: on ? P.bg : P.muted }); px += w + 6; });
  ITEMS.forEach(([n, d, p], i) => {
   const y = 166 + i * 92, k = E.outExpo(seg(u, 4.35 + i * .06, 4.8 + i * .06));
   g.save(); g.globalAlpha = k; g.translate((1 - k) * 30, 0);
   rule(g, 16, y + 82, 254);
-  T(g, n, 20, y + 28, { size: 16, w: 600, st: 'normal' }); T(g, d, 20, y + 50, { size: 12, w: 400, st: 'normal', c: P.muted });
-  T(g, `$${p}`, 20, y + 72, { size: 13, f: 'Mono', w: 600 });
+  T(g, n, 20, y + 28, { size: 17, w: 600 }); T(g, d, 20, y + 50, { size: 12.5, w: 400, c: P.muted });
+  T(g, `$${p}`, 20, y + 72, { size: 14, f: 'Mono', w: 600 });
   const tap = i === 0 ? 4.85 : i === 1 ? 5.15 : 99, kt = seg(u, tap, tap + .3), bs = 1 - .12 * Math.sin(Math.PI * kt), on = u > tap + .1;
   g.save(); g.translate(246, y + 46); g.scale(bs, bs); box(g, -16, -16, 32, 32, on ? P.acc : P.surface, on ? P.acc : P.ink); T(g, on ? '1' : '+', 0, 6, { size: 17, f: 'Mono', w: 700, c: on ? '#ffffff' : P.ink, al: 'center' }); g.restore();
   g.restore();
  });
  const kb = E.outExpo(seg(u, 5.35, 5.8)), by = lerp(650, 520, kb);
- box(g, 16, by, 254, 56, P.ok, null); T(g, 'Pedir por WhatsApp · $184', 143, by + 34, { size: 15, w: 600, st: 'normal', c: '#ffffff', al: 'center' });
+ box(g, 16, by, 254, 56, P.ok, null); T(g, 'Pedir por WhatsApp · $184', 143, by + 34, { size: 15.5, w: 600, c: '#ffffff', al: 'center' });
 }
 function nfcScreen(g, u, t) {
  T(g, '14:10', 26, 34, { size: 14, f: 'Mono', w: 600 });
  const pre = 1 - seg(u, 2.0, 2.25);
- if (pre > 0) { g.save(); g.globalAlpha = pre; nfcGlyph(g, 160, 250, 70, P.muted); T(g, 'Acerca el celular', 143, 350, { size: 17, w: 500, st: 'normal', c: P.muted, al: 'center' }); T(g, 'al chip', 143, 374, { size: 17, w: 500, st: 'normal', c: P.muted, al: 'center' }); g.restore(); }
+ if (pre > 0) { g.save(); g.globalAlpha = pre; nfcGlyph(g, 160, 250, 70, P.muted); T(g, 'Acerca el celular', 143, 350, { size: 18, w: 500, c: P.muted, al: 'center' }); T(g, 'al chip', 143, 376, { size: 18, w: 500, c: P.muted, al: 'center' }); g.restore(); }
  const m = E.inOutExpo(seg(u, 4.0, 4.55));
  g.save(); g.translate(-286 * m, 0);
  const kc = E.outCubic(seg(u, 2.05, 2.7));
  if (kc > 0) stampCard(g, 16, lerp(660, 64, kc), u);
  const kt = E.outExpo(seg(u, 3.3, 3.8));
- if (kt > 0) { const ty = lerp(640, 350, kt); box(g, 16, ty, 254, 70, P.surface2, null); g.fillStyle = P.acc; g.fillRect(16, ty, 4, 70); T(g, 'Sello de hoy', 34, ty + 30, { size: 16, w: 600, st: 'normal' }); T(g, 'Te faltan 2 para el premio', 34, ty + 52, { size: 12.5, w: 400, st: 'normal', c: P.muted }); }
+ if (kt > 0) { const ty = lerp(640, 350, kt); box(g, 16, ty, 254, 70, P.surface2, null); g.fillStyle = P.acc; g.fillRect(16, ty, 4, 70); T(g, 'Sello de hoy', 34, ty + 30, { size: 17, w: 600 }); T(g, 'Te faltan 3 para el premio', 34, ty + 52, { size: 13, w: 400, c: P.muted }); }
  g.restore();
  if (m > 0) { g.save(); g.translate(286 * (1 - m), 0); menuScreen(g, u); g.restore(); }
 }
 function sNFC(g, u, t) {
  backdrop(g);
  const out = seg(u, 6.25, 6.75);
- projectHead(g, u, { code: 'B · 02', group: 'NEGOCIO PEQUEÑO', title: 'NFC para negocios', pitch: 'Tarjeta de sellos y menú en el celular para cafés y restaurantes: el cliente sólo acerca el teléfono a un chip.', facts: ['React · TypeScript · Web NFC · QR', 'Demo, armador de tarjeta y de menú', 'Funcional · APK para Android'], out });
+ projectHead(g, u, { kind: 'Atención a clientes', title: 'NFC para negocios', pitch: 'Que vuelvan, sin quitarles tiempo.', facts: ['React · TypeScript · Web NFC · QR', 'Demo, armador de tarjeta y de menú', 'Funcional · APK para Android'], out });
  // El chip real: sticker NTAG215 redondo de 25 mm, pegado en la carpeta de la cuenta.
  const chip = { x: 1180, y: 805 }, kc = E.outCubic(seg(u, .2, .7));
  if (kc > 0) {
   g.save(); g.translate(chip.x, chip.y + E.inExpo(out) * 400); g.globalAlpha = kc;
-  box(g, -190, -150, 380, 300, P.surface2, null); T(g, 'CUENTA · MESA 7', -170, -118, { size: 11, f: 'Mono', w: 600, c: P.muted, sp: 2 });
+  box(g, -190, -150, 380, 300, P.surface2, null); T(g, 'CUENTA · MESA 7', -170, -118, { size: 12, w: 700, c: P.muted, sp: 1.5 });
   g.beginPath(); g.arc(0, 10, 92, 0, 7); g.fillStyle = P.surface; g.fill(); g.strokeStyle = P.ink; g.lineWidth = 1.5; g.stroke();
-  nfcGlyph(g, 14, 0, 70, P.ink); T(g, 'NTAG215 · 25 mm', 0, 78, { size: 11, f: 'Mono', w: 600, c: P.muted, al: 'center', sp: 1 });
+  nfcGlyph(g, 14, 0, 70, P.ink); T(g, 'NTAG215 · 25 mm', 0, 78, { size: 12.5, w: 600, c: P.muted, al: 'center', sp: .5 });
   g.restore();
  }
  for (let i = 0; i < 2; i++) { const k = seg(u, 2.0 + i * .18, 2.9 + i * .18); if (k > 0 && k < 1) { g.beginPath(); g.arc(chip.x, chip.y + 10, 92 + E.outCubic(k) * 200, 0, 7); g.strokeStyle = A(P.acc, 1 - k); g.lineWidth = 1.5; g.stroke(); } }
  const kIn = E.outExpo(seg(u, .35, 1.6)), dip = Math.sin(Math.PI * seg(u, 1.7, 2.3)) * 26, lift = E.inOutCubic(seg(u, 3.7, 4.3));
- const px = lerp(1760, 1420, kIn) + lift * 20, py = lerp(-460, 470, kIn) + dip - lift * 40 - E.inExpo(out) * 1100, rot = lerp(.3, -.06, kIn) + lift * .06;
+ const px = lerp(1760, 1420, kIn) + lift * 20, py = lerp(-460, 495, kIn) + dip - lift * 40 - E.inExpo(out) * 1100, rot = lerp(.3, -.06, kIn) + lift * .06;
  phone(g, px, py, rot, sg => nfcScreen(sg, u, t));
 }
 
 // ——— El resto del portafolio ———
+// Número, tipo, nombre, frase y tecnología, tal como salen en la portada (los cinco de arriba no se repiten).
 const MORE = [
- ['A · 04', 'Gráficas de control (SPC)', 'Gráficas de control para ver si un proceso se está desajustando antes de que salgan piezas malas.', 'Python · PySide6 · React'],
- ['B · 01', 'La Casa del Ángel', 'Página y portal de cuidados para una residencia de adultos mayores en Celaya.', 'Cliente · publicada · en uso'],
- ['C', 'IA Rogue', 'Un roguelike 3D donde una IA busca su libertad.', 'Godot 4 · en desarrollo'],
- ['D', 'VibeMap', 'Muestra un proyecto de código como mapa: qué archivo usa a cuál y qué está sobrando.', 'Hackathon · equipo de 3'],
- ['D', 'Punto U', 'App para que estudiantes de la UANL publiquen favores en el campus y los cambien.', 'React · Supabase · Capacitor'],
- ['D', 'IA local sin APIs', 'Asistente de atención que corre en la computadora del negocio, sin pagar por mensaje.', 'En desarrollo · aprendiendo'],
+ ['03', 'Calidad · manufactura', 'Gráficas de control (SPC)', 'Saber si la máquina se desajusta antes de la pieza mala.', 'Python · PySide6 · React'],
+ ['06', 'Cliente · web y app', 'La Casa del Ángel', 'Página y portal de cuidados para una residencia en Celaya.', 'React · Supabase · Capacitor'],
+ ['08', 'Juego · Godot 4', 'IA Rogue', 'Un roguelike 3D donde una IA busca su libertad.', 'Godot 4 · en desarrollo'],
+ ['09', 'Hackathon · equipo de 3', 'VibeMap', 'Cualquier código, de un vistazo.', 'React · TypeScript'],
+ ['10', 'App web y Android', 'Punto U', 'El campus, cambiando favores.', 'React · Supabase · Capacitor'],
+ ['11', 'IA · atención y datos', 'IA personalizada local sin APIs', 'Corre en el equipo del negocio: bajo costo y los datos no salen.', 'Ollama · Qwen3 · en desarrollo'],
 ];
 function sMore(g, u, t) {
  backdrop(g);
- rise(g, 'Y en el portafolio,', 150, 290, seg(u, .15, .8), { size: 92, w: 650, sp: -2 });
- rise(g, 'seis más.', 150, 392, seg(u, .3, .95), { size: 92, w: 650, sp: -2, c: P.acc });
+ rise(g, 'Y en el portafolio,', 150, 290, seg(u, .15, .8), { f: 'Disp', size: 96 });
+ rise(g, 'seis más.', 150, 396, seg(u, .3, .95), { f: 'Disp', size: 96 });
  const base = lerp(980, -560, E.inOutSine(seg(u, .2, 4.2)));
- MORE.forEach(([code, name, pitch, fact], i) => {
+ MORE.forEach(([n, kind, name, pitch, fact], i) => {
   const x = base + i * 390, ke = E.outExpo(seg(u, .25 + i * .05, .95 + i * .05));
   if (x > W + 40 || x < -400) return;
   const y = 490 + (1 - ke) * 160;
   g.save(); g.globalAlpha = ke; g.translate(x, y);
   box(g, 0, 0, 360, 400, P.surface, P.ink);
-  T(g, code, 24, 40, { size: 14, f: 'Mono', w: 700, c: P.acc, sp: 1 }); rule(g, 24, 58, 312);
-  const tl = wrap(g, name, 312, { size: 30, w: 650, sp: -.5 }); tl.forEach((l, j) => T(g, l, 24, 106 + j * 36, { size: 30, w: 650, sp: -.5 }));
-  wrap(g, pitch, 312, { size: 19, w: 400, st: 'normal' }).forEach((l, j) => T(g, l, 24, 112 + tl.length * 36 + 18 + j * 27, { size: 19, w: 400, st: 'normal', c: P.muted }));
-  rule(g, 24, 344, 312); T(g, fact, 24, 374, { size: 13, f: 'Mono', w: 500, c: P.muted });
+  T(g, n, 24, 40, { size: 15, f: 'Mono', w: 700, c: P.acc }); T(g, kind.toUpperCase(), 24 + TW(g, n, { size: 15, f: 'Mono', w: 700 }) + 14, 39, { size: 12, w: 700, c: P.muted, sp: 1 }); rule(g, 24, 58, 312);
+  const tl = wrap(g, name, 312, { size: 29, f: 'Disp' }); tl.forEach((l, j) => T(g, l, 24, 104 + j * 34, { size: 29, f: 'Disp' }));
+  wrap(g, pitch, 312, { size: 19 }).forEach((l, j) => T(g, l, 24, 104 + tl.length * 34 + 16 + j * 27, { size: 19, c: P.muted }));
+  rule(g, 24, 344, 312); T(g, fact, 24, 376, { size: 14.5, c: P.muted });
   g.restore();
  });
 }
@@ -565,26 +647,27 @@ function sMore(g, u, t) {
 // ——— Cierre ———
 function sOutro(g, u, t) {
  backdrop(g);
- rise(g, 'Bruno Salas', 150, 450, seg(u, .3, 1.1), { size: 190, w: 680, sp: -6, st: 'expanded' }, 0, .04);
- rise(g, 'Busco prácticas y también', 150, 580, seg(u, .6, 1.3), { size: 66, w: 600, sp: -1.2 });
- rise(g, 'tomo encargos.', 150, 660, seg(u, .72, 1.42), { size: 66, w: 600, sp: -1.2, c: P.acc });
+ rise(g, 'Bruno Salas', 150, 450, seg(u, .3, 1.1), { f: 'Disp', size: 190 }, 0, .04);
+ rise(g, 'Busco prácticas y también', 150, 580, seg(u, .6, 1.3), { f: 'Disp', size: 66 });
+ rise(g, 'tomo encargos.', 150, 660, seg(u, .72, 1.42), { f: 'Disp', size: 66 });
  const kr = E.outExpo(seg(u, 1.3, 1.9)); rule(g, 150, 760, (W - 300) * kr, P.ink);
  const items = [['WEB', 'bruno-portfolio-azure.vercel.app'], ['CÓDIGO', 'github.com/Brunich'], ['CORREO', 'Brunich99@gmail.com']], cw = (W - 300) / 3;
  items.forEach(([k, v], i) => { const kc = seg(u, 1.6 + i * .2, 2.4 + i * .2), x = 150 + i * cw;
-  T(g, typed(k, kc * 2), x, 802, { size: 13, f: 'Mono', w: 500, c: P.muted, sp: 2 }); T(g, typed(v, kc), x, 840, { size: 24, f: 'Mono', w: 500 }); });
+  T(g, typed(k, kc * 2), x, 802, { size: 13, w: 700, c: P.muted, sp: 2 }); T(g, typed(v, kc), x, 844, { size: 27, w: 500 }); });
 }
 
 // ——— Montaje ———
 // Cada escena dura lo suyo y se encima .6 s con la anterior; los inicios se calculan solos.
+// Los proyectos van en el orden de la portada (01 / 07 …).
 const TR = .6;
 const SCENES = [
- { d: 5.4, f: sIntro },
- { d: 3.8, f: sMani, tr: 'diag' },
- { d: 7.2, f: sTurno, tr: 'rows', hud: ['A · 01', 'entrega-de-turno'] },
- { d: 7.4, f: sCSV, tr: 'slats', hud: ['A · 02', 'analizador-csv'] },
- { d: 6.6, f: sPlanta, tr: 'diag', hud: ['A · 03', 'planta'] },
- { d: 6.4, f: sInv, tr: 'rows', hud: ['A · 05', 'inventario'] },
- { d: 7.0, f: sNFC, tr: 'slats', hud: ['B · 02', 'club-nfc'] },
+ { d: 6.2, f: sIntro },
+ { d: 3.6, f: sMani, tr: 'diag' },
+ { d: 7.2, f: sTurno, tr: 'rows', hud: ['01 / 07', 'entrega-de-turno'] },
+ { d: 6.6, f: sPlanta, tr: 'diag', hud: ['02 / 07', 'planta'] },
+ { d: 6.4, f: sInv, tr: 'rows', hud: ['04 / 07', 'inventario'] },
+ { d: 7.4, f: sCSV, tr: 'slats', hud: ['05 / 07', 'analizador-csv'] },
+ { d: 7.0, f: sNFC, tr: 'slats', hud: ['07 / 07', 'club-nfc'] },
  { d: 4.2, f: sMore, tr: 'diag' },
  { d: 6.6, f: sOutro, tr: 'rows' },
 ];
@@ -606,12 +689,12 @@ function wipeEdge(g, kind, k) {
  g.restore();
 }
 function drawScene(g, s, t) { s.f(g, t - s.a, t); }
-// Cabecera y pie de la hoja mientras pasan los proyectos: quién, qué ficha y en qué ruta del sitio vive.
+// Cabecera y pie de la hoja mientras pasan los proyectos: quién, qué lugar ocupa y en qué ruta del sitio vive.
 function hud(g, t) {
  const s0 = SECTIONS[0].a, s1 = SECTIONS[SECTIONS.length - 1].b;
  const k = E.outCubic(seg(t, s0 + .4, s0 + 1.1)) * (1 - E.inCubic(seg(t, s1 - .6, s1))); if (k <= 0) return;
  g.save(); g.globalAlpha = k;
- T(g, 'Bruno Salas', 72, 86, { size: 22, w: 650 }); T(g, 'Ingeniería en Software · UANL', 72 + TW(g, 'Bruno Salas', { size: 22, w: 650 }) + 18, 85, { size: 13, f: 'Mono', w: 500, c: P.muted });
+ T(g, 'Bruno Salas', 72, 86, { size: 24, f: 'Disp' }); T(g, 'Ingeniería en Software · UANL', 72 + TW(g, 'Bruno Salas', { size: 24, f: 'Disp' }) + 18, 85, { size: 15, c: P.muted });
  rule(g, 72, 112, W - 144, P.ink);
  let idx = 0; SECTIONS.forEach((s, i) => { if (t >= s.a + .3) idx = i; });
  const sec = SECTIONS[idx], kr = E.outExpo(seg(t, sec.a + .3, sec.a + .9));
@@ -621,8 +704,8 @@ function hud(g, t) {
  g.restore();
  const x0 = 72, x1 = W - 72, gap = 12, n = SECTIONS.length, sw = (x1 - x0 - gap * (n - 1)) / n, y = H - 52;
  SECTIONS.forEach((s, i) => { const p = seg(t, s.a, i < n - 1 ? SECTIONS[i + 1].a : s.b), x = x0 + i * (sw + gap); rule(g, x, y, sw, P.line, 3); rule(g, x, y, sw * p, i === idx ? P.acc : P.ink, 3); });
- const str = `/proyectos/${sec.hud[1]}`, kk = seg(t, sec.a + .4, sec.a + 1.1), shown = typed(str, kk), mo = { size: 16, f: 'Mono', w: 500, c: P.muted };
- T(g, shown, 72, H - 74, mo); caret(g, 72 + TW(g, shown, mo), H - 74, 16, t, kk > 0 && kk < 1, P.ink);
+ const str = `/proyectos/${sec.hud[1]}`, kk = seg(t, sec.a + .4, sec.a + 1.1), shown = typed(str, kk), mo = { size: 17, c: P.muted };
+ T(g, shown, 72, H - 74, mo); caret(g, 72 + TW(g, shown, mo), H - 74, 16, t, kk > 0 && kk < 1);
  g.restore();
 }
 function render(t) {
@@ -640,7 +723,7 @@ function sheet(times, cols = 4) {
  return s.toDataURL('image/jpeg', .85);
 }
 Object.assign(window, { render, frame, sheet, DUR });
-window.ready = Promise.all(['650 40px Arc', '400 40px Arc', '500 20px Mono', '700 20px Mono'].map(f => document.fonts.load(f)));
+window.ready = Promise.all(['600 40px Disp', '400 20px Sans', '500 20px Sans', '600 20px Sans', '700 20px Sans', '500 20px Mono', '700 20px Mono'].map(f => document.fonts.load(f)));
 const q = new URLSearchParams(location.search);
 window.ready.then(() => {
  if (q.has('export')) return;
